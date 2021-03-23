@@ -92,47 +92,30 @@ class inv_dynamic(gmspython):
 	def ivfs(self,static,variables=['qD','qS','PwT','PbT','Peq','tauS','tauLump'],merge=True):
 		""" initialize variables from database w. static version """ 
 		for var in variables:
-			add_var = pr_static.add_t_to_variable(static.get(self.ns[var]),self.get('txE'))
+			add_var = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var]),self.get('txE'))
 			if merge is True and self.ns[var] in self.model.database.symbols:
 				self.model.database[self.ns[var]] = add_var.combine_first(self.get(var))
 			else:
 				self.model.database[self.ns[var]] = add_var
 
 	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-
 	def group_conditions(self,group):
 		if group == 'g_tech_exo':
-			return {'sigma': self.g('kno_inp'), 'eta': self.g('kno_out'), 'mu': self.g('exo_mu')}
+			return [{'sigma': self.g('kno_inp'), 'eta': self.g('kno_out'), 'mu': self.g('exo_mu')}]
 		elif group == 'g_tech_endo':
-			return {'mu': {'and': [self.g('map_all'),{'not': self.g('exo_mu')}]}, 'markup': self.g('out')}
+			return [{'mu': {'and': [self.g('map_all'),{'not': self.g('exo_mu')}]}, 'markup': self.g('out')}]
 		elif group == 'gvars_endo':
-			return {'PbT': self.g('endo_PbT'), 'PwT': self.g('int'), 'qD': {'and': [self.g('wT'), self.g('tx0')]},'Peq': {'and': [self.g('n_out'),self.g('tx0E')]}}
+			return [{'PbT': self.g('endo_PbT'), 'PwT': self.g('int'), 'qD': {'and': [self.g('wT'), self.g('tx0')]},'Peq': {'and': [self.g('n_out'),self.g('tx0E')]}}]
 		elif group == 'gvars_exo':
-			return {'qS': self.g('out'), 'PwT': self.g('inp'),'tauS': self.g('out'), 'tauLump': None if self.sector is False else self.g('s_inv')}
+			return [{'qS': self.g('out'), 'PwT': self.g('inp'),'tauS': self.g('out'), 'tauLump': None if self.sector is False else self.g('s_inv')}]
 		elif group == 'g_calib_exo':
-			return {'qD': {'and': [self.g('inp'), self.g('t0')]}, 'PbT': {'and': [self.g('t0'),self.g('out'),{'not': self.g('endo_PbT')}]},'Peq': {'and': [self.g('t0'), self.g('n_out')]}}
-		elif group in self.gog:
-			return self.gog_conditions(group)
-
-	@property
-	def gog(self):
-		return ['g_tech','g_vars_exo','g_vars_endo']
-
-	def group_of_groups(self,group,n=''):
-		if group == 'g_tech':
-			return {'g_tech_exo': n+'g_tech_exo', 'g_tech_endo': n+'g_tech_endo'}
+			return [{'qD': {'and': [self.g('inp'), self.g('t0')]}, 'PbT': {'and': [self.g('t0'),self.g('out'),{'not': self.g('endo_PbT')}]},'Peq': {'and': [self.g('t0'), self.g('n_out')]}}]
+		elif group == 'g_tech':
+			return ['g_tech_exo','g_tech_endo']
 		elif group == 'g_vars_exo':
-			return {'gvars_exo': n+'gvars_exo'}
+			return ['gvars_exo']
 		elif group == 'g_vars_endo':
-			return {'gvars_endo': n+'gvars_endo','g_calib_exo': n+'g_calib_exo'}
+			return ['gvars_endo','g_calib_exo']
 
 	@property
 	def exo_groups(self):
@@ -251,44 +234,26 @@ class itoryD(gmspython):
 		elif var in self.itory.ns:
 			return self.itory.default_var_series(var)
 
-	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-		
+	# ---			3: Define groups	 		--- #		
 	def group_conditions(self,group):
 		if group == 'g_exo':
-			return {'qD': {'and': [self.g('t0'), self.g('itoryD')]}}
+			return [{'qD': {'and': [self.g('t0'), self.g('itoryD')]}}]
 		elif group == 'g_endo':
-			return {'qD': {'and': [self.g('tx0E'), self.g('itoryD')]}}
-		elif group in self.gog:
-			return self.gog_conditions(group)
+			return [{'qD': {'and': [self.g('tx0E'), self.g('itoryD')]}}]
 		else:
 			return self.itory.group_conditions(group)
-
-	@property
-	def gog(self):
-		return self.itory.gog
-
-	def group_of_groups(self,group,n=''):
-		pass
 
 	@property
 	def exo_groups(self):
 		""" Collect exogenous groups """
 		n = self.model.settings.name+'_'
-		return {**{n+g: self.add_group(g,n=n) for g in ['g_exo']},**self.itory.exo_groups(n)}
+		return {n+g: self.add_group(g,n=n) for g in ['g_exo']+self.itory.exo_groups()}
 
 	@property
 	def endo_groups(self):
 		""" Collect endogenous groups """
 		n = self.model.settings.name+'_'
-		return {**{n+g: self.add_group(g,n=n) for g in ['g_endo']},**self.itory.endo_groups(n)}
+		return {n+g: self.add_group(g,n=n) for g in ['g_endo']+self.itory.endo_groups()}
 
 	@property 
 	def sub_groups(self):

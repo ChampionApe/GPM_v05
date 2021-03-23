@@ -1,5 +1,4 @@
 from gmspython import *
-from Production import pr_static
 import gams_trade
 
 class trade_dynamic(gmspython):
@@ -69,47 +68,30 @@ class trade_dynamic(gmspython):
 	def ivfs(self,static,variables=['qD','PwT','Peq'],merge=True):
 		""" initialize variables from database w. static version """ 
 		for var in variables:
-			add_var = pr_static.add_t_to_variable(static.get(self.ns[var]),self.get('txE'))
+			add_var = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var]),self.get('txE'))
 			if merge is True and self.ns[var] in self.model.database.symbols:
 				self.model.database[self.ns[var]] = add_var.combine_first(self.get(var))
 			else:
 				self.model.database[self.ns[var]] = add_var
 
-	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-		
+	# ---			3: Define groups	 		--- #		
 	def group_conditions(self,group):
 		if group == 'g_tech_exo':
-			return {'sigma': self.g('sfor_ndom')}
+			return [{'sigma': self.g('sfor_ndom')}]
 		elif group == 'g_tech_endo':
-			return {'phi': self.g('sfor_ndom')}
+			return [{'phi': self.g('sfor_ndom')}]
 		elif group == 'g_exovars':
-			return {'PwT': self.g('sfor_ndom'), 'Peq': self.g('n_for')}
+			return [{'PwT': self.g('sfor_ndom'), 'Peq': self.g('n_for')}]
 		elif group == 'g_calib_exo':
-			return {'qD': {'and': [self.g('sfor_ndom'), self.g('t0')]}}
+			return [{'qD': {'and': [self.g('sfor_ndom'), self.g('t0')]}}]
 		elif group == 'g_endovars':
-			return {'qD': {'and': [self.g('sfor_ndom'), self.g('tx0E')]}}
-		elif group in self.gog:
-			return self.gog_conditions(group)
-
-	@property
-	def gog(self):
-		return ['g_tech','g_endo_vars','g_exo_vars']
-
-	def group_of_groups(self,group,n=''):
-		if group == 'g_tech':
-			return {'g_tech_exo': n+'g_tech_exo', 'g_tech_endo': n+'g_tech_endo'}
-		elif group == 'g_exo_vars':
-			return {'g_exovars': n+'g_exovars'}
+			return [{'qD': {'and': [self.g('sfor_ndom'), self.g('tx0E')]}}]
+		elif group == 'g_tech':
+			return ['g_tech_exo','g_tech_endo']
 		elif group == 'g_endo_vars':
-			return {'g_endovars': n+'g_endovars','g_calib_exo': n+'g_calib_exo'}
+			return ['g_endovars','g_calib_exo']
+		elif group == 'g_exo_vars':
+			return ['g_exovars']
 
 	@property
 	def exo_groups(self):

@@ -472,25 +472,15 @@ class itoryD_v1:
 		if var == 'ar1_itory':
 			return 1
 
-	def define_group(self,group):
-		return {self.ns[var]: {'conditions': getattr(self,var).rctree_gams(group[var]), 'text': getattr(self,var).write()} for var in group}
-
 	def group_conditions(self,group):
 		if group == 'itory_exo':
-			return {'ar1_itory': None}
+			return [{'ar1_itory': None}]
 
-	@property
-	def gog(self):
+	def exo_groups(self):
+		return ['itory_exo']
+
+	def endo_groups(self):
 		return []
-
-	def exo_groups(self,name_prefix):
-		return {name_prefix+g: self.define_group(self.group_conditions(g)) for g in ['itory_exo']}
-
-	def endo_groups(self,name_prefix):
-		return {}
-
-	def sub_groups(self,n=None):
-		return {}
 
 	def a(self,attr,lot_indices=[],l='',tlag=''):
 		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""

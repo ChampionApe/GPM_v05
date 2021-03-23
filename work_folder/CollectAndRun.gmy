@@ -1,0 +1,3366 @@
+$ONEOLCOM
+$EOLCOM #
+
+
+# Root File for model
+OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	n
+	s
+	t
+;
+
+alias(n,nn,nnn);
+
+sets
+	alias_[alias_set,alias_map2]
+	map_all[s,n,nn]
+	inp[s,n]
+	out[s,n]
+	int[s,n]
+	fg[n]
+	wT[s,n]
+	kno_out[s,n]
+	kno_inp[s,n]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	map_lower_nests[s,n,nn]
+	kno_lower_nests[s,n]
+	bra_lower_nests[s,n]
+	inp_lower_nests[s,n]
+	out_lower_nests[s,n]
+	kno_no_lower_nests[s,n]
+	bra_o_lower_nests[s,n]
+	bra_no_lower_nests[s,n]
+	map_upper_nest[s,n,nn]
+	kno_upper_nest[s,n]
+	bra_upper_nest[s,n]
+	inp_upper_nest[s,n]
+	out_upper_nest[s,n]
+	kno_no_upper_nest[s,n]
+	bra_o_upper_nest[s,n]
+	bra_no_upper_nest[s,n]
+	s_prod[s]
+	n_out[n]
+	dur[n]
+	dur2inv[n,nn]
+	inv[n]
+	ndur[n]
+	endo_PbT[s,n]
+	exo_mu[s,n,nn]
+;
+$GDXIN %p_1%
+$onMulti
+$load alias_set
+$load alias_map2
+$load n
+$load s
+$load t
+$load fg
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load s_prod
+$load n_out
+$load dur
+$load inv
+$load ndur
+$load alias_
+$load map_all
+$load inp
+$load out
+$load int
+$load wT
+$load kno_out
+$load kno_inp
+$load map_lower_nests
+$load kno_lower_nests
+$load bra_lower_nests
+$load inp_lower_nests
+$load out_lower_nests
+$load kno_no_lower_nests
+$load bra_o_lower_nests
+$load bra_no_lower_nests
+$load map_upper_nest
+$load kno_upper_nest
+$load bra_upper_nest
+$load inp_upper_nest
+$load out_upper_nest
+$load kno_no_upper_nest
+$load bra_o_upper_nest
+$load bra_no_upper_nest
+$load dur2inv
+$load endo_PbT
+$load exo_mu
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %p_1%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# --------------------------------------------p_g_tech_endo-------------------------------------------
+#  Initialize p_g_tech_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE mu[s,n,nn] "";
+mu.L[s,n,nn]$((map_all[s,n,nn] and not exo_mu[s,n,nn])) = 0;
+VARIABLE markup[s,n] "";
+markup.L[s,n]$(out[s,n]) = 0;
+$onlisting
+
+
+# --------------------------------------------p_gvars_endo--------------------------------------------
+#  Initialize p_gvars_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE PbT[t,s,n] "";
+PbT.L[t,s,n]$(endo_PbT[s,n]) = 0;
+VARIABLE PwT[t,s,n] "";
+PwT.L[t,s,n]$(int[s,n]) = 0;
+VARIABLE qD[t,s,n] "";
+qD.L[t,s,n]$(((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))) = 0;
+VARIABLE Peq[t,n] "";
+Peq.L[t,n]$((n_out[n] and tx0E[t])) = 0;
+$onlisting
+
+
+# ---------------------------------------------p_ict_endo---------------------------------------------
+#  Initialize p_ict_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE ic[t,s,n] "";
+ic.L[t,s,n]$(out[s,n]) = 0;
+VARIABLE os[t,s,n] "";
+os.L[t,s,n]$(out[s,n]) = 0;
+$onlisting
+
+
+# --------------------------------------------p_g_tech_exo--------------------------------------------
+#  Initialize p_g_tech_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE sigma[s,n] "";
+sigma.L[s,n]$(kno_inp[s,n]) = 0;
+VARIABLE eta[s,n] "";
+eta.L[s,n]$(kno_out[s,n]) = 0;
+$onlisting
+
+
+# ------------------------------------------p_g_tech_exo_dyn------------------------------------------
+#  Initialize p_g_tech_exo_dyn group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE rDepr[t,s,n] "";
+rDepr.L[t,s,n]$(dur[n]) = 0;
+VARIABLE Rrate[t] "";
+Rrate.L[t] = 0;
+$onlisting
+
+
+# ---------------------------------------------p_gvars_exo--------------------------------------------
+#  Initialize p_gvars_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE qS[t,s,n] "";
+qS.L[t,s,n]$(out[s,n]) = 0;
+VARIABLE tauS[t,s,n] "";
+tauS.L[t,s,n]$(out[s,n]) = 0;
+VARIABLE tauLump[t,s] "";
+tauLump.L[t,s]$(s_prod[s]) = 0;
+$onlisting
+
+
+# --------------------------------------------p_g_calib_exo-------------------------------------------
+#  Initialize p_g_calib_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# --------------------------------------------p_g_vars_endo-------------------------------------------
+#  Initialize p_g_vars_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ----------------------------------------------p_g_tech----------------------------------------------
+#  Initialize p_g_tech group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# --------------------------------------------p_g_vars_exo--------------------------------------------
+#  Initialize p_g_vars_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ----------------------------------------------p_ict_exo---------------------------------------------
+#  Initialize p_ict_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE ic_1[s,n] "";
+ic_1.L[s,n]$(dur[n]) = 0;
+VARIABLE ic_2[s,n] "";
+ic_2.L[s,n]$(dur[n]) = 0;
+VARIABLE ic_tvc[s,n] "";
+ic_tvc.L[s,n]$(dur[n]) = 0;
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$((((t0[t] and out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n]))) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((int[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$((((inp[s,n] and t0[t])) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$((((t0[t] and n_out[n])) or ((n_out[n] and tx0E[t])))) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PbT.l[t,s,n]$((((t0[t] and out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n]))) = load_PbT[t,s,n];
+  
+    PwT.l[t,s,n]$((int[s,n])) = load_PwT[t,s,n];
+  
+    qD.l[t,s,n]$((((inp[s,n] and t0[t])) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))) = load_qD[t,s,n];
+  
+    Peq.l[t,n]$((((t0[t] and n_out[n])) or ((n_out[n] and tx0E[t])))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_ic[t,s,n] "";
+    load_ic[t,s,n]$((out[s,n])) = 0;
+  
+    parameter load_os[t,s,n] "";
+    load_os[t,s,n]$((out[s,n])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_ic=ic.l  load_os=os.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    ic.l[t,s,n]$((out[s,n])) = load_ic[t,s,n];
+  
+    os.l[t,s,n]$((out[s,n])) = load_os[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = 0;
+  
+    parameter load_markup[s,n] "";
+    load_markup[s,n]$((out[s,n])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_mu=mu.l  load_markup=markup.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    mu.fx[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+  
+    markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$((endo_PbT[s,n])) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((int[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$((((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n])))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$(((n_out[n] and tx0E[t]))) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PbT.fx[t,s,n]$((endo_PbT[s,n])) = load_PbT[t,s,n];
+  
+    PwT.fx[t,s,n]$((int[s,n])) = load_PwT[t,s,n];
+  
+    qD.fx[t,s,n]$((((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n])))) = load_qD[t,s,n];
+  
+    Peq.fx[t,n]$(((n_out[n] and tx0E[t]))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((kno_inp[s,n])) = 0;
+  
+    parameter load_eta[s,n] "";
+    load_eta[s,n]$((kno_out[s,n])) = 0;
+  
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$((exo_mu[s,n,nn])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
+  
+    eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
+  
+    mu.fx[s,n,nn]$((exo_mu[s,n,nn])) = load_mu[s,n,nn];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_rDepr[t,s,n] "";
+    load_rDepr[t,s,n]$((dur[n])) = 0;
+  
+    parameter load_Rrate[t] "";
+    load_Rrate[t]$((1)) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_rDepr=rDepr.l  load_Rrate=Rrate.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    rDepr.fx[t,s,n]$((dur[n])) = load_rDepr[t,s,n];
+  
+    Rrate.fx[t]$((1)) = load_Rrate[t];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$((out[s,n])) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((inp[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((dur[n] and t0[t]))) = 0;
+  
+    parameter load_tauS[t,s,n] "";
+    load_tauS[t,s,n]$((out[s,n])) = 0;
+  
+    parameter load_tauLump[t,s] "";
+    load_tauLump[t,s]$((s_prod[s])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qS=qS.l  load_PwT=PwT.l  load_qD=qD.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qS.fx[t,s,n]$((out[s,n])) = load_qS[t,s,n];
+  
+    PwT.fx[t,s,n]$((inp[s,n])) = load_PwT[t,s,n];
+  
+    qD.fx[t,s,n]$(((dur[n] and t0[t]))) = load_qD[t,s,n];
+  
+    tauS.fx[t,s,n]$((out[s,n])) = load_tauS[t,s,n];
+  
+    tauLump.fx[t,s]$((s_prod[s])) = load_tauLump[t,s];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((inp[s,n] and t0[t]))) = 0;
+  
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$(((t0[t] and out[s,n] and not endo_PbT[s,n]))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$(((t0[t] and n_out[n]))) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l  load_PbT=PbT.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.fx[t,s,n]$(((inp[s,n] and t0[t]))) = load_qD[t,s,n];
+  
+    PbT.fx[t,s,n]$(((t0[t] and out[s,n] and not endo_PbT[s,n]))) = load_PbT[t,s,n];
+  
+    Peq.fx[t,n]$(((t0[t] and n_out[n]))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((kno_inp[s,n])) = 0;
+  
+    parameter load_eta[s,n] "";
+    load_eta[s,n]$((kno_out[s,n])) = 0;
+  
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$((((map_all[s,n,nn] and not exo_mu[s,n,nn])) or (exo_mu[s,n,nn]))) = 0;
+  
+    parameter load_rDepr[t,s,n] "";
+    load_rDepr[t,s,n]$((dur[n])) = 0;
+  
+    parameter load_Rrate[t] "";
+    load_Rrate[t]$((1)) = 0;
+  
+    parameter load_markup[s,n] "";
+    load_markup[s,n]$((out[s,n])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l  load_rDepr=rDepr.l  load_Rrate=Rrate.l  load_markup=markup.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
+  
+    eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
+  
+    mu.fx[s,n,nn]$((((map_all[s,n,nn] and not exo_mu[s,n,nn])) or (exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+  
+    rDepr.fx[t,s,n]$((dur[n])) = load_rDepr[t,s,n];
+  
+    Rrate.fx[t]$((1)) = load_Rrate[t];
+  
+    markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$((out[s,n])) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((inp[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((dur[n] and t0[t]))) = 0;
+  
+    parameter load_tauS[t,s,n] "";
+    load_tauS[t,s,n]$((out[s,n])) = 0;
+  
+    parameter load_tauLump[t,s] "";
+    load_tauLump[t,s]$((s_prod[s])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qS=qS.l  load_PwT=PwT.l  load_qD=qD.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qS.fx[t,s,n]$((out[s,n])) = load_qS[t,s,n];
+  
+    PwT.fx[t,s,n]$((inp[s,n])) = load_PwT[t,s,n];
+  
+    qD.fx[t,s,n]$(((dur[n] and t0[t]))) = load_qD[t,s,n];
+  
+    tauS.fx[t,s,n]$((out[s,n])) = load_tauS[t,s,n];
+  
+    tauLump.fx[t,s]$((s_prod[s])) = load_tauLump[t,s];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_ic_1[s,n] "";
+    load_ic_1[s,n]$((dur[n])) = 0;
+  
+    parameter load_ic_2[s,n] "";
+    load_ic_2[s,n]$((dur[n])) = 0;
+  
+    parameter load_ic_tvc[s,n] "";
+    load_ic_tvc[s,n]$((dur[n])) = 0;
+  
+  execute_load "%p_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_ic_1=ic_1.l  load_ic_2=ic_2.l  load_ic_tvc=ic_tvc.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    ic_1.fx[s,n]$((dur[n])) = load_ic_1[s,n];
+  
+    ic_2.fx[s,n]$((dur[n])) = load_ic_2[s,n];
+  
+    ic_tvc.fx[s,n]$((dur[n])) = load_ic_tvc[s,n];
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# --------------------------------------------M_lower_nests-------------------------------------------
+#  Initialize M_lower_nests equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_zp_out_lower_nests[t,s,n];
+E_zp_out_lower_nests[t,s,n]$(out_lower_nests[s,n] and txe[t]).. 	PbT[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_zp_nout_lower_nests[t,s,n];
+E_zp_nout_lower_nests[t,s,n]$(kno_no_lower_nests[s,n] and txe[t]).. 	PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_q_out_lower_nests[t,s,n];
+E_q_out_lower_nests[t,s,n]$(bra_o_lower_nests[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PbT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qS[t,s,nn]);
+EQUATION E_q_nout_lower_nests[t,s,n];
+E_q_nout_lower_nests[t,s,n]$(bra_no_lower_nests[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_lower_nests model
+# ----------------------------------------------------------------------------------------------------
+Model M_lower_nests /
+E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests
+/;
+
+
+# --------------------------------------------M_upper_nest--------------------------------------------
+#  Initialize M_upper_nest equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_zp_out_upper_nest[t,s,n];
+E_zp_out_upper_nest[t,s,n]$(out_upper_nest[s,n] and txe[t]).. 	PbT[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_zp_nout_upper_nest[t,s,n];
+E_zp_nout_upper_nest[t,s,n]$(kno_no_upper_nest[s,n] and txe[t]).. 	PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_q_out_upper_nest[t,s,n];
+E_q_out_upper_nest[t,s,n]$(bra_o_upper_nest[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PbT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qS[t,s,nn]);
+EQUATION E_q_nout_upper_nest[t,s,n];
+E_q_nout_upper_nest[t,s,n]$(bra_no_upper_nest[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_upper_nest model
+# ----------------------------------------------------------------------------------------------------
+Model M_upper_nest /
+E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest
+/;
+
+
+# -----------------------------------------------M_p_pw-----------------------------------------------
+#  Initialize M_p_pw equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_pw_p[t,s,n];
+E_pw_p[t,s,n]$(out[s,n] and txe[t]).. 	Peq[t,n]  =E=  (1+markup[s,n])*(PbT[t,s,n]*(1+tauLump[t,s]/sum(nn$(out[s,nn]), qS[t,s,nn]*PbT[t,s,nn]))+tauS[t,s,n]+ic[t,s,n]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_p_pw model
+# ----------------------------------------------------------------------------------------------------
+Model M_p_pw /
+E_pw_p
+/;
+
+
+# -----------------------------------------------M_p_cf-----------------------------------------------
+#  Initialize M_p_cf equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_lom_p[t,s,n];
+E_lom_p[t,s,n]$(txe[t] and dur[n] and s_prod[s]).. 	qD[t+1,s,n]  =E=  (qD[t,s,n]*(1-rDepr[t,s,n])+sum(nn$(dur2inv[n,nn]), qD[t,s,nn]))/(1+g_LR);
+EQUATION E_pk_p[t,s,n];
+E_pk_p[t,s,n]$(tx0e[t] and dur[n] and s_prod[s]).. 	PwT[t,s,n]  =E=  sum(nn$(dur2inv[n,nn]),Rrate[t]*(PwT[t-1,s,nn]/(1+infl_LR)+ic_1[s,n]*(qD[t-1,s,nn]/qD[t-1,s,n]-ic_2[s,n]))+(ic_1[s,n]*0.5)*(sqr(ic_2[s,n]*qD[t,s,n])-sqr(qD[t,s,nn]))/sqr(qD[t,s,n])-(1-rDepr[t,s,n])*(PwT[t,s,nn]+ic_1[s,n]*(qD[t,s,nn]/qD[t,s,n]-ic_2[s,n])));
+EQUATION E_Ktvc_p[t,s,n];
+E_Ktvc_p[t,s,n]$(te[t] and dur[n] and s_prod[s]).. 	qD[t,s,n]  =E=  (1+ic_tvc[s,n])*qD[t-1,s,n];
+EQUATION E_outs_p[t,s,n];
+E_outs_p[t,s,n]$(out[s,n] and txe[t] and s_prod[s]).. 	os[t,s,n]  =E=  qS[t,s,n]*PbT[t,s,n]/sum(nn$(out[s,nn]), qS[t,s,nn]*PbT[t,s,nn]);
+EQUATION E_instcost_p[t,s,n];
+E_instcost_p[t,s,n]$(out[s,n] and txe[t] and s_prod[s]).. 	ic[t,s,n]  =E=  (os[t,s,n]/qS[t,s,n])*sum(nn$(dur[nn]), sum(nnn$(dur2inv[nn,nnn]), ic_1[s,nn]*0.5*qD[t,s,nn]*sqr(qD[t,s,nnn]/qD[t,s,nn]-ic_2[s,nn])));
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_p_cf model
+# ----------------------------------------------------------------------------------------------------
+Model M_p_cf /
+E_lom_p, E_pk_p, E_Ktvc_p, E_outs_p, E_instcost_p
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	n
+	s
+	t
+;
+
+alias(n,nn,nnn);
+
+sets
+	alias_[alias_set,alias_map2]
+	inp_HH[s,n]
+	out_HH[s,n]
+	int_HH[s,n]
+	kno_HH[s,n]
+	map_all_HH[s,n,nn]
+	int_temp_HH[s,n]
+	exo_HH[s,n]
+	top_HH[s,n]
+	inp_HH_agg[s,n]
+	out_HH_agg[s,n]
+	kno_HH_agg[s,n]
+	map_HH_agg[s,n,nn]
+	qs_qs_HH_agg[s,n]
+	qs_qd_HH_agg[s,n]
+	qd_qd_HH_agg[s,n]
+	qd_qs_HH_agg[s,n]
+	int_temp_HH_agg[s,n]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	endo_mu[s,n]
+	s_HH[s]
+	fg_HH[n]
+	svngs[n]
+;
+$GDXIN %HH_1%
+$onMulti
+$load alias_set
+$load alias_map2
+$load n
+$load s
+$load t
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load s_HH
+$load fg_HH
+$load svngs
+$load alias_
+$load inp_HH
+$load out_HH
+$load int_HH
+$load kno_HH
+$load map_all_HH
+$load int_temp_HH
+$load exo_HH
+$load top_HH
+$load inp_HH_agg
+$load out_HH_agg
+$load kno_HH_agg
+$load map_HH_agg
+$load qs_qs_HH_agg
+$load qs_qd_HH_agg
+$load qd_qd_HH_agg
+$load qd_qs_HH_agg
+$load int_temp_HH_agg
+$load endo_mu
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %HH_1%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ------------------------------------------HH_g_endo_static------------------------------------------
+#  Initialize HH_g_endo_static group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# --------------------------------------------HH_g_endo_dyn-------------------------------------------
+#  Initialize HH_g_endo_dyn group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE vD[t,s,n] "";
+vD.L[t,s,n]$((svngs[n] and s_HH[s] and tx0[t])) = 0;
+VARIABLE sp[t,s] "";
+sp.L[t,s]$(s_HH[s]) = 0;
+$onlisting
+
+
+# -------------------------------------------HH_g_tech_endo-------------------------------------------
+#  Initialize HH_g_tech_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------HH_g_calib_endo------------------------------------------
+#  Initialize HH_g_calib_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# --------------------------------------------HH_g_tech_exo-------------------------------------------
+#  Initialize HH_g_tech_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE irate[t] "";
+irate.L[t] = 0;
+VARIABLE disc[s] "";
+disc.L[s]$(s_HH[s]) = 0;
+VARIABLE crra[s,n] "";
+crra.L[s,n]$(int_temp_HH[s,n]) = 0;
+VARIABLE hh_tvc[s,n] "";
+hh_tvc.L[s,n]$((svngs[n] and s_HH[s])) = 0;
+$onlisting
+
+
+# -------------------------------------------HH_g_exo_static------------------------------------------
+#  Initialize HH_g_exo_static group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------HH_g_calib_exo-------------------------------------------
+#  Initialize HH_g_calib_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ----------------------------------------------HH_g_tech---------------------------------------------
+#  Initialize HH_g_tech group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((int_HH[s,n])) = 0;
+  
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$((out_HH[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t])))) = 0;
+  
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$(((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PwT=PwT.l  load_PbT=PbT.l  load_qD=qD.l  load_qS=qS.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PwT.l[t,s,n]$((int_HH[s,n])) = load_PwT[t,s,n];
+  
+    PbT.l[t,s,n]$((out_HH[s,n])) = load_PbT[t,s,n];
+  
+    qD.l[t,s,n]$(((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t])))) = load_qD[t,s,n];
+  
+    qS.l[t,s,n]$(((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) = load_qS[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$(((top_HH[s,n] and tx0E[t]))) = 0;
+  
+    parameter load_vD[t,s,n] "";
+    load_vD[t,s,n]$(((svngs[n] and s_HH[s] and tx0[t]))) = 0;
+  
+    parameter load_sp[t,s] "";
+    load_sp[t,s]$((s_HH[s])) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PwT=PwT.l  load_vD=vD.l  load_sp=sp.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PwT.l[t,s,n]$(((top_HH[s,n] and tx0E[t]))) = load_PwT[t,s,n];
+  
+    vD.l[t,s,n]$(((svngs[n] and s_HH[s] and tx0[t]))) = load_vD[t,s,n];
+  
+    sp.l[t,s]$((s_HH[s])) = load_sp[t,s];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((inp_HH[s,n] and t0[t] and not exo_HH[s,n]))) = 0;
+  
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$(((out_HH[s,n] and t0[t] and not exo_HH[s,n]))) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l  load_qS=qS.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.l[t,s,n]$(((inp_HH[s,n] and t0[t] and not exo_HH[s,n]))) = load_qD[t,s,n];
+  
+    qS.l[t,s,n]$(((out_HH[s,n] and t0[t] and not exo_HH[s,n]))) = load_qS[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$((endo_mu[s,n])) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_mu=mu.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    mu.fx[s,n,nn]$((endo_mu[s,n])) = load_mu[s,n,nn];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_vD[t,s,n] "";
+    load_vD[t,s,n]$(((svngs[n] and s_HH[s] and t0[t]))) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_vD=vD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    vD.fx[t,s,n]$(((svngs[n] and s_HH[s] and t0[t]))) = load_vD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((kno_HH[s,n])) = 0;
+  
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$(((map_all_HH[s,n,nn] and not endo_mu[s,n]))) = 0;
+  
+    parameter load_irate[t] "";
+    load_irate[t]$((1)) = 0;
+  
+    parameter load_disc[s] "";
+    load_disc[s]$((s_HH[s])) = 0;
+  
+    parameter load_crra[s,n] "";
+    load_crra[s,n]$((int_temp_HH[s,n])) = 0;
+  
+    parameter load_hh_tvc[s,n] "";
+    load_hh_tvc[s,n]$(((svngs[n] and s_HH[s]))) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_mu=mu.l  load_irate=irate.l  load_disc=disc.l  load_crra=crra.l  load_hh_tvc=hh_tvc.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((kno_HH[s,n])) = load_sigma[s,n];
+  
+    mu.fx[s,n,nn]$(((map_all_HH[s,n,nn] and not endo_mu[s,n]))) = load_mu[s,n,nn];
+  
+    irate.fx[t]$((1)) = load_irate[t];
+  
+    disc.fx[s]$((s_HH[s])) = load_disc[s];
+  
+    crra.fx[s,n]$((int_temp_HH[s,n])) = load_crra[s,n];
+  
+    hh_tvc.fx[s,n]$(((svngs[n] and s_HH[s]))) = load_hh_tvc[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((inp_HH[s,n])) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$((fg_HH[n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((inp_HH[s,n] and exo_HH[s,n]))) = 0;
+  
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$(((out_HH[s,n] and exo_HH[s,n]))) = 0;
+  
+    parameter load_tauLump[t,s] "";
+    load_tauLump[t,s]$((s_HH[s])) = 0;
+  
+    parameter load_tauS[t,s,n] "";
+    load_tauS[t,s,n]$((out_HH[s,n])) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PwT=PwT.l  load_Peq=Peq.l  load_qD=qD.l  load_qS=qS.l  load_tauLump=tauLump.l  load_tauS=tauS.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PwT.fx[t,s,n]$((inp_HH[s,n])) = load_PwT[t,s,n];
+  
+    Peq.fx[t,n]$((fg_HH[n])) = load_Peq[t,n];
+  
+    qD.fx[t,s,n]$(((inp_HH[s,n] and exo_HH[s,n]))) = load_qD[t,s,n];
+  
+    qS.fx[t,s,n]$(((out_HH[s,n] and exo_HH[s,n]))) = load_qS[t,s,n];
+  
+    tauLump.fx[t,s]$((s_HH[s])) = load_tauLump[t,s];
+  
+    tauS.fx[t,s,n]$((out_HH[s,n])) = load_tauS[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((kno_HH[s,n])) = 0;
+  
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$(((endo_mu[s,n]) or ((map_all_HH[s,n,nn] and not endo_mu[s,n])))) = 0;
+  
+    parameter load_irate[t] "";
+    load_irate[t]$((1)) = 0;
+  
+    parameter load_disc[s] "";
+    load_disc[s]$((s_HH[s])) = 0;
+  
+    parameter load_crra[s,n] "";
+    load_crra[s,n]$((int_temp_HH[s,n])) = 0;
+  
+    parameter load_hh_tvc[s,n] "";
+    load_hh_tvc[s,n]$(((svngs[n] and s_HH[s]))) = 0;
+  
+  execute_load "%HH_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_mu=mu.l  load_irate=irate.l  load_disc=disc.l  load_crra=crra.l  load_hh_tvc=hh_tvc.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((kno_HH[s,n])) = load_sigma[s,n];
+  
+    mu.fx[s,n,nn]$(((endo_mu[s,n]) or ((map_all_HH[s,n,nn] and not endo_mu[s,n])))) = load_mu[s,n,nn];
+  
+    irate.fx[t]$((1)) = load_irate[t];
+  
+    disc.fx[s]$((s_HH[s])) = load_disc[s];
+  
+    crra.fx[s,n]$((int_temp_HH[s,n])) = load_crra[s,n];
+  
+    hh_tvc.fx[s,n]$(((svngs[n] and s_HH[s]))) = load_hh_tvc[s,n];
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------M_HH_agg----------------------------------------------
+#  Initialize M_HH_agg equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_zp_HH_agg[t,s,n];
+E_zp_HH_agg[t,s,n]$(kno_hh_agg[s,n] and txe[t]).. 	PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_HH_agg[s,nn,n] and qs_qd_HH_agg[s,nn]), qS[t,s,nn]*PbT[t,s,nn])+sum(nn$(map_HH_agg[s,nn,n] and qd_qd_HH_agg[s,nn]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_qout_HH_agg[t,s,n];
+E_qout_HH_agg[t,s,n]$(qs_qd_hh_agg[s,n] and txe[t]).. 	qS[t,s,n]  =E=  sum(nn$(map_HH_agg[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PbT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+EQUATION E_qnout_HH_agg[t,s,n];
+E_qnout_HH_agg[t,s,n]$(qd_qd_hh_agg[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_HH_agg[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_HH_agg model
+# ----------------------------------------------------------------------------------------------------
+Model M_HH_agg /
+E_zp_HH_agg, E_qout_HH_agg, E_qnout_HH_agg
+/;
+
+
+# ----------------------------------------------M_bdgt_HH---------------------------------------------
+#  Initialize M_bdgt_HH equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_bdgt_HH[t,s];
+E_bdgt_HH[t,s]$(s_hh[s] and txe[t]).. 	sp[t,s]  =E=  sum(n$(out_HH[s,n]), PbT[t,s,n]*qS[t,s,n])-sum(n$(inp_HH[s,n]), PwT[t,s,n]*qD[t,s,n])-tauLump[t,s];
+EQUATION E_pw_HH[t,s,n];
+E_pw_HH[t,s,n]$(out_hh[s,n] and txe[t]).. 	Peq[t,n]  =E=  PbT[t,s,n]-tauS[t,s,n];
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_bdgt_HH model
+# ----------------------------------------------------------------------------------------------------
+Model M_bdgt_HH /
+E_bdgt_HH, E_pw_HH
+/;
+
+
+# ----------------------------------------------M_HH_dyn----------------------------------------------
+#  Initialize M_HH_dyn equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_lom_HH[t,s,n];
+E_lom_HH[t,s,n]$(txe[t] and svngs[n] and s_hh[s]).. 	vD[t+1,s,n]  =E=  (vD[t,s,n]*irate[t]+sp[t,s])/((1+g_LR)*(1+infl_LR));
+EQUATION E_euler_HH[t,s,n];
+E_euler_HH[t,s,n]$(tx0e[t] and int_temp_hh[s,n]).. 	qD[t,s,n]  =E=  qD[t-1,s,n]*(disc[s]*irate[t]*(PwT[t-1,s,n]/PwT[t,s,n])/(1+infl_LR))**(1/crra[s,n])/(1+g_LR);
+EQUATION E_tvc_HH[t,s,n];
+E_tvc_HH[t,s,n]$(te[t] and svngs[n] and s_hh[s]).. 	vD[t,s,n]  =E=  (1+hh_tvc[s,n])*vD[t-1,s,n];
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_HH_dyn model
+# ----------------------------------------------------------------------------------------------------
+Model M_HH_dyn /
+E_lom_HH, E_euler_HH, E_tvc_HH
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	n
+	s
+	t
+;
+
+alias(n,nn,nnn);
+
+sets
+	alias_[alias_set,alias_map2]
+	GE_map_all[s,n,nn]
+	GE_inp[s,n]
+	GE_out[s,n]
+	GE_int[s,n]
+	fg[n]
+	GE_wT[s,n]
+	GE_kno_out[s,n]
+	GE_kno_inp[s,n]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	map_nest[s,n,nn]
+	kno_nest[s,n]
+	bra_nest[s,n]
+	inp_nest[s,n]
+	out_nest[s,n]
+	GE_out_nest[s,n]
+	kno_no_nest[s,n]
+	bra_o_nest[s,n]
+	bra_no_nest[s,n]
+	s_inv[s]
+	GE_n_out[n]
+	GE_endo_PbT[s,n]
+	GE_exo_mu[s,n,nn]
+;
+$GDXIN %inv_1%
+$onMulti
+$load alias_set
+$load alias_map2
+$load n
+$load s
+$load t
+$load fg
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load s_inv
+$load GE_n_out
+$load alias_
+$load GE_map_all
+$load GE_inp
+$load GE_out
+$load GE_int
+$load GE_wT
+$load GE_kno_out
+$load GE_kno_inp
+$load map_nest
+$load kno_nest
+$load bra_nest
+$load inp_nest
+$load out_nest
+$load GE_out_nest
+$load kno_no_nest
+$load bra_o_nest
+$load bra_no_nest
+$load GE_endo_PbT
+$load GE_exo_mu
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %inv_1%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# -------------------------------------------inv_g_tech_endo------------------------------------------
+#  Initialize inv_g_tech_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------inv_gvars_endo-------------------------------------------
+#  Initialize inv_gvars_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------inv_g_tech_exo-------------------------------------------
+#  Initialize inv_g_tech_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# --------------------------------------------inv_gvars_exo-------------------------------------------
+#  Initialize inv_gvars_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------inv_g_calib_exo------------------------------------------
+#  Initialize inv_g_calib_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------inv_g_vars_endo------------------------------------------
+#  Initialize inv_g_vars_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ---------------------------------------------inv_g_tech---------------------------------------------
+#  Initialize inv_g_tech group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------inv_g_vars_exo-------------------------------------------
+#  Initialize inv_g_vars_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$((((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or (GE_endo_PbT[s,n]))) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((GE_int[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$((((GE_inp[s,n] and t0[t])) or ((GE_wT[s,n] and tx0[t])))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$((((t0[t] and GE_n_out[n])) or ((GE_n_out[n] and tx0E[t])))) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PbT.l[t,s,n]$((((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or (GE_endo_PbT[s,n]))) = load_PbT[t,s,n];
+  
+    PwT.l[t,s,n]$((GE_int[s,n])) = load_PwT[t,s,n];
+  
+    qD.l[t,s,n]$((((GE_inp[s,n] and t0[t])) or ((GE_wT[s,n] and tx0[t])))) = load_qD[t,s,n];
+  
+    Peq.l[t,n]$((((t0[t] and GE_n_out[n])) or ((GE_n_out[n] and tx0E[t])))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$(((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn]))) = 0;
+  
+    parameter load_markup[s,n] "";
+    load_markup[s,n]$((GE_out[s,n])) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_mu=mu.l  load_markup=markup.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    mu.fx[s,n,nn]$(((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+  
+    markup.fx[s,n]$((GE_out[s,n])) = load_markup[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$((GE_endo_PbT[s,n])) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((GE_int[s,n])) = 0;
+  
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((GE_wT[s,n] and tx0[t]))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$(((GE_n_out[n] and tx0E[t]))) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PbT.fx[t,s,n]$((GE_endo_PbT[s,n])) = load_PbT[t,s,n];
+  
+    PwT.fx[t,s,n]$((GE_int[s,n])) = load_PwT[t,s,n];
+  
+    qD.fx[t,s,n]$(((GE_wT[s,n] and tx0[t]))) = load_qD[t,s,n];
+  
+    Peq.fx[t,n]$(((GE_n_out[n] and tx0E[t]))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((GE_kno_inp[s,n])) = 0;
+  
+    parameter load_eta[s,n] "";
+    load_eta[s,n]$((GE_kno_out[s,n])) = 0;
+  
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$((GE_exo_mu[s,n,nn])) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((GE_kno_inp[s,n])) = load_sigma[s,n];
+  
+    eta.fx[s,n]$((GE_kno_out[s,n])) = load_eta[s,n];
+  
+    mu.fx[s,n,nn]$((GE_exo_mu[s,n,nn])) = load_mu[s,n,nn];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$((GE_out[s,n])) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((GE_inp[s,n])) = 0;
+  
+    parameter load_tauS[t,s,n] "";
+    load_tauS[t,s,n]$((GE_out[s,n])) = 0;
+  
+    parameter load_tauLump[t,s] "";
+    load_tauLump[t,s]$((s_inv[s])) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qS=qS.l  load_PwT=PwT.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qS.fx[t,s,n]$((GE_out[s,n])) = load_qS[t,s,n];
+  
+    PwT.fx[t,s,n]$((GE_inp[s,n])) = load_PwT[t,s,n];
+  
+    tauS.fx[t,s,n]$((GE_out[s,n])) = load_tauS[t,s,n];
+  
+    tauLump.fx[t,s]$((s_inv[s])) = load_tauLump[t,s];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((GE_inp[s,n] and t0[t]))) = 0;
+  
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$(((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n]))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$(((t0[t] and GE_n_out[n]))) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l  load_PbT=PbT.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.fx[t,s,n]$(((GE_inp[s,n] and t0[t]))) = load_qD[t,s,n];
+  
+    PbT.fx[t,s,n]$(((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n]))) = load_PbT[t,s,n];
+  
+    Peq.fx[t,n]$(((t0[t] and GE_n_out[n]))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((GE_kno_inp[s,n])) = 0;
+  
+    parameter load_eta[s,n] "";
+    load_eta[s,n]$((GE_kno_out[s,n])) = 0;
+  
+    parameter load_mu[s,n,nn] "";
+    load_mu[s,n,nn]$((((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or (GE_exo_mu[s,n,nn]))) = 0;
+  
+    parameter load_markup[s,n] "";
+    load_markup[s,n]$((GE_out[s,n])) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l  load_markup=markup.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((GE_kno_inp[s,n])) = load_sigma[s,n];
+  
+    eta.fx[s,n]$((GE_kno_out[s,n])) = load_eta[s,n];
+  
+    mu.fx[s,n,nn]$((((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or (GE_exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+  
+    markup.fx[s,n]$((GE_out[s,n])) = load_markup[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$((GE_out[s,n])) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((GE_inp[s,n])) = 0;
+  
+    parameter load_tauS[t,s,n] "";
+    load_tauS[t,s,n]$((GE_out[s,n])) = 0;
+  
+    parameter load_tauLump[t,s] "";
+    load_tauLump[t,s]$((s_inv[s])) = 0;
+  
+  execute_load "%inv_1%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qS=qS.l  load_PwT=PwT.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qS.fx[t,s,n]$((GE_out[s,n])) = load_qS[t,s,n];
+  
+    PwT.fx[t,s,n]$((GE_inp[s,n])) = load_PwT[t,s,n];
+  
+    tauS.fx[t,s,n]$((GE_out[s,n])) = load_tauS[t,s,n];
+  
+    tauLump.fx[t,s]$((s_inv[s])) = load_tauLump[t,s];
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# -----------------------------------------------M_nest-----------------------------------------------
+#  Initialize M_nest equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_zp_out_nest[t,s,n];
+E_zp_out_nest[t,s,n]$(ge_out_nest[s,n] and txe[t]).. 	PbT[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_zp_nout_nest[t,s,n];
+E_zp_nout_nest[t,s,n]$(kno_no_nest[s,n] and txe[t]).. 	PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+EQUATION E_q_out_nest[t,s,n];
+E_q_out_nest[t,s,n]$(bra_o_nest[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_nest[s,n,nn]), mu[s,n,nn] * (PbT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qS[t,s,nn]);
+EQUATION E_q_nout_nest[t,s,n];
+E_q_nout_nest[t,s,n]$(bra_no_nest[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(map_nest[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_nest model
+# ----------------------------------------------------------------------------------------------------
+Model M_nest /
+E_zp_out_nest, E_zp_nout_nest, E_q_out_nest, E_q_nout_nest
+/;
+
+
+# ----------------------------------------------M_inv_pw----------------------------------------------
+#  Initialize M_inv_pw equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_pw_inv[t,s,n];
+E_pw_inv[t,s,n]$(ge_out[s,n] and txe[t]).. 	Peq[t,n]  =E=  (1+markup[s,n])*(PbT[t,s,n]*(1+tauLump[t,s]/sum(nn$(GE_out[s,nn]), qS[t,s,nn]*PbT[t,s,nn]))+tauS[t,s,n]+0);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_inv_pw model
+# ----------------------------------------------------------------------------------------------------
+Model M_inv_pw /
+E_pw_inv
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	s
+	n
+	t
+;
+
+alias(n,nn);
+
+sets
+	alias_[alias_set,alias_map2]
+	s_prod[s]
+	n_prod[n]
+	n_fg[n]
+	s_for[s]
+	n_for[n]
+	sfor_ndom[s,n]
+	sfor_nfor[s,n]
+	s_HH[s]
+	inp_HH[s,n]
+	out_HH[s,n]
+	n_tax[n]
+	s_tax[s]
+	s_itory[s]
+	s_inv[s]
+	inv[n]
+	dur2inv[n,nn]
+	dur[n]
+	itoryD[s,n]
+	n_equi[n]
+	d_Peq[n]
+	d_vD[s,n]
+	d_vS[s,n]
+	d_PwT[s,n]
+	d_PbT[s,n]
+	d_qD[s,n]
+	d_qS[s,n]
+	d_tauS[s,n]
+	d_tauD[s,n]
+	d_tauLump[s]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+;
+$GDXIN %GE_data_3%
+$onMulti
+$load alias_set
+$load alias_map2
+$load s
+$load n
+$load t
+$load s_prod
+$load n_prod
+$load n_fg
+$load s_for
+$load n_for
+$load s_HH
+$load n_tax
+$load s_tax
+$load s_itory
+$load s_inv
+$load inv
+$load dur
+$load n_equi
+$load d_Peq
+$load d_tauLump
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load alias_
+$load sfor_ndom
+$load sfor_nfor
+$load inp_HH
+$load out_HH
+$load dur2inv
+$load itoryD
+$load d_vD
+$load d_vS
+$load d_PwT
+$load d_PbT
+$load d_qD
+$load d_qS
+$load d_tauS
+$load d_tauD
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %GE_data_3%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# --------------------------------------------itory_g_endo--------------------------------------------
+#  Initialize itory_g_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ---------------------------------------------itory_g_exo--------------------------------------------
+#  Initialize itory_g_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------itory_itory_exo------------------------------------------
+#  Initialize itory_itory_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE ar1_itory "";
+ar1_itory.L = 0;
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((tx0E[t] and itoryD[s,n]))) = 0;
+  
+  execute_load "%GE_data_3%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.l[t,s,n]$(((tx0E[t] and itoryD[s,n]))) = load_qD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((t0[t] and itoryD[s,n]))) = 0;
+  
+  execute_load "%GE_data_3%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.fx[t,s,n]$(((t0[t] and itoryD[s,n]))) = load_qD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_ar1_itory "";
+    load_ar1_itory$((1)) = 0;
+  
+  execute_load "%GE_data_3%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_ar1_itory=ar1_itory.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    ar1_itory.fx$((1)) = load_ar1_itory;
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# -----------------------------------------------M_itory----------------------------------------------
+#  Initialize M_itory equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_itory[t,s,n];
+E_itory[t,s,n]$(tx0e[t] and itoryd[s,n]).. 	qD[t,s,n]  =E=  qD[t-1,s,n]*ar1_itory/(1+g_LR);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_itory model
+# ----------------------------------------------------------------------------------------------------
+Model M_itory /
+E_itory
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	t
+	n
+	s
+;
+
+alias(n,nn,nnn);
+
+sets
+	alias_[alias_set,alias_map2]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	n_for[n]
+	s_for[s]
+	n_prod[n]
+	sfor_ndom[s,n]
+	sfor_nfor[s,n]
+	dom2for[n,nn]
+;
+$GDXIN %rname%
+$onMulti
+$load alias_set
+$load alias_map2
+$load t
+$load n
+$load s
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load n_for
+$load s_for
+$load n_prod
+$load alias_
+$load sfor_ndom
+$load sfor_nfor
+$load dom2for
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %rname%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ------------------------------------------trade_g_endovars------------------------------------------
+#  Initialize trade_g_endovars group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ------------------------------------------trade_g_tech_endo-----------------------------------------
+#  Initialize trade_g_tech_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE phi[s,n] "";
+phi.L[s,n]$(sfor_ndom[s,n]) = 0;
+$onlisting
+
+
+# ------------------------------------------trade_g_tech_exo------------------------------------------
+#  Initialize trade_g_tech_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# -------------------------------------------trade_g_exovars------------------------------------------
+#  Initialize trade_g_exovars group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ------------------------------------------trade_g_calib_exo-----------------------------------------
+#  Initialize trade_g_calib_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ------------------------------------------trade_g_endo_vars-----------------------------------------
+#  Initialize trade_g_endo_vars group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# --------------------------------------------trade_g_tech--------------------------------------------
+#  Initialize trade_g_tech group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ------------------------------------------trade_g_exo_vars------------------------------------------
+#  Initialize trade_g_exo_vars group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$((((sfor_ndom[s,n] and t0[t])) or ((sfor_ndom[s,n] and tx0E[t])))) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.l[t,s,n]$((((sfor_ndom[s,n] and t0[t])) or ((sfor_ndom[s,n] and tx0E[t])))) = load_qD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((sfor_ndom[s,n] and tx0E[t]))) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.fx[t,s,n]$(((sfor_ndom[s,n] and tx0E[t]))) = load_qD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_phi[s,n] "";
+    load_phi[s,n]$((sfor_ndom[s,n])) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_phi=phi.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    phi.fx[s,n]$((sfor_ndom[s,n])) = load_phi[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((sfor_ndom[s,n])) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((sfor_ndom[s,n])) = load_sigma[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((sfor_ndom[s,n])) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$((n_for[n])) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PwT=PwT.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PwT.fx[t,s,n]$((sfor_ndom[s,n])) = load_PwT[t,s,n];
+  
+    Peq.fx[t,n]$((n_for[n])) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$(((sfor_ndom[s,n] and t0[t]))) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.fx[t,s,n]$(((sfor_ndom[s,n] and t0[t]))) = load_qD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_sigma[s,n] "";
+    load_sigma[s,n]$((sfor_ndom[s,n])) = 0;
+  
+    parameter load_phi[s,n] "";
+    load_phi[s,n]$((sfor_ndom[s,n])) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_sigma=sigma.l  load_phi=phi.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    sigma.fx[s,n]$((sfor_ndom[s,n])) = load_sigma[s,n];
+  
+    phi.fx[s,n]$((sfor_ndom[s,n])) = load_phi[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((sfor_ndom[s,n])) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$((n_for[n])) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_PwT=PwT.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    PwT.fx[t,s,n]$((sfor_ndom[s,n])) = load_PwT[t,s,n];
+  
+    Peq.fx[t,n]$((n_for[n])) = load_Peq[t,n];
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# -----------------------------------------------M_trade----------------------------------------------
+#  Initialize M_trade equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_fdemand_trade[t,s,n];
+E_fdemand_trade[t,s,n]$(sfor_ndom[s,n] and txe[t]).. 	qD[t,s,n]  =E=  sum(nn$(dom2for[n,nn]), phi[s,n] * (Peq[t,nn]/PwT[t,s,n])**(sigma[s,n]));
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_trade model
+# ----------------------------------------------------------------------------------------------------
+Model M_trade /
+E_fdemand_trade
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	s
+	n
+	t
+;
+
+alias(n,nn);
+
+sets
+	alias_[alias_set,alias_map2]
+	s_prod[s]
+	n_prod[n]
+	n_fg[n]
+	s_for[s]
+	n_for[n]
+	sfor_ndom[s,n]
+	sfor_nfor[s,n]
+	s_HH[s]
+	inp_HH[s,n]
+	out_HH[s,n]
+	n_tax[n]
+	s_tax[s]
+	s_itory[s]
+	s_inv[s]
+	inv[n]
+	dur2inv[n,nn]
+	dur[n]
+	itoryD[s,n]
+	n_equi[n]
+	d_Peq[n]
+	d_vD[s,n]
+	d_vS[s,n]
+	d_PwT[s,n]
+	d_PbT[s,n]
+	d_qD[s,n]
+	d_qS[s,n]
+	d_tauS[s,n]
+	d_tauD[s,n]
+	d_tauLump[s]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	tauDendo[s,n]
+	gsvngs[n]
+	s_G[s]
+;
+$GDXIN %GE_data_6%
+$onMulti
+$load alias_set
+$load alias_map2
+$load s
+$load n
+$load t
+$load s_prod
+$load n_prod
+$load n_fg
+$load s_for
+$load n_for
+$load s_HH
+$load n_tax
+$load s_tax
+$load s_itory
+$load s_inv
+$load inv
+$load dur
+$load n_equi
+$load d_Peq
+$load d_tauLump
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load gsvngs
+$load s_G
+$load alias_
+$load sfor_ndom
+$load sfor_nfor
+$load inp_HH
+$load out_HH
+$load dur2inv
+$load itoryD
+$load d_vD
+$load d_vS
+$load d_PwT
+$load d_PbT
+$load d_qD
+$load d_qS
+$load d_tauS
+$load d_tauD
+$load tauDendo
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %GE_data_6%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------G_g_endo----------------------------------------------
+#  Initialize G_g_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE TotTaxRev[t] "";
+TotTaxRev.L[t] = 0;
+VARIABLE g_tvc[s,n] "";
+g_tvc.L[s,n]$((gsvngs[n] and s_G[s])) = 0;
+$onlisting
+
+
+# -------------------------------------------G_g_calib_endo-------------------------------------------
+#  Initialize G_g_calib_endo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+VARIABLE tauD[t,s,n] "";
+tauD.L[t,s,n]$((tauDendo[s,n] and t0[t])) = 0;
+$onlisting
+
+
+# -----------------------------------------------G_g_exo----------------------------------------------
+#  Initialize G_g_exo group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ---------------------------------------------G_g_exo_dyn--------------------------------------------
+#  Initialize G_g_exo_dyn group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_TotTaxRev[t] "";
+    load_TotTaxRev[t]$((1)) = 0;
+  
+    parameter load_PwT[t,s,n] "";
+    load_PwT[t,s,n]$((d_tauD[s,n])) = 0;
+  
+    parameter load_vD[t,s,n] "";
+    load_vD[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t]))) = 0;
+  
+    parameter load_g_tvc[s,n] "";
+    load_g_tvc[s,n]$(((gsvngs[n] and s_G[s]))) = 0;
+  
+  execute_load "%GE_data_6%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_TotTaxRev=TotTaxRev.l  load_PwT=PwT.l  load_vD=vD.l  load_g_tvc=g_tvc.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    TotTaxRev.l[t]$((1)) = load_TotTaxRev[t];
+  
+    PwT.l[t,s,n]$((d_tauD[s,n])) = load_PwT[t,s,n];
+  
+    vD.l[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t]))) = load_vD[t,s,n];
+  
+    g_tvc.l[s,n]$(((gsvngs[n] and s_G[s]))) = load_g_tvc[s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_tauD[t,s,n] "";
+    load_tauD[t,s,n]$(((tauDendo[s,n] and t0[t]))) = 0;
+  
+  execute_load "%GE_data_6%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_tauD=tauD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    tauD.fx[t,s,n]$(((tauDendo[s,n] and t0[t]))) = load_tauD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qD[t,s,n] "";
+    load_qD[t,s,n]$((d_tauD[s,n])) = 0;
+  
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$((d_tauS[s,n])) = 0;
+  
+    parameter load_vD[t,s,n] "";
+    load_vD[t,s,n]$(((s_tax[s] and n_tax[n]))) = 0;
+  
+    parameter load_tauS[t,s,n] "";
+    load_tauS[t,s,n]$((d_tauS[s,n])) = 0;
+  
+    parameter load_tauLump[t,s] "";
+    load_tauLump[t,s]$((d_tauLump[s])) = 0;
+  
+    parameter load_PbT[t,s,n] "";
+    load_PbT[t,s,n]$((d_tauS[s,n])) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$((d_Peq[n])) = 0;
+  
+    parameter load_tauD[t,s,n] "";
+    load_tauD[t,s,n]$(((d_tauD[s,n] and (tx0E[t] or (t0[t] and not tauDendo[s,n]))))) = 0;
+  
+  execute_load "%GE_data_6%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qD=qD.l  load_qS=qS.l  load_vD=vD.l  load_tauS=tauS.l  load_tauLump=tauLump.l  load_PbT=PbT.l  load_Peq=Peq.l  load_tauD=tauD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qD.fx[t,s,n]$((d_tauD[s,n])) = load_qD[t,s,n];
+  
+    qS.fx[t,s,n]$((d_tauS[s,n])) = load_qS[t,s,n];
+  
+    vD.fx[t,s,n]$(((s_tax[s] and n_tax[n]))) = load_vD[t,s,n];
+  
+    tauS.fx[t,s,n]$((d_tauS[s,n])) = load_tauS[t,s,n];
+  
+    tauLump.fx[t,s]$((d_tauLump[s])) = load_tauLump[t,s];
+  
+    PbT.fx[t,s,n]$((d_tauS[s,n])) = load_PbT[t,s,n];
+  
+    Peq.fx[t,n]$((d_Peq[n])) = load_Peq[t,n];
+  
+    tauD.fx[t,s,n]$(((d_tauD[s,n] and (tx0E[t] or (t0[t] and not tauDendo[s,n]))))) = load_tauD[t,s,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_irate[t] "";
+    load_irate[t]$((1)) = 0;
+  
+    parameter load_vD[t,s,n] "";
+    load_vD[t,s,n]$(((gsvngs[n] and s_G[s] and t0[t]))) = 0;
+  
+  execute_load "%GE_data_6%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_irate=irate.l  load_vD=vD.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    irate.fx[t]$((1)) = load_irate[t];
+  
+    vD.fx[t,s,n]$(((gsvngs[n] and s_G[s] and t0[t]))) = load_vD[t,s,n];
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# -----------------------------------------------M_gov_G----------------------------------------------
+#  Initialize M_gov_G equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_pwt_G[t,s,n];
+E_pwt_G[t,s,n]$(d_taud[s,n] and txe[t]).. 	PwT[t,s,n]  =E=  Peq[t,n]+tauD[t,s,n];
+EQUATION E_TTREV_G[t];
+E_TTREV_G[t]$(txe[t]).. 	TotTaxRev[t]  =E=  sum([s,n]$(d_tauS[s,n]), tauS[t,s,n]*qS[t,s,n])+sum([s,n]$(d_tauD[s,n]), tauD[t,s,n]*qD[t,s,n])+sum(s$(d_tauLump[s]),tauLump[t,s]);
+EQUATION E_lom_G[t,s,n];
+E_lom_G[t,s,n]$(txe[t] and gsvngs[n] and s_g[s]).. 	vD[t+1,s,n]  =E=  (vD[t,s,n]*irate[t]+TotTaxRev[t])/((1+g_LR)*(1+infl_LR));
+EQUATION E_tvc_G[t,s,n];
+E_tvc_G[t,s,n]$(te[t] and gsvngs[n] and s_g[s]).. 	vD[t,s,n]  =E=  (1+g_tvc[s,n])*vD[t-1,s,n];
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_gov_G model
+# ----------------------------------------------------------------------------------------------------
+Model M_gov_G /
+E_pwt_G, E_TTREV_G, E_lom_G, E_tvc_G
+/;
+
+
+# ---------------------------------------------M_gcalib_G---------------------------------------------
+#  Initialize M_gcalib_G equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_TR_G[t,s,n];
+E_TR_G[t,s,n]$(s_tax[s] and n_tax[n] and t0[t]).. 	vD[t,s,n]  =E=  sum(nn$(d_tauS[s,nn]),tauS[t,s,nn]*qS[t,s,nn])+sum(nn$(d_tauD[s,nn]), tauD[t,s,nn]*qD[t,s,nn])+tauLump[t,s]$(d_tauLump[s]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_gcalib_G model
+# ----------------------------------------------------------------------------------------------------
+Model M_gcalib_G /
+E_TR_G
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_CollectFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_functions.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_level
+# ----------------------------------------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------------------------------------
+#  Define function: load_fixed
+# ----------------------------------------------------------------------------------------------------
+
+
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_sets.gms
+# ----------------------------------------------------------------------------------------------------
+
+sets
+	alias_set
+	alias_map2
+	t
+	n
+	s
+;
+
+
+sets
+	alias_[alias_set,alias_map2]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	n_equi[n]
+	d_qD[s,n]
+	d_qS[s,n]
+	Peq_endo[n]
+	qS_endo[s,n]
+;
+$GDXIN %rname%
+$onMulti
+$load alias_set
+$load alias_map2
+$load t
+$load n
+$load s
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
+$load n_equi
+$load Peq_endo
+$load alias_
+$load d_qD
+$load d_qS
+$load qS_endo
+$GDXIN
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_parameters.gms
+# ----------------------------------------------------------------------------------------------------
+
+parameters
+	R_LR
+	g_LR
+	infl_LR
+;
+$GDXIN %rname%
+$onMulti
+$load R_LR
+$load g_LR
+$load infl_LR
+$offMulti
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_groups.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# -------------------------------------------GE_module_ge_t0------------------------------------------
+#  Initialize GE_module_ge_t0 group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+
+
+# ------------------------------------------GE_module_ge_tx0E-----------------------------------------
+#  Initialize GE_module_ge_tx0E group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$(((qS_endo[s,n] and t0[t]))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$(((Peq_endo[n] and t0[t]))) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qS=qS.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qS.l[t,s,n]$(((qS_endo[s,n] and t0[t]))) = load_qS[t,s,n];
+  
+    Peq.l[t,n]$(((Peq_endo[n] and t0[t]))) = load_Peq[t,n];
+$onlisting
+;
+$offlisting
+  
+# --------------------------------------------__load_group--------------------------------------------
+#  Initialize __load_group group
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+$onlisting
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    parameter load_qS[t,s,n] "";
+    load_qS[t,s,n]$(((qS_endo[s,n] and tx0E[t]))) = 0;
+  
+    parameter load_Peq[t,n] "";
+    load_Peq[t,n]$(((Peq_endo[n] and tx0E[t]))) = 0;
+  
+  execute_load "%rname%" 
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+ load_qS=qS.l  load_Peq=Peq.l ;
+  
+# ----------------------------------------------------------------------------------------------------
+#  Loop over __load_group
+# ----------------------------------------------------------------------------------------------------
+
+    qS.l[t,s,n]$(((qS_endo[s,n] and tx0E[t]))) = load_qS[t,s,n];
+  
+    Peq.l[t,n]$(((Peq_endo[n] and tx0E[t]))) = load_Peq[t,n];
+$onlisting
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_blocks.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ------------------------------------------M_GE_module_eqt0------------------------------------------
+#  Initialize M_GE_module_eqt0 equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_equi_GE_module[t,n];
+E_equi_GE_module[t,n]$(n_equi[n] and t0[t]).. 	sum(s$(d_qS[s,n]), qS[t,s,n])  =E=  sum(s$(d_qD[s,n]), qD[t,s,n]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_GE_module_eqt0 model
+# ----------------------------------------------------------------------------------------------------
+Model M_GE_module_eqt0 /
+E_equi_GE_module
+/;
+
+
+# -----------------------------------------M_GE_module_eqtx0E-----------------------------------------
+#  Initialize M_GE_module_eqtx0E equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_equi_tx0E_GE_module[t,n];
+E_equi_tx0E_GE_module[t,n]$(n_equi[n] and tx0e[t]).. 	sum(s$(d_qS[s,n]), qS[t,s,n])  =E=  sum(s$(d_qD[s,n]), qD[t,s,n]);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_GE_module_eqtx0E model
+# ----------------------------------------------------------------------------------------------------
+Model M_GE_module_eqtx0E /
+E_equi_tx0E_GE_module
+/;
+
+;
+;
+
+# ----------------------------------------------------------------------------------------------------
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\RunFile.gms
+# ----------------------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------------------$FIX p_g_tech, p_g_vars_exo, p_ict_exo, HH_g_tech, HH_g_exo_static, HH_g_calib_endo, inv_g_tech, inv_g_vars_exo, itory_g_exo, itory_itory_exo, trade_g_tech, trade_g_exo_vars, G_g_exo, G_g_calib_endo, G_g_exo_dyn;
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+sigma.FX[s,n]$((sfor_ndom[s,n]) or ((GE_kno_inp[s,n]) or ((kno_HH[s,n]) or (kno_inp[s,n])))) = sigma.L[s,n];
+eta.FX[s,n]$((GE_kno_out[s,n]) or (kno_out[s,n])) = eta.L[s,n];
+mu.FX[s,n,nn]$((((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or (GE_exo_mu[s,n,nn])) or (((endo_mu[s,n]) or ((map_all_HH[s,n,nn] and not endo_mu[s,n]))) or (((map_all[s,n,nn] and not exo_mu[s,n,nn])) or (exo_mu[s,n,nn])))) = mu.L[s,n,nn];
+rDepr.FX[t,s,n]$(dur[n]) = rDepr.L[t,s,n];
+Rrate.FX[t] = Rrate.L[t];
+markup.FX[s,n]$((GE_out[s,n]) or (out[s,n])) = markup.L[s,n];
+qS.FX[t,s,n]$((d_tauS[s,n]) or ((GE_out[s,n]) or (((out_HH[s,n] and exo_HH[s,n])) or (out[s,n])))) = qS.L[t,s,n];
+PwT.FX[t,s,n]$((sfor_ndom[s,n]) or ((GE_inp[s,n]) or ((inp_HH[s,n]) or (inp[s,n])))) = PwT.L[t,s,n];
+qD.FX[t,s,n]$((d_tauD[s,n]) or (((t0[t] and itoryD[s,n])) or (((inp_HH[s,n] and exo_HH[s,n])) or ((dur[n] and t0[t]))))) = qD.L[t,s,n];
+tauS.FX[t,s,n]$((d_tauS[s,n]) or ((GE_out[s,n]) or ((out_HH[s,n]) or (out[s,n])))) = tauS.L[t,s,n];
+tauLump.FX[t,s]$((d_tauLump[s]) or ((s_inv[s]) or ((s_HH[s]) or (s_prod[s])))) = tauLump.L[t,s];
+ic_1.FX[s,n]$(dur[n]) = ic_1.L[s,n];
+ic_2.FX[s,n]$(dur[n]) = ic_2.L[s,n];
+ic_tvc.FX[s,n]$(dur[n]) = ic_tvc.L[s,n];
+irate.FX[t] = irate.L[t];
+disc.FX[s]$(s_HH[s]) = disc.L[s];
+crra.FX[s,n]$(int_temp_HH[s,n]) = crra.L[s,n];
+hh_tvc.FX[s,n]$((svngs[n] and s_HH[s])) = hh_tvc.L[s,n];
+Peq.FX[t,n]$((d_Peq[n]) or ((n_for[n]) or (fg_HH[n]))) = Peq.L[t,n];
+vD.FX[t,s,n]$(((gsvngs[n] and s_G[s] and t0[t])) or (((s_tax[s] and n_tax[n])) or ((svngs[n] and s_HH[s] and t0[t])))) = vD.L[t,s,n];
+ar1_itory.FX = ar1_itory.L;
+phi.FX[s,n]$(sfor_ndom[s,n]) = phi.L[s,n];
+PbT.FX[t,s,n]$(d_tauS[s,n]) = PbT.L[t,s,n];
+tauD.FX[t,s,n]$(((tauDendo[s,n] and t0[t])) or ((d_tauD[s,n] and (tx0E[t] or (t0[t] and not tauDendo[s,n]))))) = tauD.L[t,s,n];
+$onlisting
+
+# ----------------------------------------------------------------------------------------------------$UNFIX p_g_vars_endo, p_ict_endo, HH_g_endo_static, HH_g_endo_dyn, HH_g_calib_exo, inv_g_vars_endo, itory_g_endo, trade_g_endo_vars, G_g_endo, GE_module_ge_t0, GE_module_ge_tx0E;
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+PbT.lo[t,s,n]$((((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or (GE_endo_PbT[s,n])) or ((out_HH[s,n]) or (((t0[t] and out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n])))) = -inf;
+PbT.up[t,s,n]$((((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or (GE_endo_PbT[s,n])) or ((out_HH[s,n]) or (((t0[t] and out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n])))) = inf;
+PwT.lo[t,s,n]$((d_tauD[s,n]) or ((GE_int[s,n]) or (((top_HH[s,n] and tx0E[t])) or ((int_HH[s,n]) or (int[s,n]))))) = -inf;
+PwT.up[t,s,n]$((d_tauD[s,n]) or ((GE_int[s,n]) or (((top_HH[s,n] and tx0E[t])) or ((int_HH[s,n]) or (int[s,n]))))) = inf;
+qD.lo[t,s,n]$((((sfor_ndom[s,n] and t0[t])) or ((sfor_ndom[s,n] and tx0E[t]))) or (((tx0E[t] and itoryD[s,n])) or ((((GE_inp[s,n] and t0[t])) or ((GE_wT[s,n] and tx0[t]))) or (((inp_HH[s,n] and t0[t] and not exo_HH[s,n])) or (((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) or (((inp[s,n] and t0[t])) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))))))) = -inf;
+qD.up[t,s,n]$((((sfor_ndom[s,n] and t0[t])) or ((sfor_ndom[s,n] and tx0E[t]))) or (((tx0E[t] and itoryD[s,n])) or ((((GE_inp[s,n] and t0[t])) or ((GE_wT[s,n] and tx0[t]))) or (((inp_HH[s,n] and t0[t] and not exo_HH[s,n])) or (((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) or (((inp[s,n] and t0[t])) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))))))) = inf;
+Peq.lo[t,n]$(((Peq_endo[n] and tx0E[t])) or (((Peq_endo[n] and t0[t])) or ((((t0[t] and GE_n_out[n])) or ((GE_n_out[n] and tx0E[t]))) or (((t0[t] and n_out[n])) or ((n_out[n] and tx0E[t])))))) = -inf;
+Peq.up[t,n]$(((Peq_endo[n] and tx0E[t])) or (((Peq_endo[n] and t0[t])) or ((((t0[t] and GE_n_out[n])) or ((GE_n_out[n] and tx0E[t]))) or (((t0[t] and n_out[n])) or ((n_out[n] and tx0E[t])))))) = inf;
+ic.lo[t,s,n]$(out[s,n]) = -inf;
+ic.up[t,s,n]$(out[s,n]) = inf;
+os.lo[t,s,n]$(out[s,n]) = -inf;
+os.up[t,s,n]$(out[s,n]) = inf;
+qS.lo[t,s,n]$(((qS_endo[s,n] and tx0E[t])) or (((qS_endo[s,n] and t0[t])) or (((out_HH[s,n] and t0[t] and not exo_HH[s,n])) or ((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))))) = -inf;
+qS.up[t,s,n]$(((qS_endo[s,n] and tx0E[t])) or (((qS_endo[s,n] and t0[t])) or (((out_HH[s,n] and t0[t] and not exo_HH[s,n])) or ((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))))) = inf;
+vD.lo[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t])) or ((svngs[n] and s_HH[s] and tx0[t]))) = -inf;
+vD.up[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t])) or ((svngs[n] and s_HH[s] and tx0[t]))) = inf;
+sp.lo[t,s]$(s_HH[s]) = -inf;
+sp.up[t,s]$(s_HH[s]) = inf;
+TotTaxRev.lo[t] = -inf;
+TotTaxRev.up[t] = inf;
+g_tvc.lo[s,n]$((gsvngs[n] and s_G[s])) = -inf;
+g_tvc.up[s,n]$((gsvngs[n] and s_G[s])) = inf;
+$onlisting
+
+# ----------------------------------------------------------------------------------------------------
+#  Define ex1_B model
+# ----------------------------------------------------------------------------------------------------
+Model ex1_B /
+E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests, E_pw_p, E_lom_p, E_pk_p, E_Ktvc_p, E_outs_p, E_instcost_p, E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest, E_lom_HH, E_euler_HH, E_tvc_HH, E_bdgt_HH, E_pw_HH, E_zp_HH_agg, E_qout_HH_agg, E_qnout_HH_agg, E_pw_inv, E_zp_out_nest, E_zp_nout_nest, E_q_out_nest, E_q_nout_nest, E_itory, E_fdemand_trade, E_pwt_G, E_TTREV_G, E_lom_G, E_tvc_G, E_equi_tx0E_GE_module, E_equi_GE_module
+/;
+
+scalars ex1_B_modelstat, ex1_B_solvestat;
+solve ex1_B using CNS;
+ex1_B_modelstat = ex1_B.modelstat; ex1_B_solvestat = ex1_B.solvestat;
+
+# ----------------------------------------------------------------------------------------------------$FIX p_g_tech_exo, p_g_tech_exo_dyn, p_gvars_exo, p_g_calib_exo, p_ict_endo, HH_g_tech_exo, HH_g_exo_static, HH_g_calib_exo, inv_g_tech_exo, inv_gvars_exo, inv_g_calib_exo, itory_g_exo, itory_itory_exo, trade_g_tech_exo, trade_g_exovars, trade_g_calib_exo, G_g_exo, G_g_exo_dyn, GE_module_ge_t0;
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+sigma.FX[s,n]$((sfor_ndom[s,n]) or ((GE_kno_inp[s,n]) or ((kno_HH[s,n]) or (kno_inp[s,n])))) = sigma.L[s,n];
+eta.FX[s,n]$((GE_kno_out[s,n]) or (kno_out[s,n])) = eta.L[s,n];
+mu.FX[s,n,nn]$((GE_exo_mu[s,n,nn]) or (((map_all_HH[s,n,nn] and not endo_mu[s,n])) or (exo_mu[s,n,nn]))) = mu.L[s,n,nn];
+rDepr.FX[t,s,n]$(dur[n]) = rDepr.L[t,s,n];
+Rrate.FX[t] = Rrate.L[t];
+qS.FX[t,s,n]$(((qS_endo[s,n] and t0[t])) or ((d_tauS[s,n]) or ((GE_out[s,n]) or (((out_HH[s,n] and t0[t] and not exo_HH[s,n])) or (((out_HH[s,n] and exo_HH[s,n])) or (out[s,n])))))) = qS.L[t,s,n];
+PwT.FX[t,s,n]$((sfor_ndom[s,n]) or ((GE_inp[s,n]) or ((inp_HH[s,n]) or (inp[s,n])))) = PwT.L[t,s,n];
+qD.FX[t,s,n]$((d_tauD[s,n]) or (((sfor_ndom[s,n] and t0[t])) or (((t0[t] and itoryD[s,n])) or (((GE_inp[s,n] and t0[t])) or (((inp_HH[s,n] and t0[t] and not exo_HH[s,n])) or (((inp_HH[s,n] and exo_HH[s,n])) or (((inp[s,n] and t0[t])) or ((dur[n] and t0[t]))))))))) = qD.L[t,s,n];
+tauS.FX[t,s,n]$((d_tauS[s,n]) or ((GE_out[s,n]) or ((out_HH[s,n]) or (out[s,n])))) = tauS.L[t,s,n];
+tauLump.FX[t,s]$((d_tauLump[s]) or ((s_inv[s]) or ((s_HH[s]) or (s_prod[s])))) = tauLump.L[t,s];
+PbT.FX[t,s,n]$((d_tauS[s,n]) or (((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or ((t0[t] and out[s,n] and not endo_PbT[s,n])))) = PbT.L[t,s,n];
+Peq.FX[t,n]$(((Peq_endo[n] and t0[t])) or ((d_Peq[n]) or ((n_for[n]) or (((t0[t] and GE_n_out[n])) or ((fg_HH[n]) or ((t0[t] and n_out[n]))))))) = Peq.L[t,n];
+ic.FX[t,s,n]$(out[s,n]) = ic.L[t,s,n];
+os.FX[t,s,n]$(out[s,n]) = os.L[t,s,n];
+irate.FX[t] = irate.L[t];
+disc.FX[s]$(s_HH[s]) = disc.L[s];
+crra.FX[s,n]$(int_temp_HH[s,n]) = crra.L[s,n];
+hh_tvc.FX[s,n]$((svngs[n] and s_HH[s])) = hh_tvc.L[s,n];
+ar1_itory.FX = ar1_itory.L;
+vD.FX[t,s,n]$(((gsvngs[n] and s_G[s] and t0[t])) or ((s_tax[s] and n_tax[n]))) = vD.L[t,s,n];
+tauD.FX[t,s,n]$((d_tauD[s,n] and (tx0E[t] or (t0[t] and not tauDendo[s,n])))) = tauD.L[t,s,n];
+$onlisting
+
+# ----------------------------------------------------------------------------------------------------$UNFIX p_g_tech_endo, p_gvars_endo, p_ict_endo, HH_g_endo_static, HH_g_endo_dyn, HH_g_tech_endo, HH_g_calib_endo, inv_g_tech_endo, inv_gvars_endo, itory_g_endo, trade_g_endovars, trade_g_tech_endo, G_g_endo, G_g_calib_endo, GE_module_ge_tx0E;
+# ----------------------------------------------------------------------------------------------------
+$offlisting
+mu.lo[s,n,nn]$(((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or ((endo_mu[s,n]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn])))) = -inf;
+mu.up[s,n,nn]$(((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or ((endo_mu[s,n]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn])))) = inf;
+markup.lo[s,n]$((GE_out[s,n]) or (out[s,n])) = -inf;
+markup.up[s,n]$((GE_out[s,n]) or (out[s,n])) = inf;
+PbT.lo[t,s,n]$((GE_endo_PbT[s,n]) or ((out_HH[s,n]) or (endo_PbT[s,n]))) = -inf;
+PbT.up[t,s,n]$((GE_endo_PbT[s,n]) or ((out_HH[s,n]) or (endo_PbT[s,n]))) = inf;
+PwT.lo[t,s,n]$((d_tauD[s,n]) or ((GE_int[s,n]) or (((top_HH[s,n] and tx0E[t])) or ((int_HH[s,n]) or (int[s,n]))))) = -inf;
+PwT.up[t,s,n]$((d_tauD[s,n]) or ((GE_int[s,n]) or (((top_HH[s,n] and tx0E[t])) or ((int_HH[s,n]) or (int[s,n]))))) = inf;
+qD.lo[t,s,n]$(((sfor_ndom[s,n] and tx0E[t])) or (((tx0E[t] and itoryD[s,n])) or (((GE_wT[s,n] and tx0[t])) or (((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))))) = -inf;
+qD.up[t,s,n]$(((sfor_ndom[s,n] and tx0E[t])) or (((tx0E[t] and itoryD[s,n])) or (((GE_wT[s,n] and tx0[t])) or (((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))))) = inf;
+Peq.lo[t,n]$(((Peq_endo[n] and tx0E[t])) or (((GE_n_out[n] and tx0E[t])) or ((n_out[n] and tx0E[t])))) = -inf;
+Peq.up[t,n]$(((Peq_endo[n] and tx0E[t])) or (((GE_n_out[n] and tx0E[t])) or ((n_out[n] and tx0E[t])))) = inf;
+ic.lo[t,s,n]$(out[s,n]) = -inf;
+ic.up[t,s,n]$(out[s,n]) = inf;
+os.lo[t,s,n]$(out[s,n]) = -inf;
+os.up[t,s,n]$(out[s,n]) = inf;
+qS.lo[t,s,n]$(((qS_endo[s,n] and tx0E[t])) or ((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) = -inf;
+qS.up[t,s,n]$(((qS_endo[s,n] and tx0E[t])) or ((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) = inf;
+vD.lo[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t])) or (((svngs[n] and s_HH[s] and t0[t])) or ((svngs[n] and s_HH[s] and tx0[t])))) = -inf;
+vD.up[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t])) or (((svngs[n] and s_HH[s] and t0[t])) or ((svngs[n] and s_HH[s] and tx0[t])))) = inf;
+sp.lo[t,s]$(s_HH[s]) = -inf;
+sp.up[t,s]$(s_HH[s]) = inf;
+phi.lo[s,n]$(sfor_ndom[s,n]) = -inf;
+phi.up[s,n]$(sfor_ndom[s,n]) = inf;
+TotTaxRev.lo[t] = -inf;
+TotTaxRev.up[t] = inf;
+g_tvc.lo[s,n]$((gsvngs[n] and s_G[s])) = -inf;
+g_tvc.up[s,n]$((gsvngs[n] and s_G[s])) = inf;
+tauD.lo[t,s,n]$((tauDendo[s,n] and t0[t])) = -inf;
+tauD.up[t,s,n]$((tauDendo[s,n] and t0[t])) = inf;
+$onlisting
+
+# ----------------------------------------------------------------------------------------------------
+#  Define ex1_DC model
+# ----------------------------------------------------------------------------------------------------
+Model ex1_DC /
+E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests, E_pw_p, E_lom_p, E_pk_p, E_Ktvc_p, E_outs_p, E_instcost_p, E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest, E_lom_HH, E_euler_HH, E_tvc_HH, E_bdgt_HH, E_pw_HH, E_zp_HH_agg, E_qout_HH_agg, E_qnout_HH_agg, E_pw_inv, E_zp_out_nest, E_zp_nout_nest, E_q_out_nest, E_q_nout_nest, E_itory, E_fdemand_trade, E_pwt_G, E_TTREV_G, E_lom_G, E_tvc_G, E_TR_G, E_equi_tx0E_GE_module
+/;
+
+;

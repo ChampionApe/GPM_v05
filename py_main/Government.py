@@ -88,30 +88,15 @@ class g_static(gmspython):
 			return 0
 
 	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-
-	@property
-	def gog(self):
-		return []
-
 	def group_conditions(self,group):
 		if group == 'g_exo':
-			return {'qD': self.g('d_tauD'), 'qS': self.g('d_tauS'), 'vD': {'and': [self.g('s_tax'), self.g('n_tax')]},
+			return [{'qD': self.g('d_tauD'), 'qS': self.g('d_tauS'), 'vD': {'and': [self.g('s_tax'), self.g('n_tax')]},
 					'tauD': {'and': [self.g('d_tauD'), {'not': self.g('tauDendo')}]}, 'tauS': self.g('d_tauS'), 'tauLump': self.g('d_tauLump'), 
-					'PbT': self.g('d_tauS'), 'Peq': self.g('d_Peq')}
+					'PbT': self.g('d_tauS'), 'Peq': self.g('d_Peq')}]
 		elif group == 'g_endo':
-			return {'TotTaxRev': None,'PwT': self.g('d_tauD')}
+			return [{'TotTaxRev': None,'PwT': self.g('d_tauD')}]
 		elif group == 'g_calib_endo':
-			return {'tauD': self.g('tauDendo')}
-		elif group in self.gog:
-			return self.gog_conditions(group)
+			return [{'tauD': self.g('tauDendo')}]
 
 	@property
 	def exo_groups(self):
@@ -147,13 +132,6 @@ class g_static(gmspython):
 	def init_gclass(self):
 		self.gclass.add_symbols(self.model.database,self.ns)
 		self.gclass.add_conditions(self.model.database,self.ns)
-
-	@staticmethod
-	def add_t_to_variable(var,tindex):
-		if tindex.name not in var.index.names:
-			return pd.concat({i: var for i in tindex},names=tindex.names)
-		else:
-			return var
 
 class g_dynamic(gmspython):
 	""" government sector, static."""
@@ -210,7 +188,7 @@ class g_dynamic(gmspython):
 	def ivfs(self,static,variables=['Peq','PwT','PbT','qD','qS','vD','tauD','tauS','tauLump'],merge=True):
 		""" initialize variables from database w. static version """ 
 		for var in variables:
-			add_var = g_static.add_t_to_variable(static.get(self.ns[var]),self.get('txE'))
+			add_var = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var]),self.get('txE'))
 			if merge is True and self.ns[var] in self.model.database.symbols:
 				self.model.database[self.ns[var]] = add_var.combine_first(self.get(var))
 			else:
@@ -245,31 +223,16 @@ class g_dynamic(gmspython):
 			return pd.Series(0, index = pd.MultiIndex.from_product([self.get('s_G'),self.get('gsvngs')],names=self.g('s_G').domains+self.g('gsvngs').domains), name = self.n(var))
 
 	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-
-	@property
-	def gog(self):
-		return []
-
 	def group_conditions(self,group):
 		if group == 'g_exo':
-			return {'qD': self.g('d_tauD'), 'qS': self.g('d_tauS'), 'vD': {'and': [self.g('s_tax'), self.g('n_tax')]}, 'tauS': self.g('d_tauS'), 'tauLump': self.g('d_tauLump'), 'PbT': self.g('d_tauS'), 'Peq': self.g('d_Peq'),
-			'tauD': {'and': [self.g('d_tauD'), {'or': [self.g('tx0E'), {'and': [self.g('t0'), {'not': self.g('tauDendo')}]}]}]}}
+			return [{'qD': self.g('d_tauD'), 'qS': self.g('d_tauS'), 'vD': {'and': [self.g('s_tax'), self.g('n_tax')]}, 'tauS': self.g('d_tauS'), 'tauLump': self.g('d_tauLump'), 'PbT': self.g('d_tauS'), 'Peq': self.g('d_Peq'),
+			'tauD': {'and': [self.g('d_tauD'), {'or': [self.g('tx0E'), {'and': [self.g('t0'), {'not': self.g('tauDendo')}]}]}]}}]
 		elif group == 'g_exo_dyn':
-			return {'irate': None, 'vD': {'and': [self.g('gsvngs'),self.g('s_G'),self.g('t0')]}}
+			return [{'irate': None, 'vD': {'and': [self.g('gsvngs'),self.g('s_G'),self.g('t0')]}}]
 		elif group == 'g_endo':
-			return {'TotTaxRev': None,'PwT': self.g('d_tauD'), 'vD': {'and': [self.g('gsvngs'),self.g('s_G'),self.g('tx0')]},'g_tvc': {'and': [self.g('gsvngs'), self.g('s_G')]}}
+			return [{'TotTaxRev': None,'PwT': self.g('d_tauD'), 'vD': {'and': [self.g('gsvngs'),self.g('s_G'),self.g('tx0')]},'g_tvc': {'and': [self.g('gsvngs'), self.g('s_G')]}}]
 		elif group == 'g_calib_endo':
-			return {'tauD': {'and': [self.g('tauDendo'), self.g('t0')]}}
-		elif group in self.gog:
-			return self.gog_conditions(group)
+			return [{'tauD': {'and': [self.g('tauDendo'), self.g('t0')]}}]
 
 	@property
 	def exo_groups(self):

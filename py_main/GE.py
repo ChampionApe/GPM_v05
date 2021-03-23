@@ -53,17 +53,11 @@ class GE_v1(gmspython):
 		self.equi.add_conditions(self.model.database,self.ns,dynamic=True)
 
 	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-
 	def group_conditions(self,group):
 		if group == 'ge_t0':
-			return {'qS': {'and': [self.g('qS_endo'), self.g('t0')]}, 'Peq': {'and': [self.g('Peq_endo'),self.g('t0')]}}
+			return [{'qS': {'and': [self.g('qS_endo'), self.g('t0')]}, 'Peq': {'and': [self.g('Peq_endo'),self.g('t0')]}}]
 		elif group == 'ge_tx0E':
-			return {'qS': {'and': [self.g('qS_endo'), self.g('tx0E')]}, 'Peq': {'and': [self.g('Peq_endo'),self.g('tx0E')]}}
+			return [{'qS': {'and': [self.g('qS_endo'), self.g('tx0E')]}, 'Peq': {'and': [self.g('Peq_endo'),self.g('tx0E')]}}]
 
 	@property
 	def endo_groups(self):
@@ -85,10 +79,6 @@ class GE_v1(gmspython):
 	@property 
 	def sub_groups(self):
 		return {}
-
-	@property
-	def gog(self):
-		return []
 
 	# --- 		4: Define blocks 		--- #
 	@property

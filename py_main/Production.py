@@ -217,13 +217,6 @@ class pr_static(gmspython):
 		if self.ns['s'] not in db[subset].domains:
 			db[subset] = DataBase_wheels.prepend_index_with_1dindex(db.get(subset),self.get('s')[self.get('s')==self.s])	
 
-	@staticmethod
-	def add_t_to_variable(var,tindex):
-		if tindex.name not in var.index.names:
-			return pd.concat({i: var for i in tindex},names=tindex.names)
-		else:
-			return var
-
 class pr_dynamic(gmspython):
 	def __init__(self,nt=None,pickle_path=None,work_folder=None,ict='ict_v1',gs_v='gs_v1',pw='pricewedge',kwargs_ns={},kwargs_st={},gs_vals={},**kwargs_gs):
 		databases = None if nt is None else [nt.database.copy()]
@@ -307,10 +300,10 @@ class pr_dynamic(gmspython):
 		""" initialize variables from database w. static version """
 		for var in variables:
 			if var not in ('qD','PwT'):
-				add_var = pr_static.add_t_to_variable(static.get(self.ns[var]),self.get('txE'))
+				add_var = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var]),self.get('txE'))
 			else:
-				ndurs = pr_static.add_t_to_variable(static.get(self.ns[var]),self.get('txE'))
-				durs  = pr_static.add_t_to_variable(static.get(self.ns[var])[static.get(self.ns[var]).index.get_level_values(self.ns['n']).isin(self.get('dur'))],self.get('t'))
+				ndurs = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var]),self.get('txE'))
+				durs  = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var])[static.get(self.ns[var]).index.get_level_values(self.ns['n']).isin(self.get('dur'))],self.get('t'))
 				add_var = ndurs.combine_first(durs)
 			if merge is True and self.ns[var] in self.model.database.symbols:
 				self.model.database[self.ns[var]] = add_var.combine_first(self.get(var))
@@ -392,7 +385,7 @@ class pr_dynamic(gmspython):
 
 	def ss_rDepr(self,GE_data,inplace=True):
 		inv = DataBase_wheels.mi.v1_series(GE_data[self.n('qD')].rctree_pd(self.g('inv')), pd.MultiIndex.from_tuples(self.get('dur2inv').swaplevel(0,1).values,names=[self.n('n'),self.n('nn')]))
-		rDepr = pd.Series(pr_static.add_t_to_variable(inv/GE_data[self.n('qD')].rctree_pd(self.g('dur'))-self.get('g_LR'),self.get('t')),name=self.n('rDepr'))
+		rDepr = pd.Series(DataBase_wheels.repeat_variable_windex(inv/GE_data[self.n('qD')].rctree_pd(self.g('dur'))-self.get('g_LR'),self.get('t')),name=self.n('rDepr'))
 		if inplace is True:
 			self.model.database[self.n('rDepr')] = rDepr
 		else:

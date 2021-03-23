@@ -1,0 +1,21 @@
+		# Tell the solver that the system is square 
+		# lssqrs = t 
+		
+		# Keep searching for a solution even if a bound is hit (due to non linearities) 
+		lmmxsf = 1 
+		
+		# Time limit in seconds 
+		rvtime = 1000000 
+		reslim = 1000000 
+		
+		# Limit for slow progress, Range: [12,MAXINT], Default: 12 
+		# lfnicr = 100 
+		
+		# Optimality tolerance for reduced gradient 
+		#  RTREDG = 1.e-9 
+		
+		# Absolute pivot tolerance, Range: [2.2e-16, 1.e-7], Default: 1.e-10 
+		# rtpiva = 2.22044605e-16 
+		Threads = 4 
+		THREADF=4 
+		

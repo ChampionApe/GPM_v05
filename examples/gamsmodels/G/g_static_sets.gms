@@ -1,96 +1,96 @@
 sets
-	n
-	s
-	alias_map2
 	alias_set
+	alias_map2
+	s
+	n
 	t
 ;
 
 alias(n,nn);
 
 sets
-	n_equi[n]
-	tx0[t]
-	tx0E[t]
-	inv[n]
-	s_itory[s]
-	d_qS[s,n]
-	d_vD[s,n]
-	txE[t]
-	d_PbT[s,n]
-	d_tauLump[s]
-	n_fg[n]
-	d_qD[s,n]
-	d_tauD[s,n]
-	s_tax[s]
-	dur[n]
-	d_tauS[s,n]
-	dur2inv[n,nn]
-	n_tax[n]
-	s_for[s]
-	s_inv[s]
 	alias_[alias_set,alias_map2]
-	t0E[t]
 	s_prod[s]
-	tauDendo[s,n]
-	n_for[n]
-	t0[t]
-	sfor_nfor[s,n]
-	d_PwT[s,n]
-	tE[t]
-	d_Peq[n]
-	s_HH[s]
-	sfor_ndom[s,n]
-	inp_HH[s,n]
 	n_prod[n]
-	itoryD[s,n]
+	n_fg[n]
+	s_for[s]
+	n_for[n]
+	sfor_ndom[s,n]
+	sfor_nfor[s,n]
+	s_HH[s]
+	inp_HH[s,n]
 	out_HH[s,n]
+	n_tax[n]
+	s_tax[s]
+	s_itory[s]
+	s_inv[s]
+	inv[n]
+	dur2inv[n,nn]
+	dur[n]
+	itoryD[s,n]
+	n_equi[n]
+	d_Peq[n]
 	d_vS[s,n]
+	d_vD[s,n]
+	d_PwT[s,n]
+	d_PbT[s,n]
+	d_qD[s,n]
+	d_qS[s,n]
+	d_tauS[s,n]
+	d_tauD[s,n]
+	d_tauLump[s]
+	t0[t]
+	tE[t]
+	tx0[t]
+	txE[t]
+	t0E[t]
+	tx0E[t]
+	tauDendo[s,n]
 ;
 
 $GDXIN %GE_data%
 $onMulti
+$load alias_set
 $load alias_map2
+$load s
 $load n
 $load t
-$load alias_set
-$load s
-$load n_equi
-$load tx0
-$load n_tax
+$load s_prod
+$load n_prod
+$load n_fg
 $load s_for
-$load tx0E
+$load n_for
+$load s_HH
+$load n_tax
+$load s_tax
+$load s_itory
 $load s_inv
 $load inv
-$load s_itory
-$load t0E
-$load s_prod
-$load txE
-$load n_for
-$load t0
-$load d_tauLump
-$load n_fg
-$load tE
-$load d_Peq
-$load s_HH
-$load n_prod
-$load s_tax
 $load dur
-$load d_tauS
-$load dur2inv
+$load n_equi
+$load d_Peq
+$load d_tauLump
+$load t0
+$load tE
+$load tx0
+$load txE
+$load t0E
+$load tx0E
 $load alias_
-$load d_qS
-$load d_vD
-$load tauDendo
-$load sfor_nfor
-$load d_PbT
-$load d_PwT
-$load d_qD
 $load sfor_ndom
+$load sfor_nfor
 $load inp_HH
-$load itoryD
-$load d_tauD
 $load out_HH
+$load dur2inv
+$load itoryD
 $load d_vS
+$load d_vD
+$load d_PwT
+$load d_PbT
+$load d_qD
+$load d_qS
+$load d_tauS
+$load d_tauD
+$load tauDendo
 $GDXIN
 $offMulti

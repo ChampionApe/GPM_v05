@@ -30,8 +30,8 @@ sets
 	itoryD[s,n]
 	n_equi[n]
 	d_Peq[n]
-	d_vS[s,n]
 	d_vD[s,n]
+	d_vS[s,n]
 	d_PwT[s,n]
 	d_PbT[s,n]
 	d_qD[s,n]
@@ -83,8 +83,8 @@ $load inp_HH
 $load out_HH
 $load dur2inv
 $load itoryD
-$load d_vS
 $load d_vD
+$load d_vS
 $load d_PwT
 $load d_PbT
 $load d_qD

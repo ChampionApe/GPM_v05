@@ -16,8 +16,11 @@ def slice_in_and_out(all_,exceptions=[],add_to_specific=None):
 	all_ = all_ if add_to_specific is None else all_.intersection(set(add_to_specific))
 	return all_-set(exceptions)
 
-# def map_mi_var(var,mapping,level=None):
-# 	""" apply mapping (defined as multiindex) to the variable, by swapping levels of the existing multiindex."""
+def repeat_variable_windex(var,index):
+	if index.name not in var.index.names:
+		return pd.concat({i: var for i in index},names=index.names)
+	else:
+		return var
 
 class mi:
 	""" small collection of multiindex operations """

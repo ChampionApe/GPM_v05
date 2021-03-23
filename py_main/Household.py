@@ -95,39 +95,23 @@ class hh_static(gmspython):
 				return 0
 
 	# ---			3: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}	
-
-	@property
-	def gog(self):
-		return ['g_tech']
-
-	def group_of_groups(self,group,n=''):
-		if group == 'g_tech':
-			return {'g_tech_exo': n+'g_tech_exo', 'g_tech_endo': n+'g_tech_endo'}
 
 	def group_conditions(self,group):
 		if group == 'g_tech_exo':
-			return {'sigma': self.g('kno'), 'mu': {'and': [self.g('map_all'), {'not': self.g('endo_mu')}]}}
+			return [{'sigma': self.g('kno'), 'mu': {'and': [self.g('map_all'), {'not': self.g('endo_mu')}]}}]
 		elif group == 'g_tech_endo':
-			return {'mu': self.g('endo_mu')}
+			return [{'mu': self.g('endo_mu')}]
 		elif group == 'g_endovars':
-			return {'PwT': {'and': [self.g('int'), {'not':self.g('top')}]},'PbT': self.g('out'),'qD': self.g('int')}
+			return [{'PwT': {'and': [self.g('int'), {'not':self.g('top')}]},'PbT': self.g('out'),'qD': self.g('int')}]
 		elif group == 'g_exovars':
-			return {'PwT': self.g('inp'), 'Peq': self.g('fg_HH'), 'qD': {'and': [self.g('inp'),self.g('exo')]}, 'qS': {'and': [self.g('out'), self.g('exo')]},'tauS': self.g('out'),
-					'tauLump': None if self.hh_sectors is None else self.g('s_HH')}
+			return [{'PwT': self.g('inp'), 'Peq': self.g('fg_HH'), 'qD': {'and': [self.g('inp'),self.g('exo')]}, 'qS': {'and': [self.g('out'), self.g('exo')]},'tauS': self.g('out'),
+					 'tauLump': None if self.hh_sectors is None else self.g('s_HH')}]
 		elif group == 'g_calib_exo':
-			return {'qD': {'and': [self.g('inp'), {'not': self.g('exo')}]}, 'qS': {'and': [self.g('out'),{'not': self.g('exo')}]}, 'PwT': self.g('top')} 
-		elif group is 'g_savings':
-			return {'sp': self.g('s_HH')}
-		elif group in self.gog:
-			return self.gog_conditions(group)
+			return [{'qD': {'and': [self.g('inp'), {'not': self.g('exo')}]}, 'qS': {'and': [self.g('out'),{'not': self.g('exo')}]}, 'PwT': self.g('top')}]
+		elif group == 'g_savings':
+			return [{'sp': self.g('s_HH')}]
+		elif group == 'g_tech':
+			return ['g_tech_exo','g_tech_endo']
 
 	@property
 	def exo_groups(self):
@@ -174,13 +158,6 @@ class hh_static(gmspython):
 		gams_class.add_symbols(self.model.database,self.ns,sector=self.hh_sectors)
 		gams_class.add_conditions(sector=self.hh_sectors)
 		return gams_class.run(self.model.settings.name)
-
-	@staticmethod
-	def add_t_to_variable(var,tindex):
-		if tindex.name not in var.index.names:
-			return pd.concat({i: var for i in tindex},names=tindex.names)
-		else:
-			return var
 
 class hh_dynamic(gmspython):
 	def __init__(self,nt=None,dyn='ramsey',pickle_path=None,work_folder=None,gs_v='gs_v1',gs_vals = {},kwargs_ns={},kwargs_st = {},**kwargs_gs):
@@ -265,7 +242,7 @@ class hh_dynamic(gmspython):
 	def ivfs(self,static,variables=['qS','qD','PbT','PwT','Peq','sp','tauS','tauLump'],merge=True):
 		""" initialize variables from database w. static version """ 
 		for var in variables:
-			add_var = hh_static.add_t_to_variable(static.get(self.ns[var]),self.get('txE'))
+			add_var = DataBase_wheels.repeat_variable_windex(static.get(self.ns[var]),self.get('txE'))
 			if merge is True and self.ns[var] in self.model.database.symbols:
 				self.model.database[self.ns[var]] = add_var.combine_first(self.get(var))
 			else:
@@ -338,44 +315,27 @@ class hh_dynamic(gmspython):
 		return (1+self.get('g_LR'))**(self.get('crra').droplevel('n'))/self.get('R_LR')
 
 	# ---			4: Define groups	 		--- #
-	def add_group(self,group,n=None):
-		if group in self.gog:
-			return self.group_of_groups(group,n=n)
-		else:
-			return self.define_group(self.group_conditions(group))
-
-	def define_group(self,group):
-		return {self.n(var): {'conditions': self.g(var).rctree_gams(group[var]), 'text': self.g(var).write()} for var in group}
-
-	@property
-	def gog(self):
-		return ['g_tech']
-
-	def group_of_groups(self,group,n=''):
-		if group == 'g_tech':
-			return {'g_tech_exo': n+'g_tech_exo', 'g_tech_endo': n+'g_tech_endo'}
-
 	def group_conditions(self,group):
 		if group == 'g_tech_exo':
-			return {'sigma': self.g('kno'), 'mu': {'and': [self.g('map_all'), {'not': self.g('endo_mu')}]},
-					'irate': None,'disc': self.g('s_HH'),'crra':self.g('int_temp'), 'hh_tvc':{'and': [self.g('svngs'), self.g('s_HH')]}}
+			return [{'sigma': self.g('kno'), 'mu': {'and': [self.g('map_all'), {'not': self.g('endo_mu')}]},
+					 'irate': None,'disc': self.g('s_HH'),'crra':self.g('int_temp'), 'hh_tvc':{'and': [self.g('svngs'), self.g('s_HH')]}}]
 		elif group == 'g_tech_endo':
-			return {'mu': self.g('endo_mu')}
+			return [{'mu': self.g('endo_mu')}]
 		elif group =='g_endo_static':
-			return {'PwT': self.g('int'), 'PbT': self.g('out'), 'qD': {'or': [self.g('int'), {'and': [self.g('inp'),{'not': self.g('exo')},self.g('tx0E')]}]},
-					 'qS': {'and': [self.g('out'),{'not':self.g('exo')},self.g('tx0E')]}}
+			return [{'PwT': self.g('int'), 'PbT': self.g('out'), 'qD': {'or': [self.g('int'), {'and': [self.g('inp'),{'not': self.g('exo')},self.g('tx0E')]}]},
+					  'qS': {'and': [self.g('out'),{'not':self.g('exo')},self.g('tx0E')]}}]
 		elif group =='g_endo_dyn':
-			return {'PwT': {'and': [self.g('top'),self.g('tx0E')]}, 'vD': {'and': [self.g('svngs'),self.g('s_HH'),self.g('tx0')]},'sp': self.g('s_HH')}
+			return [{'PwT': {'and': [self.g('top'),self.g('tx0E')]}, 'vD': {'and': [self.g('svngs'),self.g('s_HH'),self.g('tx0')]},'sp': self.g('s_HH')}]
 		elif group =='g_exo_static':
-			return {'PwT': self.g('inp'), 'Peq': self.g('fg_HH'), 'qD': {'and': [self.g('inp'),self.g('exo')]}, 'qS': {'and': [self.g('out'), self.g('exo')]}, 
-					'tauLump': self.g('s_HH'), 'tauS': self.g('out')}
+			return [{'PwT': self.g('inp'), 'Peq': self.g('fg_HH'), 'qD': {'and': [self.g('inp'),self.g('exo')]}, 'qS': {'and': [self.g('out'), self.g('exo')]}, 
+					'tauLump': self.g('s_HH'), 'tauS': self.g('out')}]
 		elif group =='g_calib_endo':
-			return {'vD': {'and': [self.g('svngs'), self.g('s_HH'), self.g('t0')]}}
+			return [{'vD': {'and': [self.g('svngs'), self.g('s_HH'), self.g('t0')]}}]
 		elif group == 'g_calib_exo':
-			return {'qD': {'and': [self.g('inp'),self.g('t0'),{'not': self.g('exo')}]},
-					'qS': {'and': [self.g('out'),self.g('t0'),{'not': self.g('exo')}]}}
-		elif group in self.gog:
-			return self.gog_conditions(group)
+			return [{'qD': {'and': [self.g('inp'),self.g('t0'),{'not': self.g('exo')}]},
+					 'qS': {'and': [self.g('out'),self.g('t0'),{'not': self.g('exo')}]}}]
+		elif group == 'g_tech':
+			return ['g_tech_exo','g_tech_endo']
 
 	@property
 	def exo_groups(self):

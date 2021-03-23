@@ -1,0 +1,3105 @@
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   3   
+   4   
+   5  # Root File for model
+   6  OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
+   7  ;
+   8   
+   9  # ----------------------------------------------------------------------------------------------------
+  10  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_CollectFile.gms
+  11  # ----------------------------------------------------------------------------------------------------
+  12   
+  13   
+  14  # ----------------------------------------------------------------------------------------------------
+  15  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_functions.gms
+  16  # ----------------------------------------------------------------------------------------------------
+  17   
+  18   
+  19  # ----------------------------------------------------------------------------------------------------
+  20  #  Define function: load_level
+  21  # ----------------------------------------------------------------------------------------------------
+  22   
+  23   
+  24   
+  25  # ----------------------------------------------------------------------------------------------------
+  26  #  Define function: load_fixed
+  27  # ----------------------------------------------------------------------------------------------------
+  28   
+  29   
+  30  ;
+  31   
+  32  # ----------------------------------------------------------------------------------------------------
+  33  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_sets.gms
+  34  # ----------------------------------------------------------------------------------------------------
+  35   
+  36  sets
+  37          alias_set
+  38          alias_map2
+  39          n
+  40          s
+  41          t
+  42  ;
+  43   
+  44  alias(n,nn,nnn);
+  45   
+  46  sets
+  47          alias_[alias_set,alias_map2]
+  48          map_all[s,n,nn]
+  49          inp[s,n]
+  50          out[s,n]
+  51          int[s,n]
+  52          fg[n]
+  53          wT[s,n]
+  54          kno_out[s,n]
+  55          kno_inp[s,n]
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+  56          t0[t]
+  57          tE[t]
+  58          tx0[t]
+  59          txE[t]
+  60          t0E[t]
+  61          tx0E[t]
+  62          map_lower_nests[s,n,nn]
+  63          kno_lower_nests[s,n]
+  64          bra_lower_nests[s,n]
+  65          inp_lower_nests[s,n]
+  66          out_lower_nests[s,n]
+  67          kno_no_lower_nests[s,n]
+  68          bra_o_lower_nests[s,n]
+  69          bra_no_lower_nests[s,n]
+  70          map_upper_nest[s,n,nn]
+  71          kno_upper_nest[s,n]
+  72          bra_upper_nest[s,n]
+  73          inp_upper_nest[s,n]
+  74          out_upper_nest[s,n]
+  75          kno_no_upper_nest[s,n]
+  76          bra_o_upper_nest[s,n]
+  77          bra_no_upper_nest[s,n]
+  78          s_prod[s]
+  79          n_out[n]
+  80          dur[n]
+  81          dur2inv[n,nn]
+  82          inv[n]
+  83          ndur[n]
+  84          endo_PbT[s,n]
+  85          exo_mu[s,n,nn]
+  86  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- LOAD  alias_set = 1:alias_set
+--- LOAD  alias_map2 = 2:alias_map2
+--- LOAD  n = 3:n
+--- LOAD  s = 4:s
+--- LOAD  t = 5:t
+--- LOAD  fg = 13:fg
+--- LOAD  t0 = 17:t0
+--- LOAD  tE = 18:tE
+--- LOAD  tx0 = 19:tx0
+--- LOAD  txE = 20:txE
+--- LOAD  t0E = 21:t0E
+--- LOAD  tx0E = 22:tx0E
+--- LOAD  s_prod = 39:s_prod
+--- LOAD  n_out = 40:n_out
+--- LOAD  dur = 41:dur
+--- LOAD  inv = 43:inv
+--- LOAD  ndur = 44:ndur
+--- LOAD  alias_ = 8:alias_
+--- LOAD  map_all = 9:map_all
+--- LOAD  inp = 10:inp
+--- LOAD  out = 11:out
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+--- LOAD  int = 12:int
+--- LOAD  wT = 14:wT
+--- LOAD  kno_out = 15:kno_out
+--- LOAD  kno_inp = 16:kno_inp
+--- LOAD  map_lower_nests = 23:map_lower_nests
+--- LOAD  kno_lower_nests = 24:kno_lower_nests
+--- LOAD  bra_lower_nests = 25:bra_lower_nests
+--- LOAD  inp_lower_nests = 26:inp_lower_nests
+--- LOAD  out_lower_nests = 27:out_lower_nests
+--- LOAD  kno_no_lower_nests = 28:kno_no_lower_nests
+--- LOAD  bra_o_lower_nests = 29:bra_o_lower_nests
+--- LOAD  bra_no_lower_nests = 30:bra_no_lower_nests
+--- LOAD  map_upper_nest = 31:map_upper_nest
+--- LOAD  kno_upper_nest = 32:kno_upper_nest
+--- LOAD  bra_upper_nest = 33:bra_upper_nest
+--- LOAD  inp_upper_nest = 34:inp_upper_nest
+--- LOAD  out_upper_nest = 35:out_upper_nest
+--- LOAD  kno_no_upper_nest = 36:kno_no_upper_nest
+--- LOAD  bra_o_upper_nest = 37:bra_o_upper_nest
+--- LOAD  bra_no_upper_nest = 38:bra_no_upper_nest
+--- LOAD  dur2inv = 42:dur2inv
+--- LOAD  endo_PbT = 45:endo_PbT
+--- LOAD  exo_mu = 46:exo_mu
+ 135  ;
+ 136   
+ 137  # ----------------------------------------------------------------------------------------------------
+ 138  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_parameters.gms
+ 139  # ----------------------------------------------------------------------------------------------------
+ 140   
+ 141  parameters
+ 142          R_LR
+ 143          g_LR
+ 144          infl_LR
+ 145  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- LOAD  R_LR = 47:R_LR
+--- LOAD  g_LR = 48:g_LR
+--- LOAD  infl_LR = 49:infl_LR
+ 152  ;
+ 153   
+ 154  # ----------------------------------------------------------------------------------------------------
+ 155  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_groups.gms
+ 156  # ----------------------------------------------------------------------------------------------------
+ 157   
+ 158   
+ 159  # --------------------------------------------p_g_tech_endo-------------------------------------------
+ 160  #  Initialize p_g_tech_endo group
+ 161  # ----------------------------------------------------------------------------------------------------
+ 168   
+ 169   
+ 170  # --------------------------------------------p_gvars_endo--------------------------------------------
+ 171  #  Initialize p_gvars_endo group
+ 172  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 183   
+ 184   
+ 185  # ---------------------------------------------p_ict_endo---------------------------------------------
+ 186  #  Initialize p_ict_endo group
+ 187  # ----------------------------------------------------------------------------------------------------
+ 194   
+ 195   
+ 196  # --------------------------------------------p_g_tech_exo--------------------------------------------
+ 197  #  Initialize p_g_tech_exo group
+ 198  # ----------------------------------------------------------------------------------------------------
+ 205   
+ 206   
+ 207  # ------------------------------------------p_g_tech_exo_dyn------------------------------------------
+ 208  #  Initialize p_g_tech_exo_dyn group
+ 209  # ----------------------------------------------------------------------------------------------------
+ 216   
+ 217   
+ 218  # ---------------------------------------------p_gvars_exo--------------------------------------------
+ 219  #  Initialize p_gvars_exo group
+ 220  # ----------------------------------------------------------------------------------------------------
+ 229   
+ 230   
+ 231  # --------------------------------------------p_g_calib_exo-------------------------------------------
+ 232  #  Initialize p_g_calib_exo group
+ 233  # ----------------------------------------------------------------------------------------------------
+ 236   
+ 237   
+ 238  # --------------------------------------------p_g_vars_endo-------------------------------------------
+ 239  #  Initialize p_g_vars_endo group
+ 240  # ----------------------------------------------------------------------------------------------------
+ 243   
+ 244   
+ 245  # ----------------------------------------------p_g_tech----------------------------------------------
+ 246  #  Initialize p_g_tech group
+ 247  # ----------------------------------------------------------------------------------------------------
+ 250   
+ 251   
+ 252  # --------------------------------------------p_g_vars_exo--------------------------------------------
+ 253  #  Initialize p_g_vars_exo group
+ 254  # ----------------------------------------------------------------------------------------------------
+ 257   
+ 258   
+ 259  # ----------------------------------------------p_ict_exo---------------------------------------------
+ 260  #  Initialize p_ict_exo group
+ 261  # ----------------------------------------------------------------------------------------------------
+ 277   
+ 278  # ----------------------------------------------------------------------------------------------------
+ 279  #  Loop over __load_group
+ 280  # ----------------------------------------------------------------------------------------------------
+ 281   
+ 282      parameter load_PbT[t,s,n] "";
+ 283      load_PbT[t,s,n]$((((t0[t] and out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n]))) = 0;
+ 284   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 285      parameter load_PwT[t,s,n] "";
+ 286      load_PwT[t,s,n]$((int[s,n])) = 0;
+ 287   
+ 288      parameter load_qD[t,s,n] "";
+ 289      load_qD[t,s,n]$((((inp[s,n] and t0[t])) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))) = 0;
+ 290   
+ 291      parameter load_Peq[t,n] "";
+ 292      load_Peq[t,n]$((((t0[t] and n_out[n])) or ((n_out[n] and tx0E[t])))) = 0;
+ 293   
+ 294    execute_load "db_ex1"
+ 295  # ----------------------------------------------------------------------------------------------------
+ 296  #  Loop over __load_group
+ 297  # ----------------------------------------------------------------------------------------------------
+ 298   load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+ 299   
+ 300  # ----------------------------------------------------------------------------------------------------
+ 301  #  Loop over __load_group
+ 302  # ----------------------------------------------------------------------------------------------------
+ 303   
+ 304      PbT.l[t,s,n]$((((t0[t] and out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n]))) = load_PbT[t,s,n];
+ 305   
+ 306      PwT.l[t,s,n]$((int[s,n])) = load_PwT[t,s,n];
+ 307   
+ 308      qD.l[t,s,n]$((((inp[s,n] and t0[t])) or (((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n]))))) = load_qD[t,s,n];
+ 309   
+ 310      Peq.l[t,n]$((((t0[t] and n_out[n])) or ((n_out[n] and tx0E[t])))) = load_Peq[t,n];
+ 312  ;
+ 320   
+ 321  # ----------------------------------------------------------------------------------------------------
+ 322  #  Loop over __load_group
+ 323  # ----------------------------------------------------------------------------------------------------
+ 324   
+ 325      parameter load_ic[t,s,n] "";
+ 326      load_ic[t,s,n]$((out[s,n])) = 0;
+ 327   
+ 328      parameter load_os[t,s,n] "";
+ 329      load_os[t,s,n]$((out[s,n])) = 0;
+ 330   
+ 331    execute_load "db_ex1"
+ 332  # ----------------------------------------------------------------------------------------------------
+ 333  #  Loop over __load_group
+ 334  # ----------------------------------------------------------------------------------------------------
+ 335   load_ic=ic.l  load_os=os.l ;
+ 336   
+ 337  # ----------------------------------------------------------------------------------------------------
+ 338  #  Loop over __load_group
+ 339  # ----------------------------------------------------------------------------------------------------
+ 340   
+ 341      ic.l[t,s,n]$((out[s,n])) = load_ic[t,s,n];
+ 342   
+ 343      os.l[t,s,n]$((out[s,n])) = load_os[t,s,n];
+ 345  ;
+ 353   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 354  # ----------------------------------------------------------------------------------------------------
+ 355  #  Loop over __load_group
+ 356  # ----------------------------------------------------------------------------------------------------
+ 357   
+ 358      parameter load_mu[s,n,nn] "";
+ 359      load_mu[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = 0;
+ 360   
+ 361      parameter load_markup[s,n] "";
+ 362      load_markup[s,n]$((out[s,n])) = 0;
+ 363   
+ 364    execute_load "db_ex1"
+ 365  # ----------------------------------------------------------------------------------------------------
+ 366  #  Loop over __load_group
+ 367  # ----------------------------------------------------------------------------------------------------
+ 368   load_mu=mu.l  load_markup=markup.l ;
+ 369   
+ 370  # ----------------------------------------------------------------------------------------------------
+ 371  #  Loop over __load_group
+ 372  # ----------------------------------------------------------------------------------------------------
+ 373   
+ 374      mu.fx[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+ 375   
+ 376      markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+ 378  ;
+ 386   
+ 387  # ----------------------------------------------------------------------------------------------------
+ 388  #  Loop over __load_group
+ 389  # ----------------------------------------------------------------------------------------------------
+ 390   
+ 391      parameter load_PbT[t,s,n] "";
+ 392      load_PbT[t,s,n]$((endo_PbT[s,n])) = 0;
+ 393   
+ 394      parameter load_PwT[t,s,n] "";
+ 395      load_PwT[t,s,n]$((int[s,n])) = 0;
+ 396   
+ 397      parameter load_qD[t,s,n] "";
+ 398      load_qD[t,s,n]$((((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n])))) = 0;
+ 399   
+ 400      parameter load_Peq[t,n] "";
+ 401      load_Peq[t,n]$(((n_out[n] and tx0E[t]))) = 0;
+ 402   
+ 403    execute_load "db_ex1"
+ 404  # ----------------------------------------------------------------------------------------------------
+ 405  #  Loop over __load_group
+ 406  # ----------------------------------------------------------------------------------------------------
+ 407   load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+ 408   
+ 409  # ----------------------------------------------------------------------------------------------------
+ 410  #  Loop over __load_group
+ 411  # ----------------------------------------------------------------------------------------------------
+ 412   
+ 413      PbT.fx[t,s,n]$((endo_PbT[s,n])) = load_PbT[t,s,n];
+ 414   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 415      PwT.fx[t,s,n]$((int[s,n])) = load_PwT[t,s,n];
+ 416   
+ 417      qD.fx[t,s,n]$((((wT[s,n] and tx0[t]) or (int[s,n] and t0[t] and not dur[n])))) = load_qD[t,s,n];
+ 418   
+ 419      Peq.fx[t,n]$(((n_out[n] and tx0E[t]))) = load_Peq[t,n];
+ 421  ;
+ 429   
+ 430  # ----------------------------------------------------------------------------------------------------
+ 431  #  Loop over __load_group
+ 432  # ----------------------------------------------------------------------------------------------------
+ 433   
+ 434      parameter load_sigma[s,n] "";
+ 435      load_sigma[s,n]$((kno_inp[s,n])) = 0;
+ 436   
+ 437      parameter load_eta[s,n] "";
+ 438      load_eta[s,n]$((kno_out[s,n])) = 0;
+ 439   
+ 440      parameter load_mu[s,n,nn] "";
+ 441      load_mu[s,n,nn]$((exo_mu[s,n,nn])) = 0;
+ 442   
+ 443    execute_load "db_ex1"
+ 444  # ----------------------------------------------------------------------------------------------------
+ 445  #  Loop over __load_group
+ 446  # ----------------------------------------------------------------------------------------------------
+ 447   load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l ;
+ 448   
+ 449  # ----------------------------------------------------------------------------------------------------
+ 450  #  Loop over __load_group
+ 451  # ----------------------------------------------------------------------------------------------------
+ 452   
+ 453      sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
+ 454   
+ 455      eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
+ 456   
+ 457      mu.fx[s,n,nn]$((exo_mu[s,n,nn])) = load_mu[s,n,nn];
+ 459  ;
+ 467   
+ 468  # ----------------------------------------------------------------------------------------------------
+ 469  #  Loop over __load_group
+ 470  # ----------------------------------------------------------------------------------------------------
+ 471   
+ 472      parameter load_rDepr[t,s,n] "";
+ 473      load_rDepr[t,s,n]$((dur[n])) = 0;
+ 474   
+ 475      parameter load_Rrate[t] "";
+ 476      load_Rrate[t]$((1)) = 0;
+ 477   
+ 478    execute_load "db_ex1"
+ 479  # ----------------------------------------------------------------------------------------------------
+ 480  #  Loop over __load_group
+ 481  # ----------------------------------------------------------------------------------------------------
+ 482   load_rDepr=rDepr.l  load_Rrate=Rrate.l ;
+ 483   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 484  # ----------------------------------------------------------------------------------------------------
+ 485  #  Loop over __load_group
+ 486  # ----------------------------------------------------------------------------------------------------
+ 487   
+ 488      rDepr.fx[t,s,n]$((dur[n])) = load_rDepr[t,s,n];
+ 489   
+ 490      Rrate.fx[t]$((1)) = load_Rrate[t];
+ 492  ;
+ 500   
+ 501  # ----------------------------------------------------------------------------------------------------
+ 502  #  Loop over __load_group
+ 503  # ----------------------------------------------------------------------------------------------------
+ 504   
+ 505      parameter load_qS[t,s,n] "";
+ 506      load_qS[t,s,n]$((out[s,n])) = 0;
+ 507   
+ 508      parameter load_PwT[t,s,n] "";
+ 509      load_PwT[t,s,n]$((inp[s,n])) = 0;
+ 510   
+ 511      parameter load_qD[t,s,n] "";
+ 512      load_qD[t,s,n]$(((dur[n] and t0[t]))) = 0;
+ 513   
+ 514      parameter load_tauS[t,s,n] "";
+ 515      load_tauS[t,s,n]$((out[s,n])) = 0;
+ 516   
+ 517      parameter load_tauLump[t,s] "";
+ 518      load_tauLump[t,s]$((s_prod[s])) = 0;
+ 519   
+ 520    execute_load "db_ex1"
+ 521  # ----------------------------------------------------------------------------------------------------
+ 522  #  Loop over __load_group
+ 523  # ----------------------------------------------------------------------------------------------------
+ 524   load_qS=qS.l  load_PwT=PwT.l  load_qD=qD.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+ 525   
+ 526  # ----------------------------------------------------------------------------------------------------
+ 527  #  Loop over __load_group
+ 528  # ----------------------------------------------------------------------------------------------------
+ 529   
+ 530      qS.fx[t,s,n]$((out[s,n])) = load_qS[t,s,n];
+ 531   
+ 532      PwT.fx[t,s,n]$((inp[s,n])) = load_PwT[t,s,n];
+ 533   
+ 534      qD.fx[t,s,n]$(((dur[n] and t0[t]))) = load_qD[t,s,n];
+ 535   
+ 536      tauS.fx[t,s,n]$((out[s,n])) = load_tauS[t,s,n];
+ 537   
+ 538      tauLump.fx[t,s]$((s_prod[s])) = load_tauLump[t,s];
+ 540  ;
+ 548   
+ 549  # ----------------------------------------------------------------------------------------------------
+ 550  #  Loop over __load_group
+ 551  # ----------------------------------------------------------------------------------------------------
+ 552   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               03/23/21 11:02:38 Page 9
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 553      parameter load_qD[t,s,n] "";
+ 554      load_qD[t,s,n]$(((inp[s,n] and t0[t]))) = 0;
+ 555   
+ 556      parameter load_PbT[t,s,n] "";
+ 557      load_PbT[t,s,n]$(((t0[t] and out[s,n] and not endo_PbT[s,n]))) = 0;
+ 558   
+ 559      parameter load_Peq[t,n] "";
+ 560      load_Peq[t,n]$(((t0[t] and n_out[n]))) = 0;
+ 561   
+ 562    execute_load "db_ex1"
+ 563  # ----------------------------------------------------------------------------------------------------
+ 564  #  Loop over __load_group
+ 565  # ----------------------------------------------------------------------------------------------------
+ 566   load_qD=qD.l  load_PbT=PbT.l  load_Peq=Peq.l ;
+ 567   
+ 568  # ----------------------------------------------------------------------------------------------------
+ 569  #  Loop over __load_group
+ 570  # ----------------------------------------------------------------------------------------------------
+ 571   
+ 572      qD.fx[t,s,n]$(((inp[s,n] and t0[t]))) = load_qD[t,s,n];
+ 573   
+ 574      PbT.fx[t,s,n]$(((t0[t] and out[s,n] and not endo_PbT[s,n]))) = load_PbT[t,s,n];
+ 575   
+ 576      Peq.fx[t,n]$(((t0[t] and n_out[n]))) = load_Peq[t,n];
+ 578  ;
+ 586   
+ 587  # ----------------------------------------------------------------------------------------------------
+ 588  #  Loop over __load_group
+ 589  # ----------------------------------------------------------------------------------------------------
+ 590   
+ 591      parameter load_sigma[s,n] "";
+ 592      load_sigma[s,n]$((kno_inp[s,n])) = 0;
+ 593   
+ 594      parameter load_eta[s,n] "";
+ 595      load_eta[s,n]$((kno_out[s,n])) = 0;
+ 596   
+ 597      parameter load_mu[s,n,nn] "";
+ 598      load_mu[s,n,nn]$((((map_all[s,n,nn] and not exo_mu[s,n,nn])) or (exo_mu[s,n,nn]))) = 0;
+ 599   
+ 600      parameter load_rDepr[t,s,n] "";
+ 601      load_rDepr[t,s,n]$((dur[n])) = 0;
+ 602   
+ 603      parameter load_Rrate[t] "";
+ 604      load_Rrate[t]$((1)) = 0;
+ 605   
+ 606      parameter load_markup[s,n] "";
+ 607      load_markup[s,n]$((out[s,n])) = 0;
+ 608   
+ 609    execute_load "db_ex1"
+ 610  # ----------------------------------------------------------------------------------------------------
+ 611  #  Loop over __load_group
+ 612  # ----------------------------------------------------------------------------------------------------
+ 613   load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l  load_rDepr=rDepr.l  load_Rrate=Rrate.l  load_markup=markup.l ;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 10
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 614   
+ 615  # ----------------------------------------------------------------------------------------------------
+ 616  #  Loop over __load_group
+ 617  # ----------------------------------------------------------------------------------------------------
+ 618   
+ 619      sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
+ 620   
+ 621      eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
+ 622   
+ 623      mu.fx[s,n,nn]$((((map_all[s,n,nn] and not exo_mu[s,n,nn])) or (exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+ 624   
+ 625      rDepr.fx[t,s,n]$((dur[n])) = load_rDepr[t,s,n];
+ 626   
+ 627      Rrate.fx[t]$((1)) = load_Rrate[t];
+ 628   
+ 629      markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+ 631  ;
+ 639   
+ 640  # ----------------------------------------------------------------------------------------------------
+ 641  #  Loop over __load_group
+ 642  # ----------------------------------------------------------------------------------------------------
+ 643   
+ 644      parameter load_qS[t,s,n] "";
+ 645      load_qS[t,s,n]$((out[s,n])) = 0;
+ 646   
+ 647      parameter load_PwT[t,s,n] "";
+ 648      load_PwT[t,s,n]$((inp[s,n])) = 0;
+ 649   
+ 650      parameter load_qD[t,s,n] "";
+ 651      load_qD[t,s,n]$(((dur[n] and t0[t]))) = 0;
+ 652   
+ 653      parameter load_tauS[t,s,n] "";
+ 654      load_tauS[t,s,n]$((out[s,n])) = 0;
+ 655   
+ 656      parameter load_tauLump[t,s] "";
+ 657      load_tauLump[t,s]$((s_prod[s])) = 0;
+ 658   
+ 659    execute_load "db_ex1"
+ 660  # ----------------------------------------------------------------------------------------------------
+ 661  #  Loop over __load_group
+ 662  # ----------------------------------------------------------------------------------------------------
+ 663   load_qS=qS.l  load_PwT=PwT.l  load_qD=qD.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+ 664   
+ 665  # ----------------------------------------------------------------------------------------------------
+ 666  #  Loop over __load_group
+ 667  # ----------------------------------------------------------------------------------------------------
+ 668   
+ 669      qS.fx[t,s,n]$((out[s,n])) = load_qS[t,s,n];
+ 670   
+ 671      PwT.fx[t,s,n]$((inp[s,n])) = load_PwT[t,s,n];
+ 672   
+ 673      qD.fx[t,s,n]$(((dur[n] and t0[t]))) = load_qD[t,s,n];
+ 674   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 11
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 675      tauS.fx[t,s,n]$((out[s,n])) = load_tauS[t,s,n];
+ 676   
+ 677      tauLump.fx[t,s]$((s_prod[s])) = load_tauLump[t,s];
+ 679  ;
+ 687   
+ 688  # ----------------------------------------------------------------------------------------------------
+ 689  #  Loop over __load_group
+ 690  # ----------------------------------------------------------------------------------------------------
+ 691   
+ 692      parameter load_ic_1[s,n] "";
+ 693      load_ic_1[s,n]$((dur[n])) = 0;
+ 694   
+ 695      parameter load_ic_2[s,n] "";
+ 696      load_ic_2[s,n]$((dur[n])) = 0;
+ 697   
+ 698      parameter load_ic_tvc[s,n] "";
+ 699      load_ic_tvc[s,n]$((dur[n])) = 0;
+ 700   
+ 701    execute_load "db_ex1"
+ 702  # ----------------------------------------------------------------------------------------------------
+ 703  #  Loop over __load_group
+ 704  # ----------------------------------------------------------------------------------------------------
+ 705   load_ic_1=ic_1.l  load_ic_2=ic_2.l  load_ic_tvc=ic_tvc.l ;
+ 706   
+ 707  # ----------------------------------------------------------------------------------------------------
+ 708  #  Loop over __load_group
+ 709  # ----------------------------------------------------------------------------------------------------
+ 710   
+ 711      ic_1.fx[s,n]$((dur[n])) = load_ic_1[s,n];
+ 712   
+ 713      ic_2.fx[s,n]$((dur[n])) = load_ic_2[s,n];
+ 714   
+ 715      ic_tvc.fx[s,n]$((dur[n])) = load_ic_tvc[s,n];
+ 717  ;
+ 718  ;
+ 719   
+ 720  # ----------------------------------------------------------------------------------------------------
+ 721  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_blocks.gms
+ 722  # ----------------------------------------------------------------------------------------------------
+ 723   
+ 724   
+ 725  # --------------------------------------------M_lower_nests-------------------------------------------
+ 726  #  Initialize M_lower_nests equation block
+ 727  # ----------------------------------------------------------------------------------------------------
+ 728  EQUATION E_zp_out_lower_nests[t,s,n];
+ 729  E_zp_out_lower_nests[t,s,n]$(out_lower_nests[s,n] and txe[t])..         PbT[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+ 730  EQUATION E_zp_nout_lower_nests[t,s,n];
+ 731  E_zp_nout_lower_nests[t,s,n]$(kno_no_lower_nests[s,n] and txe[t])..     PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+ 732  EQUATION E_q_out_lower_nests[t,s,n];
+ 733  E_q_out_lower_nests[t,s,n]$(bra_o_lower_nests[s,n] and txe[t])..        qD[t,s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PbT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qS[t,s,nn]);
+ 734  EQUATION E_q_nout_lower_nests[t,s,n];
+ 735  E_q_nout_lower_nests[t,s,n]$(bra_no_lower_nests[s,n] and txe[t])..      qD[t,s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+ 736   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 12
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 737  # ----------------------------------------------------------------------------------------------------
+ 738  #  Define M_lower_nests model
+ 739  # ----------------------------------------------------------------------------------------------------
+ 740  Model M_lower_nests /
+ 741  E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests
+ 742  /;
+ 743   
+ 744   
+ 745  # --------------------------------------------M_upper_nest--------------------------------------------
+ 746  #  Initialize M_upper_nest equation block
+ 747  # ----------------------------------------------------------------------------------------------------
+ 748  EQUATION E_zp_out_upper_nest[t,s,n];
+ 749  E_zp_out_upper_nest[t,s,n]$(out_upper_nest[s,n] and txe[t])..   PbT[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+ 750  EQUATION E_zp_nout_upper_nest[t,s,n];
+ 751  E_zp_nout_upper_nest[t,s,n]$(kno_no_upper_nest[s,n] and txe[t])..       PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+ 752  EQUATION E_q_out_upper_nest[t,s,n];
+ 753  E_q_out_upper_nest[t,s,n]$(bra_o_upper_nest[s,n] and txe[t])..  qD[t,s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PbT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qS[t,s,nn]);
+ 754  EQUATION E_q_nout_upper_nest[t,s,n];
+ 755  E_q_nout_upper_nest[t,s,n]$(bra_no_upper_nest[s,n] and txe[t])..        qD[t,s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+ 756   
+ 757  # ----------------------------------------------------------------------------------------------------
+ 758  #  Define M_upper_nest model
+ 759  # ----------------------------------------------------------------------------------------------------
+ 760  Model M_upper_nest /
+ 761  E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest
+ 762  /;
+ 763   
+ 764   
+ 765  # -----------------------------------------------M_p_pw-----------------------------------------------
+ 766  #  Initialize M_p_pw equation block
+ 767  # ----------------------------------------------------------------------------------------------------
+ 768  EQUATION E_pw_p[t,s,n];
+ 769  E_pw_p[t,s,n]$(out[s,n] and txe[t])..   Peq[t,n]  =E=  (1+markup[s,n])*(PbT[t,s,n]*(1+tauLump[t,s]/sum(nn$(out[s,nn]), qS[t,s,nn]*PbT[t,s,nn]))+tauS[t,s,n]+ic[t,s,n]);
+ 770   
+ 771  # ----------------------------------------------------------------------------------------------------
+ 772  #  Define M_p_pw model
+ 773  # ----------------------------------------------------------------------------------------------------
+ 774  Model M_p_pw /
+ 775  E_pw_p
+ 776  /;
+ 777   
+ 778   
+ 779  # -----------------------------------------------M_p_cf-----------------------------------------------
+ 780  #  Initialize M_p_cf equation block
+ 781  # ----------------------------------------------------------------------------------------------------
+ 782  EQUATION E_lom_p[t,s,n];
+ 783  E_lom_p[t,s,n]$(txe[t] and dur[n] and s_prod[s])..      qD[t+1,s,n]  =E=  (qD[t,s,n]*(1-rDepr[t,s,n])+sum(nn$(dur2inv[n,nn]), qD[t,s,nn]))/(1+g_LR);
+ 784  EQUATION E_pk_p[t,s,n];
+ 785  E_pk_p[t,s,n]$(tx0e[t] and dur[n] and s_prod[s])..      PwT[t,s,n]  =E=  sum(nn$(dur2inv[n,nn]),Rrate[t]*(PwT[t-1,s,nn]/(1+infl_LR)+ic_1[s,n]*(qD[t-1,s,nn]/qD[t-1,s,n]-ic_2[s,n]))+(ic_1[s,n]*0.5)*(sqr(ic_2[s,n]*qD[t,s,n])-sqr(qD[t,s,nn]))/sqr(qD[t,s
+      ,n])-(1-rDepr[t,s,n])*(PwT[t,s,nn]+ic_1[s,n]*(qD[t,s,nn]/qD[t,s,n]-ic_2[s,n])));
+ 786  EQUATION E_Ktvc_p[t,s,n];
+ 787  E_Ktvc_p[t,s,n]$(te[t] and dur[n] and s_prod[s])..      qD[t,s,n]  =E=  (1+ic_tvc[s,n])*qD[t-1,s,n];
+ 788  EQUATION E_outs_p[t,s,n];
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 13
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 789  E_outs_p[t,s,n]$(out[s,n] and txe[t] and s_prod[s])..   os[t,s,n]  =E=  qS[t,s,n]*PbT[t,s,n]/sum(nn$(out[s,nn]), qS[t,s,nn]*PbT[t,s,nn]);
+ 790  EQUATION E_instcost_p[t,s,n];
+ 791  E_instcost_p[t,s,n]$(out[s,n] and txe[t] and s_prod[s])..       ic[t,s,n]  =E=  (os[t,s,n]/qS[t,s,n])*sum(nn$(dur[nn]), sum(nnn$(dur2inv[nn,nnn]), ic_1[s,nn]*0.5*qD[t,s,nn]*sqr(qD[t,s,nnn]/qD[t,s,nn]-ic_2[s,nn])));
+ 792   
+ 793  # ----------------------------------------------------------------------------------------------------
+ 794  #  Define M_p_cf model
+ 795  # ----------------------------------------------------------------------------------------------------
+ 796  Model M_p_cf /
+ 797  E_lom_p, E_pk_p, E_Ktvc_p, E_outs_p, E_instcost_p
+ 798  /;
+ 799   
+ 800  ;
+ 801  ;
+ 802   
+ 803  # ----------------------------------------------------------------------------------------------------
+ 804  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_CollectFile.gms
+ 805  # ----------------------------------------------------------------------------------------------------
+ 806   
+ 807   
+ 808  # ----------------------------------------------------------------------------------------------------
+ 809  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_functions.gms
+ 810  # ----------------------------------------------------------------------------------------------------
+ 811   
+ 812   
+ 813  # ----------------------------------------------------------------------------------------------------
+ 814  #  Define function: load_level
+ 815  # ----------------------------------------------------------------------------------------------------
+ 816   
+ 817   
+ 818   
+ 819  # ----------------------------------------------------------------------------------------------------
+ 820  #  Define function: load_fixed
+ 821  # ----------------------------------------------------------------------------------------------------
+ 822   
+ 823   
+ 824  ;
+ 825   
+ 826  # ----------------------------------------------------------------------------------------------------
+ 827  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_sets.gms
+ 828  # ----------------------------------------------------------------------------------------------------
+ 829   
+ 830  sets
+ 831          alias_set
+ 832          alias_map2
+ 833          n
+ 834          s
+ 835          t
+ 836  ;
+ 837   
+ 838  alias(n,nn,nnn);
+ 839   
+ 840  sets
+ 841          alias_[alias_set,alias_map2]
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 14
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 842          inp_HH[s,n]
+ 843          out_HH[s,n]
+ 844          int_HH[s,n]
+ 845          kno_HH[s,n]
+ 846          map_all_HH[s,n,nn]
+ 847          int_temp_HH[s,n]
+ 848          exo_HH[s,n]
+ 849          top_HH[s,n]
+ 850          inp_HH_agg[s,n]
+ 851          out_HH_agg[s,n]
+ 852          kno_HH_agg[s,n]
+ 853          map_HH_agg[s,n,nn]
+ 854          qs_qs_HH_agg[s,n]
+ 855          qs_qd_HH_agg[s,n]
+ 856          qd_qd_HH_agg[s,n]
+ 857          qd_qs_HH_agg[s,n]
+ 858          int_temp_HH_agg[s,n]
+ 859          t0[t]
+ 860          tE[t]
+ 861          tx0[t]
+ 862          txE[t]
+ 863          t0E[t]
+ 864          tx0E[t]
+ 865          endo_mu[s,n]
+ 866          s_HH[s]
+ 867          fg_HH[n]
+ 868          svngs[n]
+ 869  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE alias_set = 1:alias_set
+--- MERGE alias_map2 = 2:alias_map2
+--- MERGE n = 3:n
+--- MERGE s = 4:s
+--- MERGE t = 5:t
+--- MERGE t0 = 17:t0
+--- MERGE tE = 18:tE
+--- MERGE tx0 = 19:tx0
+--- MERGE txE = 20:txE
+--- MERGE t0E = 21:t0E
+--- MERGE tx0E = 22:tx0E
+--- LOAD  s_HH = 86:s_HH
+--- LOAD  fg_HH = 87:fg_HH
+--- LOAD  svngs = 88:svngs
+--- MERGE alias_ = 8:alias_
+--- LOAD  inp_HH = 68:inp_HH
+--- LOAD  out_HH = 69:out_HH
+--- LOAD  int_HH = 70:int_HH
+--- LOAD  kno_HH = 71:kno_HH
+--- LOAD  map_all_HH = 72:map_all_HH
+--- LOAD  int_temp_HH = 73:int_temp_HH
+--- LOAD  exo_HH = 74:exo_HH
+--- LOAD  top_HH = 75:top_HH
+--- LOAD  inp_HH_agg = 76:inp_HH_agg
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 15
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+--- LOAD  out_HH_agg = 77:out_HH_agg
+--- LOAD  kno_HH_agg = 78:kno_HH_agg
+--- LOAD  map_HH_agg = 79:map_HH_agg
+--- LOAD  qs_qs_HH_agg = 80:qs_qs_HH_agg
+--- LOAD  qs_qd_HH_agg = 81:qs_qd_HH_agg
+--- LOAD  qd_qd_HH_agg = 82:qd_qd_HH_agg
+--- LOAD  qd_qs_HH_agg = 83:qd_qs_HH_agg
+--- LOAD  int_temp_HH_agg = 84:int_temp_HH_agg
+--- LOAD  endo_mu = 85:endo_mu
+ 907  ;
+ 908   
+ 909  # ----------------------------------------------------------------------------------------------------
+ 910  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_parameters.gms
+ 911  # ----------------------------------------------------------------------------------------------------
+ 912   
+ 913  parameters
+ 914          R_LR
+ 915          g_LR
+ 916          infl_LR
+ 917  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE R_LR = 47:R_LR
+--- MERGE g_LR = 48:g_LR
+--- MERGE infl_LR = 49:infl_LR
+ 924  ;
+ 925   
+ 926  # ----------------------------------------------------------------------------------------------------
+ 927  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_groups.gms
+ 928  # ----------------------------------------------------------------------------------------------------
+ 929   
+ 930   
+ 931  # ------------------------------------------HH_g_endo_static------------------------------------------
+ 932  #  Initialize HH_g_endo_static group
+ 933  # ----------------------------------------------------------------------------------------------------
+ 936   
+ 937   
+ 938  # --------------------------------------------HH_g_endo_dyn-------------------------------------------
+ 939  #  Initialize HH_g_endo_dyn group
+ 940  # ----------------------------------------------------------------------------------------------------
+ 947   
+ 948   
+ 949  # -------------------------------------------HH_g_tech_endo-------------------------------------------
+ 950  #  Initialize HH_g_tech_endo group
+ 951  # ----------------------------------------------------------------------------------------------------
+ 954   
+ 955   
+ 956  # -------------------------------------------HH_g_calib_endo------------------------------------------
+ 957  #  Initialize HH_g_calib_endo group
+ 958  # ----------------------------------------------------------------------------------------------------
+ 961   
+ 962   
+ 963  # --------------------------------------------HH_g_tech_exo-------------------------------------------
+ 964  #  Initialize HH_g_tech_exo group
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 16
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 965  # ----------------------------------------------------------------------------------------------------
+ 976   
+ 977   
+ 978  # -------------------------------------------HH_g_exo_static------------------------------------------
+ 979  #  Initialize HH_g_exo_static group
+ 980  # ----------------------------------------------------------------------------------------------------
+ 983   
+ 984   
+ 985  # -------------------------------------------HH_g_calib_exo-------------------------------------------
+ 986  #  Initialize HH_g_calib_exo group
+ 987  # ----------------------------------------------------------------------------------------------------
+ 990   
+ 991   
+ 992  # ----------------------------------------------HH_g_tech---------------------------------------------
+ 993  #  Initialize HH_g_tech group
+ 994  # ----------------------------------------------------------------------------------------------------
+1004   
+1005  # ----------------------------------------------------------------------------------------------------
+1006  #  Loop over __load_group
+1007  # ----------------------------------------------------------------------------------------------------
+1008   
+1009      parameter load_PwT[t,s,n] "";
+1010      load_PwT[t,s,n]$((int_HH[s,n])) = 0;
+1011   
+1012      parameter load_PbT[t,s,n] "";
+1013      load_PbT[t,s,n]$((out_HH[s,n])) = 0;
+1014   
+1015      parameter load_qD[t,s,n] "";
+1016      load_qD[t,s,n]$(((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t])))) = 0;
+1017   
+1018      parameter load_qS[t,s,n] "";
+1019      load_qS[t,s,n]$(((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) = 0;
+1020   
+1021    execute_load "db_ex1"
+1022  # ----------------------------------------------------------------------------------------------------
+1023  #  Loop over __load_group
+1024  # ----------------------------------------------------------------------------------------------------
+1025   load_PwT=PwT.l  load_PbT=PbT.l  load_qD=qD.l  load_qS=qS.l ;
+1026   
+1027  # ----------------------------------------------------------------------------------------------------
+1028  #  Loop over __load_group
+1029  # ----------------------------------------------------------------------------------------------------
+1030   
+1031      PwT.l[t,s,n]$((int_HH[s,n])) = load_PwT[t,s,n];
+1032   
+1033      PbT.l[t,s,n]$((out_HH[s,n])) = load_PbT[t,s,n];
+1034   
+1035      qD.l[t,s,n]$(((int_HH[s,n] or (inp_HH[s,n] and not exo_HH[s,n] and tx0E[t])))) = load_qD[t,s,n];
+1036   
+1037      qS.l[t,s,n]$(((out_HH[s,n] and not exo_HH[s,n] and tx0E[t]))) = load_qS[t,s,n];
+1039  ;
+1047   
+1048  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 17
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1049  #  Loop over __load_group
+1050  # ----------------------------------------------------------------------------------------------------
+1051   
+1052      parameter load_PwT[t,s,n] "";
+1053      load_PwT[t,s,n]$(((top_HH[s,n] and tx0E[t]))) = 0;
+1054   
+1055      parameter load_vD[t,s,n] "";
+1056      load_vD[t,s,n]$(((svngs[n] and s_HH[s] and tx0[t]))) = 0;
+1057   
+1058      parameter load_sp[t,s] "";
+1059      load_sp[t,s]$((s_HH[s])) = 0;
+1060   
+1061    execute_load "db_ex1"
+1062  # ----------------------------------------------------------------------------------------------------
+1063  #  Loop over __load_group
+1064  # ----------------------------------------------------------------------------------------------------
+1065   load_PwT=PwT.l  load_vD=vD.l  load_sp=sp.l ;
+1066   
+1067  # ----------------------------------------------------------------------------------------------------
+1068  #  Loop over __load_group
+1069  # ----------------------------------------------------------------------------------------------------
+1070   
+1071      PwT.l[t,s,n]$(((top_HH[s,n] and tx0E[t]))) = load_PwT[t,s,n];
+1072   
+1073      vD.l[t,s,n]$(((svngs[n] and s_HH[s] and tx0[t]))) = load_vD[t,s,n];
+1074   
+1075      sp.l[t,s]$((s_HH[s])) = load_sp[t,s];
+1077  ;
+1085   
+1086  # ----------------------------------------------------------------------------------------------------
+1087  #  Loop over __load_group
+1088  # ----------------------------------------------------------------------------------------------------
+1089   
+1090      parameter load_qD[t,s,n] "";
+1091      load_qD[t,s,n]$(((inp_HH[s,n] and t0[t] and not exo_HH[s,n]))) = 0;
+1092   
+1093      parameter load_qS[t,s,n] "";
+1094      load_qS[t,s,n]$(((out_HH[s,n] and t0[t] and not exo_HH[s,n]))) = 0;
+1095   
+1096    execute_load "db_ex1"
+1097  # ----------------------------------------------------------------------------------------------------
+1098  #  Loop over __load_group
+1099  # ----------------------------------------------------------------------------------------------------
+1100   load_qD=qD.l  load_qS=qS.l ;
+1101   
+1102  # ----------------------------------------------------------------------------------------------------
+1103  #  Loop over __load_group
+1104  # ----------------------------------------------------------------------------------------------------
+1105   
+1106      qD.l[t,s,n]$(((inp_HH[s,n] and t0[t] and not exo_HH[s,n]))) = load_qD[t,s,n];
+1107   
+1108      qS.l[t,s,n]$(((out_HH[s,n] and t0[t] and not exo_HH[s,n]))) = load_qS[t,s,n];
+1110  ;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 18
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1118   
+1119  # ----------------------------------------------------------------------------------------------------
+1120  #  Loop over __load_group
+1121  # ----------------------------------------------------------------------------------------------------
+1122   
+1123      parameter load_mu[s,n,nn] "";
+1124      load_mu[s,n,nn]$((endo_mu[s,n])) = 0;
+1125   
+1126    execute_load "db_ex1"
+1127  # ----------------------------------------------------------------------------------------------------
+1128  #  Loop over __load_group
+1129  # ----------------------------------------------------------------------------------------------------
+1130   load_mu=mu.l ;
+1131   
+1132  # ----------------------------------------------------------------------------------------------------
+1133  #  Loop over __load_group
+1134  # ----------------------------------------------------------------------------------------------------
+1135   
+1136      mu.fx[s,n,nn]$((endo_mu[s,n])) = load_mu[s,n,nn];
+1138  ;
+1146   
+1147  # ----------------------------------------------------------------------------------------------------
+1148  #  Loop over __load_group
+1149  # ----------------------------------------------------------------------------------------------------
+1150   
+1151      parameter load_vD[t,s,n] "";
+1152      load_vD[t,s,n]$(((svngs[n] and s_HH[s] and t0[t]))) = 0;
+1153   
+1154    execute_load "db_ex1"
+1155  # ----------------------------------------------------------------------------------------------------
+1156  #  Loop over __load_group
+1157  # ----------------------------------------------------------------------------------------------------
+1158   load_vD=vD.l ;
+1159   
+1160  # ----------------------------------------------------------------------------------------------------
+1161  #  Loop over __load_group
+1162  # ----------------------------------------------------------------------------------------------------
+1163   
+1164      vD.fx[t,s,n]$(((svngs[n] and s_HH[s] and t0[t]))) = load_vD[t,s,n];
+1166  ;
+1174   
+1175  # ----------------------------------------------------------------------------------------------------
+1176  #  Loop over __load_group
+1177  # ----------------------------------------------------------------------------------------------------
+1178   
+1179      parameter load_sigma[s,n] "";
+1180      load_sigma[s,n]$((kno_HH[s,n])) = 0;
+1181   
+1182      parameter load_mu[s,n,nn] "";
+1183      load_mu[s,n,nn]$(((map_all_HH[s,n,nn] and not endo_mu[s,n]))) = 0;
+1184   
+1185      parameter load_irate[t] "";
+1186      load_irate[t]$((1)) = 0;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 19
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1187   
+1188      parameter load_disc[s] "";
+1189      load_disc[s]$((s_HH[s])) = 0;
+1190   
+1191      parameter load_crra[s,n] "";
+1192      load_crra[s,n]$((int_temp_HH[s,n])) = 0;
+1193   
+1194      parameter load_hh_tvc[s,n] "";
+1195      load_hh_tvc[s,n]$(((svngs[n] and s_HH[s]))) = 0;
+1196   
+1197    execute_load "db_ex1"
+1198  # ----------------------------------------------------------------------------------------------------
+1199  #  Loop over __load_group
+1200  # ----------------------------------------------------------------------------------------------------
+1201   load_sigma=sigma.l  load_mu=mu.l  load_irate=irate.l  load_disc=disc.l  load_crra=crra.l  load_hh_tvc=hh_tvc.l ;
+1202   
+1203  # ----------------------------------------------------------------------------------------------------
+1204  #  Loop over __load_group
+1205  # ----------------------------------------------------------------------------------------------------
+1206   
+1207      sigma.fx[s,n]$((kno_HH[s,n])) = load_sigma[s,n];
+1208   
+1209      mu.fx[s,n,nn]$(((map_all_HH[s,n,nn] and not endo_mu[s,n]))) = load_mu[s,n,nn];
+1210   
+1211      irate.fx[t]$((1)) = load_irate[t];
+1212   
+1213      disc.fx[s]$((s_HH[s])) = load_disc[s];
+1214   
+1215      crra.fx[s,n]$((int_temp_HH[s,n])) = load_crra[s,n];
+1216   
+1217      hh_tvc.fx[s,n]$(((svngs[n] and s_HH[s]))) = load_hh_tvc[s,n];
+1219  ;
+1227   
+1228  # ----------------------------------------------------------------------------------------------------
+1229  #  Loop over __load_group
+1230  # ----------------------------------------------------------------------------------------------------
+1231   
+1232      parameter load_PwT[t,s,n] "";
+1233      load_PwT[t,s,n]$((inp_HH[s,n])) = 0;
+1234   
+1235      parameter load_Peq[t,n] "";
+1236      load_Peq[t,n]$((fg_HH[n])) = 0;
+1237   
+1238      parameter load_qD[t,s,n] "";
+1239      load_qD[t,s,n]$(((inp_HH[s,n] and exo_HH[s,n]))) = 0;
+1240   
+1241      parameter load_qS[t,s,n] "";
+1242      load_qS[t,s,n]$(((out_HH[s,n] and exo_HH[s,n]))) = 0;
+1243   
+1244      parameter load_tauLump[t,s] "";
+1245      load_tauLump[t,s]$((s_HH[s])) = 0;
+1246   
+1247      parameter load_tauS[t,s,n] "";
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 20
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1248      load_tauS[t,s,n]$((out_HH[s,n])) = 0;
+1249   
+1250    execute_load "db_ex1"
+1251  # ----------------------------------------------------------------------------------------------------
+1252  #  Loop over __load_group
+1253  # ----------------------------------------------------------------------------------------------------
+1254   load_PwT=PwT.l  load_Peq=Peq.l  load_qD=qD.l  load_qS=qS.l  load_tauLump=tauLump.l  load_tauS=tauS.l ;
+1255   
+1256  # ----------------------------------------------------------------------------------------------------
+1257  #  Loop over __load_group
+1258  # ----------------------------------------------------------------------------------------------------
+1259   
+1260      PwT.fx[t,s,n]$((inp_HH[s,n])) = load_PwT[t,s,n];
+1261   
+1262      Peq.fx[t,n]$((fg_HH[n])) = load_Peq[t,n];
+1263   
+1264      qD.fx[t,s,n]$(((inp_HH[s,n] and exo_HH[s,n]))) = load_qD[t,s,n];
+1265   
+1266      qS.fx[t,s,n]$(((out_HH[s,n] and exo_HH[s,n]))) = load_qS[t,s,n];
+1267   
+1268      tauLump.fx[t,s]$((s_HH[s])) = load_tauLump[t,s];
+1269   
+1270      tauS.fx[t,s,n]$((out_HH[s,n])) = load_tauS[t,s,n];
+1272  ;
+1280   
+1281  # ----------------------------------------------------------------------------------------------------
+1282  #  Loop over __load_group
+1283  # ----------------------------------------------------------------------------------------------------
+1284   
+1285      parameter load_sigma[s,n] "";
+1286      load_sigma[s,n]$((kno_HH[s,n])) = 0;
+1287   
+1288      parameter load_mu[s,n,nn] "";
+1289      load_mu[s,n,nn]$(((endo_mu[s,n]) or ((map_all_HH[s,n,nn] and not endo_mu[s,n])))) = 0;
+1290   
+1291      parameter load_irate[t] "";
+1292      load_irate[t]$((1)) = 0;
+1293   
+1294      parameter load_disc[s] "";
+1295      load_disc[s]$((s_HH[s])) = 0;
+1296   
+1297      parameter load_crra[s,n] "";
+1298      load_crra[s,n]$((int_temp_HH[s,n])) = 0;
+1299   
+1300      parameter load_hh_tvc[s,n] "";
+1301      load_hh_tvc[s,n]$(((svngs[n] and s_HH[s]))) = 0;
+1302   
+1303    execute_load "db_ex1"
+1304  # ----------------------------------------------------------------------------------------------------
+1305  #  Loop over __load_group
+1306  # ----------------------------------------------------------------------------------------------------
+1307   load_sigma=sigma.l  load_mu=mu.l  load_irate=irate.l  load_disc=disc.l  load_crra=crra.l  load_hh_tvc=hh_tvc.l ;
+1308   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 21
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1309  # ----------------------------------------------------------------------------------------------------
+1310  #  Loop over __load_group
+1311  # ----------------------------------------------------------------------------------------------------
+1312   
+1313      sigma.fx[s,n]$((kno_HH[s,n])) = load_sigma[s,n];
+1314   
+1315      mu.fx[s,n,nn]$(((endo_mu[s,n]) or ((map_all_HH[s,n,nn] and not endo_mu[s,n])))) = load_mu[s,n,nn];
+1316   
+1317      irate.fx[t]$((1)) = load_irate[t];
+1318   
+1319      disc.fx[s]$((s_HH[s])) = load_disc[s];
+1320   
+1321      crra.fx[s,n]$((int_temp_HH[s,n])) = load_crra[s,n];
+1322   
+1323      hh_tvc.fx[s,n]$(((svngs[n] and s_HH[s]))) = load_hh_tvc[s,n];
+1325  ;
+1326  ;
+1327   
+1328  # ----------------------------------------------------------------------------------------------------
+1329  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\HH_blocks.gms
+1330  # ----------------------------------------------------------------------------------------------------
+1331   
+1332   
+1333  # ----------------------------------------------M_HH_agg----------------------------------------------
+1334  #  Initialize M_HH_agg equation block
+1335  # ----------------------------------------------------------------------------------------------------
+1336  EQUATION E_zp_HH_agg[t,s,n];
+1337  E_zp_HH_agg[t,s,n]$(kno_hh_agg[s,n] and txe[t])..       PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_HH_agg[s,nn,n] and qs_qd_HH_agg[s,nn]), qS[t,s,nn]*PbT[t,s,nn])+sum(nn$(map_HH_agg[s,nn,n] and qd_qd_HH_agg[s,nn]), qD[t,s,nn]*PwT[t,s,nn]);
+1338  EQUATION E_qout_HH_agg[t,s,n];
+1339  E_qout_HH_agg[t,s,n]$(qs_qd_hh_agg[s,n] and txe[t])..   qS[t,s,n]  =E=  sum(nn$(map_HH_agg[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PbT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+1340  EQUATION E_qnout_HH_agg[t,s,n];
+1341  E_qnout_HH_agg[t,s,n]$(qd_qd_hh_agg[s,n] and txe[t])..  qD[t,s,n]  =E=  sum(nn$(map_HH_agg[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+1342   
+1343  # ----------------------------------------------------------------------------------------------------
+1344  #  Define M_HH_agg model
+1345  # ----------------------------------------------------------------------------------------------------
+1346  Model M_HH_agg /
+1347  E_zp_HH_agg, E_qout_HH_agg, E_qnout_HH_agg
+1348  /;
+1349   
+1350   
+1351  # ----------------------------------------------M_bdgt_HH---------------------------------------------
+1352  #  Initialize M_bdgt_HH equation block
+1353  # ----------------------------------------------------------------------------------------------------
+1354  EQUATION E_bdgt_HH[t,s];
+1355  E_bdgt_HH[t,s]$(s_hh[s] and txe[t])..   sp[t,s]  =E=  sum(n$(out_HH[s,n]), PbT[t,s,n]*qS[t,s,n])-sum(n$(inp_HH[s,n]), PwT[t,s,n]*qD[t,s,n])-tauLump[t,s];
+1356  EQUATION E_pw_HH[t,s,n];
+1357  E_pw_HH[t,s,n]$(out_hh[s,n] and txe[t])..       Peq[t,n]  =E=  PbT[t,s,n]-tauS[t,s,n];
+1358   
+1359  # ----------------------------------------------------------------------------------------------------
+1360  #  Define M_bdgt_HH model
+1361  # ----------------------------------------------------------------------------------------------------
+1362  Model M_bdgt_HH /
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 22
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1363  E_bdgt_HH, E_pw_HH
+1364  /;
+1365   
+1366   
+1367  # ----------------------------------------------M_HH_dyn----------------------------------------------
+1368  #  Initialize M_HH_dyn equation block
+1369  # ----------------------------------------------------------------------------------------------------
+1370  EQUATION E_lom_HH[t,s,n];
+1371  E_lom_HH[t,s,n]$(txe[t] and svngs[n] and s_hh[s])..     vD[t+1,s,n]  =E=  (vD[t,s,n]*irate[t]+sp[t,s])/((1+g_LR)*(1+infl_LR));
+1372  EQUATION E_euler_HH[t,s,n];
+1373  E_euler_HH[t,s,n]$(tx0e[t] and int_temp_hh[s,n])..      qD[t,s,n]  =E=  qD[t-1,s,n]*(disc[s]*irate[t]*(PwT[t-1,s,n]/PwT[t,s,n])/(1+infl_LR))**(1/crra[s,n])/(1+g_LR);
+1374  EQUATION E_tvc_HH[t,s,n];
+1375  E_tvc_HH[t,s,n]$(te[t] and svngs[n] and s_hh[s])..      vD[t,s,n]  =E=  (1+hh_tvc[s,n])*vD[t-1,s,n];
+1376   
+1377  # ----------------------------------------------------------------------------------------------------
+1378  #  Define M_HH_dyn model
+1379  # ----------------------------------------------------------------------------------------------------
+1380  Model M_HH_dyn /
+1381  E_lom_HH, E_euler_HH, E_tvc_HH
+1382  /;
+1383   
+1384  ;
+1385  ;
+1386   
+1387  # ----------------------------------------------------------------------------------------------------
+1388  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_CollectFile.gms
+1389  # ----------------------------------------------------------------------------------------------------
+1390   
+1391   
+1392  # ----------------------------------------------------------------------------------------------------
+1393  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_functions.gms
+1394  # ----------------------------------------------------------------------------------------------------
+1395   
+1396   
+1397  # ----------------------------------------------------------------------------------------------------
+1398  #  Define function: load_level
+1399  # ----------------------------------------------------------------------------------------------------
+1400   
+1401   
+1402   
+1403  # ----------------------------------------------------------------------------------------------------
+1404  #  Define function: load_fixed
+1405  # ----------------------------------------------------------------------------------------------------
+1406   
+1407   
+1408  ;
+1409   
+1410  # ----------------------------------------------------------------------------------------------------
+1411  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_sets.gms
+1412  # ----------------------------------------------------------------------------------------------------
+1413   
+1414  sets
+1415          alias_set
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 23
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1416          alias_map2
+1417          n
+1418          s
+1419          t
+1420  ;
+1421   
+1422  alias(n,nn,nnn);
+1423   
+1424  sets
+1425          alias_[alias_set,alias_map2]
+1426          GE_map_all[s,n,nn]
+1427          GE_inp[s,n]
+1428          GE_out[s,n]
+1429          GE_int[s,n]
+1430          fg[n]
+1431          GE_wT[s,n]
+1432          GE_kno_out[s,n]
+1433          GE_kno_inp[s,n]
+1434          t0[t]
+1435          tE[t]
+1436          tx0[t]
+1437          txE[t]
+1438          t0E[t]
+1439          tx0E[t]
+1440          map_nest[s,n,nn]
+1441          kno_nest[s,n]
+1442          bra_nest[s,n]
+1443          inp_nest[s,n]
+1444          out_nest[s,n]
+1445          GE_out_nest[s,n]
+1446          kno_no_nest[s,n]
+1447          bra_o_nest[s,n]
+1448          bra_no_nest[s,n]
+1449          s_inv[s]
+1450          GE_n_out[n]
+1451          GE_endo_PbT[s,n]
+1452          GE_exo_mu[s,n,nn]
+1453  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE alias_set = 1:alias_set
+--- MERGE alias_map2 = 2:alias_map2
+--- MERGE n = 3:n
+--- MERGE s = 4:s
+--- MERGE t = 5:t
+--- MERGE fg = 13:fg
+--- MERGE t0 = 17:t0
+--- MERGE tE = 18:tE
+--- MERGE tx0 = 19:tx0
+--- MERGE txE = 20:txE
+--- MERGE t0E = 21:t0E
+--- MERGE tx0E = 22:tx0E
+--- LOAD  s_inv = 111:s_inv
+--- LOAD  GE_n_out = 112:GE_n_out
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 24
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+--- MERGE alias_ = 8:alias_
+--- LOAD  GE_map_all = 95:GE_map_all
+--- LOAD  GE_inp = 96:GE_inp
+--- LOAD  GE_out = 97:GE_out
+--- LOAD  GE_int = 98:GE_int
+--- LOAD  GE_wT = 99:GE_wT
+--- LOAD  GE_kno_out = 100:GE_kno_out
+--- LOAD  GE_kno_inp = 101:GE_kno_inp
+--- LOAD  map_nest = 102:map_nest
+--- LOAD  kno_nest = 103:kno_nest
+--- LOAD  bra_nest = 104:bra_nest
+--- LOAD  inp_nest = 105:inp_nest
+--- LOAD  out_nest = 106:out_nest
+--- LOAD  GE_out_nest = 107:GE_out_nest
+--- LOAD  kno_no_nest = 108:kno_no_nest
+--- LOAD  bra_o_nest = 109:bra_o_nest
+--- LOAD  bra_no_nest = 110:bra_no_nest
+--- LOAD  GE_endo_PbT = 113:GE_endo_PbT
+--- LOAD  GE_exo_mu = 114:GE_exo_mu
+1491  ;
+1492   
+1493  # ----------------------------------------------------------------------------------------------------
+1494  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_parameters.gms
+1495  # ----------------------------------------------------------------------------------------------------
+1496   
+1497  parameters
+1498          R_LR
+1499          g_LR
+1500          infl_LR
+1501  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE R_LR = 47:R_LR
+--- MERGE g_LR = 48:g_LR
+--- MERGE infl_LR = 49:infl_LR
+1508  ;
+1509   
+1510  # ----------------------------------------------------------------------------------------------------
+1511  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_groups.gms
+1512  # ----------------------------------------------------------------------------------------------------
+1513   
+1514   
+1515  # -------------------------------------------inv_g_tech_endo------------------------------------------
+1516  #  Initialize inv_g_tech_endo group
+1517  # ----------------------------------------------------------------------------------------------------
+1520   
+1521   
+1522  # -------------------------------------------inv_gvars_endo-------------------------------------------
+1523  #  Initialize inv_gvars_endo group
+1524  # ----------------------------------------------------------------------------------------------------
+1527   
+1528   
+1529  # -------------------------------------------inv_g_tech_exo-------------------------------------------
+1530  #  Initialize inv_g_tech_exo group
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 25
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1531  # ----------------------------------------------------------------------------------------------------
+1534   
+1535   
+1536  # --------------------------------------------inv_gvars_exo-------------------------------------------
+1537  #  Initialize inv_gvars_exo group
+1538  # ----------------------------------------------------------------------------------------------------
+1541   
+1542   
+1543  # -------------------------------------------inv_g_calib_exo------------------------------------------
+1544  #  Initialize inv_g_calib_exo group
+1545  # ----------------------------------------------------------------------------------------------------
+1548   
+1549   
+1550  # -------------------------------------------inv_g_vars_endo------------------------------------------
+1551  #  Initialize inv_g_vars_endo group
+1552  # ----------------------------------------------------------------------------------------------------
+1555   
+1556   
+1557  # ---------------------------------------------inv_g_tech---------------------------------------------
+1558  #  Initialize inv_g_tech group
+1559  # ----------------------------------------------------------------------------------------------------
+1562   
+1563   
+1564  # -------------------------------------------inv_g_vars_exo-------------------------------------------
+1565  #  Initialize inv_g_vars_exo group
+1566  # ----------------------------------------------------------------------------------------------------
+1576   
+1577  # ----------------------------------------------------------------------------------------------------
+1578  #  Loop over __load_group
+1579  # ----------------------------------------------------------------------------------------------------
+1580   
+1581      parameter load_PbT[t,s,n] "";
+1582      load_PbT[t,s,n]$((((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or (GE_endo_PbT[s,n]))) = 0;
+1583   
+1584      parameter load_PwT[t,s,n] "";
+1585      load_PwT[t,s,n]$((GE_int[s,n])) = 0;
+1586   
+1587      parameter load_qD[t,s,n] "";
+1588      load_qD[t,s,n]$((((GE_inp[s,n] and t0[t])) or ((GE_wT[s,n] and tx0[t])))) = 0;
+1589   
+1590      parameter load_Peq[t,n] "";
+1591      load_Peq[t,n]$((((t0[t] and GE_n_out[n])) or ((GE_n_out[n] and tx0E[t])))) = 0;
+1592   
+1593    execute_load "db_ex1"
+1594  # ----------------------------------------------------------------------------------------------------
+1595  #  Loop over __load_group
+1596  # ----------------------------------------------------------------------------------------------------
+1597   load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+1598   
+1599  # ----------------------------------------------------------------------------------------------------
+1600  #  Loop over __load_group
+1601  # ----------------------------------------------------------------------------------------------------
+1602   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 26
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1603      PbT.l[t,s,n]$((((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n])) or (GE_endo_PbT[s,n]))) = load_PbT[t,s,n];
+1604   
+1605      PwT.l[t,s,n]$((GE_int[s,n])) = load_PwT[t,s,n];
+1606   
+1607      qD.l[t,s,n]$((((GE_inp[s,n] and t0[t])) or ((GE_wT[s,n] and tx0[t])))) = load_qD[t,s,n];
+1608   
+1609      Peq.l[t,n]$((((t0[t] and GE_n_out[n])) or ((GE_n_out[n] and tx0E[t])))) = load_Peq[t,n];
+1611  ;
+1619   
+1620  # ----------------------------------------------------------------------------------------------------
+1621  #  Loop over __load_group
+1622  # ----------------------------------------------------------------------------------------------------
+1623   
+1624      parameter load_mu[s,n,nn] "";
+1625      load_mu[s,n,nn]$(((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn]))) = 0;
+1626   
+1627      parameter load_markup[s,n] "";
+1628      load_markup[s,n]$((GE_out[s,n])) = 0;
+1629   
+1630    execute_load "db_ex1"
+1631  # ----------------------------------------------------------------------------------------------------
+1632  #  Loop over __load_group
+1633  # ----------------------------------------------------------------------------------------------------
+1634   load_mu=mu.l  load_markup=markup.l ;
+1635   
+1636  # ----------------------------------------------------------------------------------------------------
+1637  #  Loop over __load_group
+1638  # ----------------------------------------------------------------------------------------------------
+1639   
+1640      mu.fx[s,n,nn]$(((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+1641   
+1642      markup.fx[s,n]$((GE_out[s,n])) = load_markup[s,n];
+1644  ;
+1652   
+1653  # ----------------------------------------------------------------------------------------------------
+1654  #  Loop over __load_group
+1655  # ----------------------------------------------------------------------------------------------------
+1656   
+1657      parameter load_PbT[t,s,n] "";
+1658      load_PbT[t,s,n]$((GE_endo_PbT[s,n])) = 0;
+1659   
+1660      parameter load_PwT[t,s,n] "";
+1661      load_PwT[t,s,n]$((GE_int[s,n])) = 0;
+1662   
+1663      parameter load_qD[t,s,n] "";
+1664      load_qD[t,s,n]$(((GE_wT[s,n] and tx0[t]))) = 0;
+1665   
+1666      parameter load_Peq[t,n] "";
+1667      load_Peq[t,n]$(((GE_n_out[n] and tx0E[t]))) = 0;
+1668   
+1669    execute_load "db_ex1"
+1670  # ----------------------------------------------------------------------------------------------------
+1671  #  Loop over __load_group
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 27
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1672  # ----------------------------------------------------------------------------------------------------
+1673   load_PbT=PbT.l  load_PwT=PwT.l  load_qD=qD.l  load_Peq=Peq.l ;
+1674   
+1675  # ----------------------------------------------------------------------------------------------------
+1676  #  Loop over __load_group
+1677  # ----------------------------------------------------------------------------------------------------
+1678   
+1679      PbT.fx[t,s,n]$((GE_endo_PbT[s,n])) = load_PbT[t,s,n];
+1680   
+1681      PwT.fx[t,s,n]$((GE_int[s,n])) = load_PwT[t,s,n];
+1682   
+1683      qD.fx[t,s,n]$(((GE_wT[s,n] and tx0[t]))) = load_qD[t,s,n];
+1684   
+1685      Peq.fx[t,n]$(((GE_n_out[n] and tx0E[t]))) = load_Peq[t,n];
+1687  ;
+1695   
+1696  # ----------------------------------------------------------------------------------------------------
+1697  #  Loop over __load_group
+1698  # ----------------------------------------------------------------------------------------------------
+1699   
+1700      parameter load_sigma[s,n] "";
+1701      load_sigma[s,n]$((GE_kno_inp[s,n])) = 0;
+1702   
+1703      parameter load_eta[s,n] "";
+1704      load_eta[s,n]$((GE_kno_out[s,n])) = 0;
+1705   
+1706      parameter load_mu[s,n,nn] "";
+1707      load_mu[s,n,nn]$((GE_exo_mu[s,n,nn])) = 0;
+1708   
+1709    execute_load "db_ex1"
+1710  # ----------------------------------------------------------------------------------------------------
+1711  #  Loop over __load_group
+1712  # ----------------------------------------------------------------------------------------------------
+1713   load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l ;
+1714   
+1715  # ----------------------------------------------------------------------------------------------------
+1716  #  Loop over __load_group
+1717  # ----------------------------------------------------------------------------------------------------
+1718   
+1719      sigma.fx[s,n]$((GE_kno_inp[s,n])) = load_sigma[s,n];
+1720   
+1721      eta.fx[s,n]$((GE_kno_out[s,n])) = load_eta[s,n];
+1722   
+1723      mu.fx[s,n,nn]$((GE_exo_mu[s,n,nn])) = load_mu[s,n,nn];
+1725  ;
+1733   
+1734  # ----------------------------------------------------------------------------------------------------
+1735  #  Loop over __load_group
+1736  # ----------------------------------------------------------------------------------------------------
+1737   
+1738      parameter load_qS[t,s,n] "";
+1739      load_qS[t,s,n]$((GE_out[s,n])) = 0;
+1740   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 28
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1741      parameter load_PwT[t,s,n] "";
+1742      load_PwT[t,s,n]$((GE_inp[s,n])) = 0;
+1743   
+1744      parameter load_tauS[t,s,n] "";
+1745      load_tauS[t,s,n]$((GE_out[s,n])) = 0;
+1746   
+1747      parameter load_tauLump[t,s] "";
+1748      load_tauLump[t,s]$((s_inv[s])) = 0;
+1749   
+1750    execute_load "db_ex1"
+1751  # ----------------------------------------------------------------------------------------------------
+1752  #  Loop over __load_group
+1753  # ----------------------------------------------------------------------------------------------------
+1754   load_qS=qS.l  load_PwT=PwT.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+1755   
+1756  # ----------------------------------------------------------------------------------------------------
+1757  #  Loop over __load_group
+1758  # ----------------------------------------------------------------------------------------------------
+1759   
+1760      qS.fx[t,s,n]$((GE_out[s,n])) = load_qS[t,s,n];
+1761   
+1762      PwT.fx[t,s,n]$((GE_inp[s,n])) = load_PwT[t,s,n];
+1763   
+1764      tauS.fx[t,s,n]$((GE_out[s,n])) = load_tauS[t,s,n];
+1765   
+1766      tauLump.fx[t,s]$((s_inv[s])) = load_tauLump[t,s];
+1768  ;
+1776   
+1777  # ----------------------------------------------------------------------------------------------------
+1778  #  Loop over __load_group
+1779  # ----------------------------------------------------------------------------------------------------
+1780   
+1781      parameter load_qD[t,s,n] "";
+1782      load_qD[t,s,n]$(((GE_inp[s,n] and t0[t]))) = 0;
+1783   
+1784      parameter load_PbT[t,s,n] "";
+1785      load_PbT[t,s,n]$(((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n]))) = 0;
+1786   
+1787      parameter load_Peq[t,n] "";
+1788      load_Peq[t,n]$(((t0[t] and GE_n_out[n]))) = 0;
+1789   
+1790    execute_load "db_ex1"
+1791  # ----------------------------------------------------------------------------------------------------
+1792  #  Loop over __load_group
+1793  # ----------------------------------------------------------------------------------------------------
+1794   load_qD=qD.l  load_PbT=PbT.l  load_Peq=Peq.l ;
+1795   
+1796  # ----------------------------------------------------------------------------------------------------
+1797  #  Loop over __load_group
+1798  # ----------------------------------------------------------------------------------------------------
+1799   
+1800      qD.fx[t,s,n]$(((GE_inp[s,n] and t0[t]))) = load_qD[t,s,n];
+1801   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 29
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1802      PbT.fx[t,s,n]$(((t0[t] and GE_out[s,n] and not GE_endo_PbT[s,n]))) = load_PbT[t,s,n];
+1803   
+1804      Peq.fx[t,n]$(((t0[t] and GE_n_out[n]))) = load_Peq[t,n];
+1806  ;
+1814   
+1815  # ----------------------------------------------------------------------------------------------------
+1816  #  Loop over __load_group
+1817  # ----------------------------------------------------------------------------------------------------
+1818   
+1819      parameter load_sigma[s,n] "";
+1820      load_sigma[s,n]$((GE_kno_inp[s,n])) = 0;
+1821   
+1822      parameter load_eta[s,n] "";
+1823      load_eta[s,n]$((GE_kno_out[s,n])) = 0;
+1824   
+1825      parameter load_mu[s,n,nn] "";
+1826      load_mu[s,n,nn]$((((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or (GE_exo_mu[s,n,nn]))) = 0;
+1827   
+1828      parameter load_markup[s,n] "";
+1829      load_markup[s,n]$((GE_out[s,n])) = 0;
+1830   
+1831    execute_load "db_ex1"
+1832  # ----------------------------------------------------------------------------------------------------
+1833  #  Loop over __load_group
+1834  # ----------------------------------------------------------------------------------------------------
+1835   load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l  load_markup=markup.l ;
+1836   
+1837  # ----------------------------------------------------------------------------------------------------
+1838  #  Loop over __load_group
+1839  # ----------------------------------------------------------------------------------------------------
+1840   
+1841      sigma.fx[s,n]$((GE_kno_inp[s,n])) = load_sigma[s,n];
+1842   
+1843      eta.fx[s,n]$((GE_kno_out[s,n])) = load_eta[s,n];
+1844   
+1845      mu.fx[s,n,nn]$((((GE_map_all[s,n,nn] and not GE_exo_mu[s,n,nn])) or (GE_exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+1846   
+1847      markup.fx[s,n]$((GE_out[s,n])) = load_markup[s,n];
+1849  ;
+1857   
+1858  # ----------------------------------------------------------------------------------------------------
+1859  #  Loop over __load_group
+1860  # ----------------------------------------------------------------------------------------------------
+1861   
+1862      parameter load_qS[t,s,n] "";
+1863      load_qS[t,s,n]$((GE_out[s,n])) = 0;
+1864   
+1865      parameter load_PwT[t,s,n] "";
+1866      load_PwT[t,s,n]$((GE_inp[s,n])) = 0;
+1867   
+1868      parameter load_tauS[t,s,n] "";
+1869      load_tauS[t,s,n]$((GE_out[s,n])) = 0;
+1870   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 30
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1871      parameter load_tauLump[t,s] "";
+1872      load_tauLump[t,s]$((s_inv[s])) = 0;
+1873   
+1874    execute_load "db_ex1"
+1875  # ----------------------------------------------------------------------------------------------------
+1876  #  Loop over __load_group
+1877  # ----------------------------------------------------------------------------------------------------
+1878   load_qS=qS.l  load_PwT=PwT.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+1879   
+1880  # ----------------------------------------------------------------------------------------------------
+1881  #  Loop over __load_group
+1882  # ----------------------------------------------------------------------------------------------------
+1883   
+1884      qS.fx[t,s,n]$((GE_out[s,n])) = load_qS[t,s,n];
+1885   
+1886      PwT.fx[t,s,n]$((GE_inp[s,n])) = load_PwT[t,s,n];
+1887   
+1888      tauS.fx[t,s,n]$((GE_out[s,n])) = load_tauS[t,s,n];
+1889   
+1890      tauLump.fx[t,s]$((s_inv[s])) = load_tauLump[t,s];
+1892  ;
+1893  ;
+1894   
+1895  # ----------------------------------------------------------------------------------------------------
+1896  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\inv_blocks.gms
+1897  # ----------------------------------------------------------------------------------------------------
+1898   
+1899   
+1900  # -----------------------------------------------M_nest-----------------------------------------------
+1901  #  Initialize M_nest equation block
+1902  # ----------------------------------------------------------------------------------------------------
+1903  EQUATION E_zp_out_nest[t,s,n];
+1904  E_zp_out_nest[t,s,n]$(ge_out_nest[s,n] and txe[t])..    PbT[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+1905  EQUATION E_zp_nout_nest[t,s,n];
+1906  E_zp_nout_nest[t,s,n]$(kno_no_nest[s,n] and txe[t])..   PwT[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_nest[s,nn,n]), qD[t,s,nn]*PwT[t,s,nn]);
+1907  EQUATION E_q_out_nest[t,s,n];
+1908  E_q_out_nest[t,s,n]$(bra_o_nest[s,n] and txe[t])..      qD[t,s,n]  =E=  sum(nn$(map_nest[s,n,nn]), mu[s,n,nn] * (PbT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qS[t,s,nn]);
+1909  EQUATION E_q_nout_nest[t,s,n];
+1910  E_q_nout_nest[t,s,n]$(bra_no_nest[s,n] and txe[t])..    qD[t,s,n]  =E=  sum(nn$(map_nest[s,n,nn]), mu[s,n,nn] * (PwT[t,s,nn]/PwT[t,s,n])**(sigma[s,nn]) * qD[t,s,nn]);
+1911   
+1912  # ----------------------------------------------------------------------------------------------------
+1913  #  Define M_nest model
+1914  # ----------------------------------------------------------------------------------------------------
+1915  Model M_nest /
+1916  E_zp_out_nest, E_zp_nout_nest, E_q_out_nest, E_q_nout_nest
+1917  /;
+1918   
+1919   
+1920  # ----------------------------------------------M_inv_pw----------------------------------------------
+1921  #  Initialize M_inv_pw equation block
+1922  # ----------------------------------------------------------------------------------------------------
+1923  EQUATION E_pw_inv[t,s,n];
+1924  E_pw_inv[t,s,n]$(ge_out[s,n] and txe[t])..      Peq[t,n]  =E=  (1+markup[s,n])*(PbT[t,s,n]*(1+tauLump[t,s]/sum(nn$(GE_out[s,nn]), qS[t,s,nn]*PbT[t,s,nn]))+tauS[t,s,n]+0);
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 31
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1925   
+1926  # ----------------------------------------------------------------------------------------------------
+1927  #  Define M_inv_pw model
+1928  # ----------------------------------------------------------------------------------------------------
+1929  Model M_inv_pw /
+1930  E_pw_inv
+1931  /;
+1932   
+1933  ;
+1934  ;
+1935   
+1936  # ----------------------------------------------------------------------------------------------------
+1937  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_CollectFile.gms
+1938  # ----------------------------------------------------------------------------------------------------
+1939   
+1940   
+1941  # ----------------------------------------------------------------------------------------------------
+1942  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_functions.gms
+1943  # ----------------------------------------------------------------------------------------------------
+1944   
+1945   
+1946  # ----------------------------------------------------------------------------------------------------
+1947  #  Define function: load_level
+1948  # ----------------------------------------------------------------------------------------------------
+1949   
+1950   
+1951   
+1952  # ----------------------------------------------------------------------------------------------------
+1953  #  Define function: load_fixed
+1954  # ----------------------------------------------------------------------------------------------------
+1955   
+1956   
+1957  ;
+1958   
+1959  # ----------------------------------------------------------------------------------------------------
+1960  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_sets.gms
+1961  # ----------------------------------------------------------------------------------------------------
+1962   
+1963  sets
+1964          alias_set
+1965          alias_map2
+1966          s
+1967          n
+1968          t
+1969  ;
+1970   
+1971  alias(n,nn);
+1972   
+1973  sets
+1974          alias_[alias_set,alias_map2]
+1975          s_prod[s]
+1976          n_prod[n]
+1977          n_fg[n]
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 32
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+1978          s_for[s]
+1979          n_for[n]
+1980          sfor_ndom[s,n]
+1981          sfor_nfor[s,n]
+1982          s_HH[s]
+1983          inp_HH[s,n]
+1984          out_HH[s,n]
+1985          n_tax[n]
+1986          s_tax[s]
+1987          s_itory[s]
+1988          s_inv[s]
+1989          inv[n]
+1990          dur2inv[n,nn]
+1991          dur[n]
+1992          itoryD[s,n]
+1993          n_equi[n]
+1994          d_Peq[n]
+1995          d_vD[s,n]
+1996          d_vS[s,n]
+1997          d_PwT[s,n]
+1998          d_PbT[s,n]
+1999          d_qD[s,n]
+2000          d_qS[s,n]
+2001          d_tauS[s,n]
+2002          d_tauD[s,n]
+2003          d_tauLump[s]
+2004          t0[t]
+2005          tE[t]
+2006          tx0[t]
+2007          txE[t]
+2008          t0E[t]
+2009          tx0E[t]
+2010  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE alias_set = 1:alias_set
+--- MERGE alias_map2 = 2:alias_map2
+--- MERGE s = 4:s
+--- MERGE n = 3:n
+--- MERGE t = 5:t
+--- MERGE s_prod = 39:s_prod
+--- LOAD  n_prod = 115:n_prod
+--- LOAD  n_fg = 116:n_fg
+--- LOAD  s_for = 117:s_for
+--- LOAD  n_for = 118:n_for
+--- MERGE s_HH = 86:s_HH
+--- LOAD  n_tax = 121:n_tax
+--- LOAD  s_tax = 122:s_tax
+--- LOAD  s_itory = 123:s_itory
+--- MERGE s_inv = 111:s_inv
+--- MERGE inv = 43:inv
+--- MERGE dur = 41:dur
+--- LOAD  n_equi = 125:n_equi
+--- LOAD  d_Peq = 126:d_Peq
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 33
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+--- LOAD  d_tauLump = 135:d_tauLump
+--- MERGE t0 = 17:t0
+--- MERGE tE = 18:tE
+--- MERGE tx0 = 19:tx0
+--- MERGE txE = 20:txE
+--- MERGE t0E = 21:t0E
+--- MERGE tx0E = 22:tx0E
+--- MERGE alias_ = 8:alias_
+--- LOAD  sfor_ndom = 119:sfor_ndom
+--- LOAD  sfor_nfor = 120:sfor_nfor
+--- MERGE inp_HH = 68:inp_HH
+--- MERGE out_HH = 69:out_HH
+--- MERGE dur2inv = 42:dur2inv
+--- LOAD  itoryD = 124:itoryD
+--- LOAD  d_vD = 127:d_vD
+--- LOAD  d_vS = 128:d_vS
+--- LOAD  d_PwT = 129:d_PwT
+--- LOAD  d_PbT = 130:d_PbT
+--- LOAD  d_qD = 131:d_qD
+--- LOAD  d_qS = 132:d_qS
+--- LOAD  d_tauS = 133:d_tauS
+--- LOAD  d_tauD = 134:d_tauD
+2056  ;
+2057   
+2058  # ----------------------------------------------------------------------------------------------------
+2059  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_parameters.gms
+2060  # ----------------------------------------------------------------------------------------------------
+2061   
+2062  parameters
+2063          R_LR
+2064          g_LR
+2065          infl_LR
+2066  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE R_LR = 47:R_LR
+--- MERGE g_LR = 48:g_LR
+--- MERGE infl_LR = 49:infl_LR
+2073  ;
+2074   
+2075  # ----------------------------------------------------------------------------------------------------
+2076  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_groups.gms
+2077  # ----------------------------------------------------------------------------------------------------
+2078   
+2079   
+2080  # --------------------------------------------itory_g_endo--------------------------------------------
+2081  #  Initialize itory_g_endo group
+2082  # ----------------------------------------------------------------------------------------------------
+2085   
+2086   
+2087  # ---------------------------------------------itory_g_exo--------------------------------------------
+2088  #  Initialize itory_g_exo group
+2089  # ----------------------------------------------------------------------------------------------------
+2092   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 34
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2093   
+2094  # -------------------------------------------itory_itory_exo------------------------------------------
+2095  #  Initialize itory_itory_exo group
+2096  # ----------------------------------------------------------------------------------------------------
+2108   
+2109  # ----------------------------------------------------------------------------------------------------
+2110  #  Loop over __load_group
+2111  # ----------------------------------------------------------------------------------------------------
+2112   
+2113      parameter load_qD[t,s,n] "";
+2114      load_qD[t,s,n]$(((tx0E[t] and itoryD[s,n]))) = 0;
+2115   
+2116    execute_load "db_ex1"
+2117  # ----------------------------------------------------------------------------------------------------
+2118  #  Loop over __load_group
+2119  # ----------------------------------------------------------------------------------------------------
+2120   load_qD=qD.l ;
+2121   
+2122  # ----------------------------------------------------------------------------------------------------
+2123  #  Loop over __load_group
+2124  # ----------------------------------------------------------------------------------------------------
+2125   
+2126      qD.l[t,s,n]$(((tx0E[t] and itoryD[s,n]))) = load_qD[t,s,n];
+2128  ;
+2136   
+2137  # ----------------------------------------------------------------------------------------------------
+2138  #  Loop over __load_group
+2139  # ----------------------------------------------------------------------------------------------------
+2140   
+2141      parameter load_qD[t,s,n] "";
+2142      load_qD[t,s,n]$(((t0[t] and itoryD[s,n]))) = 0;
+2143   
+2144    execute_load "db_ex1"
+2145  # ----------------------------------------------------------------------------------------------------
+2146  #  Loop over __load_group
+2147  # ----------------------------------------------------------------------------------------------------
+2148   load_qD=qD.l ;
+2149   
+2150  # ----------------------------------------------------------------------------------------------------
+2151  #  Loop over __load_group
+2152  # ----------------------------------------------------------------------------------------------------
+2153   
+2154      qD.fx[t,s,n]$(((t0[t] and itoryD[s,n]))) = load_qD[t,s,n];
+2156  ;
+2164   
+2165  # ----------------------------------------------------------------------------------------------------
+2166  #  Loop over __load_group
+2167  # ----------------------------------------------------------------------------------------------------
+2168   
+2169      parameter load_ar1_itory "";
+2170      load_ar1_itory$((1)) = 0;
+2171   
+2172    execute_load "db_ex1"
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 35
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2173  # ----------------------------------------------------------------------------------------------------
+2174  #  Loop over __load_group
+2175  # ----------------------------------------------------------------------------------------------------
+2176   load_ar1_itory=ar1_itory.l ;
+2177   
+2178  # ----------------------------------------------------------------------------------------------------
+2179  #  Loop over __load_group
+2180  # ----------------------------------------------------------------------------------------------------
+2181   
+2182      ar1_itory.fx$((1)) = load_ar1_itory;
+2184  ;
+2185  ;
+2186   
+2187  # ----------------------------------------------------------------------------------------------------
+2188  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\itory_blocks.gms
+2189  # ----------------------------------------------------------------------------------------------------
+2190   
+2191   
+2192  # -----------------------------------------------M_itory----------------------------------------------
+2193  #  Initialize M_itory equation block
+2194  # ----------------------------------------------------------------------------------------------------
+2195  EQUATION E_itory[t,s,n];
+2196  E_itory[t,s,n]$(tx0e[t] and itoryd[s,n])..      qD[t,s,n]  =E=  qD[t-1,s,n]*ar1_itory/(1+g_LR);
+2197   
+2198  # ----------------------------------------------------------------------------------------------------
+2199  #  Define M_itory model
+2200  # ----------------------------------------------------------------------------------------------------
+2201  Model M_itory /
+2202  E_itory
+2203  /;
+2204   
+2205  ;
+2206  ;
+2207   
+2208  # ----------------------------------------------------------------------------------------------------
+2209  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_CollectFile.gms
+2210  # ----------------------------------------------------------------------------------------------------
+2211   
+2212   
+2213  # ----------------------------------------------------------------------------------------------------
+2214  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_functions.gms
+2215  # ----------------------------------------------------------------------------------------------------
+2216   
+2217   
+2218  # ----------------------------------------------------------------------------------------------------
+2219  #  Define function: load_level
+2220  # ----------------------------------------------------------------------------------------------------
+2221   
+2222   
+2223   
+2224  # ----------------------------------------------------------------------------------------------------
+2225  #  Define function: load_fixed
+2226  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 36
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2227   
+2228   
+2229  ;
+2230   
+2231  # ----------------------------------------------------------------------------------------------------
+2232  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_sets.gms
+2233  # ----------------------------------------------------------------------------------------------------
+2234   
+2235  sets
+2236          alias_set
+2237          alias_map2
+2238          t
+2239          n
+2240          s
+2241  ;
+2242   
+2243  alias(n,nn,nnn);
+2244   
+2245  sets
+2246          alias_[alias_set,alias_map2]
+2247          t0[t]
+2248          tE[t]
+2249          tx0[t]
+2250          txE[t]
+2251          t0E[t]
+2252          tx0E[t]
+2253          n_for[n]
+2254          s_for[s]
+2255          n_prod[n]
+2256          sfor_ndom[s,n]
+2257          sfor_nfor[s,n]
+2258          dom2for[n,nn]
+2259  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE alias_set = 1:alias_set
+--- MERGE alias_map2 = 2:alias_map2
+--- MERGE t = 5:t
+--- MERGE n = 3:n
+--- MERGE s = 4:s
+--- MERGE t0 = 17:t0
+--- MERGE tE = 18:tE
+--- MERGE tx0 = 19:tx0
+--- MERGE txE = 20:txE
+--- MERGE t0E = 21:t0E
+--- MERGE tx0E = 22:tx0E
+--- MERGE n_for = 118:n_for
+--- MERGE s_for = 117:s_for
+--- MERGE n_prod = 115:n_prod
+--- MERGE alias_ = 8:alias_
+--- MERGE sfor_ndom = 119:sfor_ndom
+--- MERGE sfor_nfor = 120:sfor_nfor
+--- LOAD  dom2for = 137:dom2for
+2282  ;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 37
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2283   
+2284  # ----------------------------------------------------------------------------------------------------
+2285  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_parameters.gms
+2286  # ----------------------------------------------------------------------------------------------------
+2287   
+2288  parameters
+2289          R_LR
+2290          g_LR
+2291          infl_LR
+2292  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE R_LR = 47:R_LR
+--- MERGE g_LR = 48:g_LR
+--- MERGE infl_LR = 49:infl_LR
+2299  ;
+2300   
+2301  # ----------------------------------------------------------------------------------------------------
+2302  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_groups.gms
+2303  # ----------------------------------------------------------------------------------------------------
+2304   
+2305   
+2306  # ------------------------------------------trade_g_endovars------------------------------------------
+2307  #  Initialize trade_g_endovars group
+2308  # ----------------------------------------------------------------------------------------------------
+2311   
+2312   
+2313  # ------------------------------------------trade_g_tech_endo-----------------------------------------
+2314  #  Initialize trade_g_tech_endo group
+2315  # ----------------------------------------------------------------------------------------------------
+2320   
+2321   
+2322  # ------------------------------------------trade_g_tech_exo------------------------------------------
+2323  #  Initialize trade_g_tech_exo group
+2324  # ----------------------------------------------------------------------------------------------------
+2327   
+2328   
+2329  # -------------------------------------------trade_g_exovars------------------------------------------
+2330  #  Initialize trade_g_exovars group
+2331  # ----------------------------------------------------------------------------------------------------
+2334   
+2335   
+2336  # ------------------------------------------trade_g_calib_exo-----------------------------------------
+2337  #  Initialize trade_g_calib_exo group
+2338  # ----------------------------------------------------------------------------------------------------
+2341   
+2342   
+2343  # ------------------------------------------trade_g_endo_vars-----------------------------------------
+2344  #  Initialize trade_g_endo_vars group
+2345  # ----------------------------------------------------------------------------------------------------
+2348   
+2349   
+2350  # --------------------------------------------trade_g_tech--------------------------------------------
+2351  #  Initialize trade_g_tech group
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 38
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2352  # ----------------------------------------------------------------------------------------------------
+2355   
+2356   
+2357  # ------------------------------------------trade_g_exo_vars------------------------------------------
+2358  #  Initialize trade_g_exo_vars group
+2359  # ----------------------------------------------------------------------------------------------------
+2369   
+2370  # ----------------------------------------------------------------------------------------------------
+2371  #  Loop over __load_group
+2372  # ----------------------------------------------------------------------------------------------------
+2373   
+2374      parameter load_qD[t,s,n] "";
+2375      load_qD[t,s,n]$((((sfor_ndom[s,n] and t0[t])) or ((sfor_ndom[s,n] and tx0E[t])))) = 0;
+2376   
+2377    execute_load "db_ex1"
+2378  # ----------------------------------------------------------------------------------------------------
+2379  #  Loop over __load_group
+2380  # ----------------------------------------------------------------------------------------------------
+2381   load_qD=qD.l ;
+2382   
+2383  # ----------------------------------------------------------------------------------------------------
+2384  #  Loop over __load_group
+2385  # ----------------------------------------------------------------------------------------------------
+2386   
+2387      qD.l[t,s,n]$((((sfor_ndom[s,n] and t0[t])) or ((sfor_ndom[s,n] and tx0E[t])))) = load_qD[t,s,n];
+2389  ;
+2397   
+2398  # ----------------------------------------------------------------------------------------------------
+2399  #  Loop over __load_group
+2400  # ----------------------------------------------------------------------------------------------------
+2401   
+2402      parameter load_qD[t,s,n] "";
+2403      load_qD[t,s,n]$(((sfor_ndom[s,n] and tx0E[t]))) = 0;
+2404   
+2405    execute_load "db_ex1"
+2406  # ----------------------------------------------------------------------------------------------------
+2407  #  Loop over __load_group
+2408  # ----------------------------------------------------------------------------------------------------
+2409   load_qD=qD.l ;
+2410   
+2411  # ----------------------------------------------------------------------------------------------------
+2412  #  Loop over __load_group
+2413  # ----------------------------------------------------------------------------------------------------
+2414   
+2415      qD.fx[t,s,n]$(((sfor_ndom[s,n] and tx0E[t]))) = load_qD[t,s,n];
+2417  ;
+2425   
+2426  # ----------------------------------------------------------------------------------------------------
+2427  #  Loop over __load_group
+2428  # ----------------------------------------------------------------------------------------------------
+2429   
+2430      parameter load_phi[s,n] "";
+2431      load_phi[s,n]$((sfor_ndom[s,n])) = 0;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 39
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2432   
+2433    execute_load "db_ex1"
+2434  # ----------------------------------------------------------------------------------------------------
+2435  #  Loop over __load_group
+2436  # ----------------------------------------------------------------------------------------------------
+2437   load_phi=phi.l ;
+2438   
+2439  # ----------------------------------------------------------------------------------------------------
+2440  #  Loop over __load_group
+2441  # ----------------------------------------------------------------------------------------------------
+2442   
+2443      phi.fx[s,n]$((sfor_ndom[s,n])) = load_phi[s,n];
+2445  ;
+2453   
+2454  # ----------------------------------------------------------------------------------------------------
+2455  #  Loop over __load_group
+2456  # ----------------------------------------------------------------------------------------------------
+2457   
+2458      parameter load_sigma[s,n] "";
+2459      load_sigma[s,n]$((sfor_ndom[s,n])) = 0;
+2460   
+2461    execute_load "db_ex1"
+2462  # ----------------------------------------------------------------------------------------------------
+2463  #  Loop over __load_group
+2464  # ----------------------------------------------------------------------------------------------------
+2465   load_sigma=sigma.l ;
+2466   
+2467  # ----------------------------------------------------------------------------------------------------
+2468  #  Loop over __load_group
+2469  # ----------------------------------------------------------------------------------------------------
+2470   
+2471      sigma.fx[s,n]$((sfor_ndom[s,n])) = load_sigma[s,n];
+2473  ;
+2481   
+2482  # ----------------------------------------------------------------------------------------------------
+2483  #  Loop over __load_group
+2484  # ----------------------------------------------------------------------------------------------------
+2485   
+2486      parameter load_PwT[t,s,n] "";
+2487      load_PwT[t,s,n]$((sfor_ndom[s,n])) = 0;
+2488   
+2489      parameter load_Peq[t,n] "";
+2490      load_Peq[t,n]$((n_for[n])) = 0;
+2491   
+2492    execute_load "db_ex1"
+2493  # ----------------------------------------------------------------------------------------------------
+2494  #  Loop over __load_group
+2495  # ----------------------------------------------------------------------------------------------------
+2496   load_PwT=PwT.l  load_Peq=Peq.l ;
+2497   
+2498  # ----------------------------------------------------------------------------------------------------
+2499  #  Loop over __load_group
+2500  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 40
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2501   
+2502      PwT.fx[t,s,n]$((sfor_ndom[s,n])) = load_PwT[t,s,n];
+2503   
+2504      Peq.fx[t,n]$((n_for[n])) = load_Peq[t,n];
+2506  ;
+2514   
+2515  # ----------------------------------------------------------------------------------------------------
+2516  #  Loop over __load_group
+2517  # ----------------------------------------------------------------------------------------------------
+2518   
+2519      parameter load_qD[t,s,n] "";
+2520      load_qD[t,s,n]$(((sfor_ndom[s,n] and t0[t]))) = 0;
+2521   
+2522    execute_load "db_ex1"
+2523  # ----------------------------------------------------------------------------------------------------
+2524  #  Loop over __load_group
+2525  # ----------------------------------------------------------------------------------------------------
+2526   load_qD=qD.l ;
+2527   
+2528  # ----------------------------------------------------------------------------------------------------
+2529  #  Loop over __load_group
+2530  # ----------------------------------------------------------------------------------------------------
+2531   
+2532      qD.fx[t,s,n]$(((sfor_ndom[s,n] and t0[t]))) = load_qD[t,s,n];
+2534  ;
+2542   
+2543  # ----------------------------------------------------------------------------------------------------
+2544  #  Loop over __load_group
+2545  # ----------------------------------------------------------------------------------------------------
+2546   
+2547      parameter load_sigma[s,n] "";
+2548      load_sigma[s,n]$((sfor_ndom[s,n])) = 0;
+2549   
+2550      parameter load_phi[s,n] "";
+2551      load_phi[s,n]$((sfor_ndom[s,n])) = 0;
+2552   
+2553    execute_load "db_ex1"
+2554  # ----------------------------------------------------------------------------------------------------
+2555  #  Loop over __load_group
+2556  # ----------------------------------------------------------------------------------------------------
+2557   load_sigma=sigma.l  load_phi=phi.l ;
+2558   
+2559  # ----------------------------------------------------------------------------------------------------
+2560  #  Loop over __load_group
+2561  # ----------------------------------------------------------------------------------------------------
+2562   
+2563      sigma.fx[s,n]$((sfor_ndom[s,n])) = load_sigma[s,n];
+2564   
+2565      phi.fx[s,n]$((sfor_ndom[s,n])) = load_phi[s,n];
+2567  ;
+2575   
+2576  # ----------------------------------------------------------------------------------------------------
+2577  #  Loop over __load_group
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 41
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2578  # ----------------------------------------------------------------------------------------------------
+2579   
+2580      parameter load_PwT[t,s,n] "";
+2581      load_PwT[t,s,n]$((sfor_ndom[s,n])) = 0;
+2582   
+2583      parameter load_Peq[t,n] "";
+2584      load_Peq[t,n]$((n_for[n])) = 0;
+2585   
+2586    execute_load "db_ex1"
+2587  # ----------------------------------------------------------------------------------------------------
+2588  #  Loop over __load_group
+2589  # ----------------------------------------------------------------------------------------------------
+2590   load_PwT=PwT.l  load_Peq=Peq.l ;
+2591   
+2592  # ----------------------------------------------------------------------------------------------------
+2593  #  Loop over __load_group
+2594  # ----------------------------------------------------------------------------------------------------
+2595   
+2596      PwT.fx[t,s,n]$((sfor_ndom[s,n])) = load_PwT[t,s,n];
+2597   
+2598      Peq.fx[t,n]$((n_for[n])) = load_Peq[t,n];
+2600  ;
+2601  ;
+2602   
+2603  # ----------------------------------------------------------------------------------------------------
+2604  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\trade_blocks.gms
+2605  # ----------------------------------------------------------------------------------------------------
+2606   
+2607   
+2608  # -----------------------------------------------M_trade----------------------------------------------
+2609  #  Initialize M_trade equation block
+2610  # ----------------------------------------------------------------------------------------------------
+2611  EQUATION E_fdemand_trade[t,s,n];
+2612  E_fdemand_trade[t,s,n]$(sfor_ndom[s,n] and txe[t])..    qD[t,s,n]  =E=  sum(nn$(dom2for[n,nn]), phi[s,n] * (Peq[t,nn]/PwT[t,s,n])**(sigma[s,n]));
+2613   
+2614  # ----------------------------------------------------------------------------------------------------
+2615  #  Define M_trade model
+2616  # ----------------------------------------------------------------------------------------------------
+2617  Model M_trade /
+2618  E_fdemand_trade
+2619  /;
+2620   
+2621  ;
+2622  ;
+2623   
+2624  # ----------------------------------------------------------------------------------------------------
+2625  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_CollectFile.gms
+2626  # ----------------------------------------------------------------------------------------------------
+2627   
+2628   
+2629  # ----------------------------------------------------------------------------------------------------
+2630  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_functions.gms
+2631  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 42
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2632   
+2633   
+2634  # ----------------------------------------------------------------------------------------------------
+2635  #  Define function: load_level
+2636  # ----------------------------------------------------------------------------------------------------
+2637   
+2638   
+2639   
+2640  # ----------------------------------------------------------------------------------------------------
+2641  #  Define function: load_fixed
+2642  # ----------------------------------------------------------------------------------------------------
+2643   
+2644   
+2645  ;
+2646   
+2647  # ----------------------------------------------------------------------------------------------------
+2648  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_sets.gms
+2649  # ----------------------------------------------------------------------------------------------------
+2650   
+2651  sets
+2652          alias_set
+2653          alias_map2
+2654          s
+2655          n
+2656          t
+2657  ;
+2658   
+2659  alias(n,nn);
+2660   
+2661  sets
+2662          alias_[alias_set,alias_map2]
+2663          s_prod[s]
+2664          n_prod[n]
+2665          n_fg[n]
+2666          s_for[s]
+2667          n_for[n]
+2668          sfor_ndom[s,n]
+2669          sfor_nfor[s,n]
+2670          s_HH[s]
+2671          inp_HH[s,n]
+2672          out_HH[s,n]
+2673          n_tax[n]
+2674          s_tax[s]
+2675          s_itory[s]
+2676          s_inv[s]
+2677          inv[n]
+2678          dur2inv[n,nn]
+2679          dur[n]
+2680          itoryD[s,n]
+2681          n_equi[n]
+2682          d_Peq[n]
+2683          d_vD[s,n]
+2684          d_vS[s,n]
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 43
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2685          d_PwT[s,n]
+2686          d_PbT[s,n]
+2687          d_qD[s,n]
+2688          d_qS[s,n]
+2689          d_tauS[s,n]
+2690          d_tauD[s,n]
+2691          d_tauLump[s]
+2692          t0[t]
+2693          tE[t]
+2694          tx0[t]
+2695          txE[t]
+2696          t0E[t]
+2697          tx0E[t]
+2698          tauDendo[s,n]
+2699          gsvngs[n]
+2700          s_G[s]
+2701  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE alias_set = 1:alias_set
+--- MERGE alias_map2 = 2:alias_map2
+--- MERGE s = 4:s
+--- MERGE n = 3:n
+--- MERGE t = 5:t
+--- MERGE s_prod = 39:s_prod
+--- MERGE n_prod = 115:n_prod
+--- MERGE n_fg = 116:n_fg
+--- MERGE s_for = 117:s_for
+--- MERGE n_for = 118:n_for
+--- MERGE s_HH = 86:s_HH
+--- MERGE n_tax = 121:n_tax
+--- MERGE s_tax = 122:s_tax
+--- MERGE s_itory = 123:s_itory
+--- MERGE s_inv = 111:s_inv
+--- MERGE inv = 43:inv
+--- MERGE dur = 41:dur
+--- MERGE n_equi = 125:n_equi
+--- MERGE d_Peq = 126:d_Peq
+--- MERGE d_tauLump = 135:d_tauLump
+--- MERGE t0 = 17:t0
+--- MERGE tE = 18:tE
+--- MERGE tx0 = 19:tx0
+--- MERGE txE = 20:txE
+--- MERGE t0E = 21:t0E
+--- MERGE tx0E = 22:tx0E
+--- LOAD  gsvngs = 140:gsvngs
+--- LOAD  s_G = 141:s_G
+--- MERGE alias_ = 8:alias_
+--- MERGE sfor_ndom = 119:sfor_ndom
+--- MERGE sfor_nfor = 120:sfor_nfor
+--- MERGE inp_HH = 68:inp_HH
+--- MERGE out_HH = 69:out_HH
+--- MERGE dur2inv = 42:dur2inv
+--- MERGE itoryD = 124:itoryD
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 44
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+--- MERGE d_vD = 127:d_vD
+--- MERGE d_vS = 128:d_vS
+--- MERGE d_PwT = 129:d_PwT
+--- MERGE d_PbT = 130:d_PbT
+--- MERGE d_qD = 131:d_qD
+--- MERGE d_qS = 132:d_qS
+--- MERGE d_tauS = 133:d_tauS
+--- MERGE d_tauD = 134:d_tauD
+--- LOAD  tauDendo = 139:tauDendo
+2750  ;
+2751   
+2752  # ----------------------------------------------------------------------------------------------------
+2753  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_parameters.gms
+2754  # ----------------------------------------------------------------------------------------------------
+2755   
+2756  parameters
+2757          R_LR
+2758          g_LR
+2759          infl_LR
+2760  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE R_LR = 47:R_LR
+--- MERGE g_LR = 48:g_LR
+--- MERGE infl_LR = 49:infl_LR
+2767  ;
+2768   
+2769  # ----------------------------------------------------------------------------------------------------
+2770  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_groups.gms
+2771  # ----------------------------------------------------------------------------------------------------
+2772   
+2773   
+2774  # ----------------------------------------------G_g_endo----------------------------------------------
+2775  #  Initialize G_g_endo group
+2776  # ----------------------------------------------------------------------------------------------------
+2783   
+2784   
+2785  # -------------------------------------------G_g_calib_endo-------------------------------------------
+2786  #  Initialize G_g_calib_endo group
+2787  # ----------------------------------------------------------------------------------------------------
+2792   
+2793   
+2794  # -----------------------------------------------G_g_exo----------------------------------------------
+2795  #  Initialize G_g_exo group
+2796  # ----------------------------------------------------------------------------------------------------
+2799   
+2800   
+2801  # ---------------------------------------------G_g_exo_dyn--------------------------------------------
+2802  #  Initialize G_g_exo_dyn group
+2803  # ----------------------------------------------------------------------------------------------------
+2813   
+2814  # ----------------------------------------------------------------------------------------------------
+2815  #  Loop over __load_group
+2816  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 45
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2817   
+2818      parameter load_TotTaxRev[t] "";
+2819      load_TotTaxRev[t]$((1)) = 0;
+2820   
+2821      parameter load_PwT[t,s,n] "";
+2822      load_PwT[t,s,n]$((d_tauD[s,n])) = 0;
+2823   
+2824      parameter load_vD[t,s,n] "";
+2825      load_vD[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t]))) = 0;
+2826   
+2827      parameter load_g_tvc[s,n] "";
+2828      load_g_tvc[s,n]$(((gsvngs[n] and s_G[s]))) = 0;
+2829   
+2830    execute_load "db_ex1"
+2831  # ----------------------------------------------------------------------------------------------------
+2832  #  Loop over __load_group
+2833  # ----------------------------------------------------------------------------------------------------
+2834   load_TotTaxRev=TotTaxRev.l  load_PwT=PwT.l  load_vD=vD.l  load_g_tvc=g_tvc.l ;
+2835   
+2836  # ----------------------------------------------------------------------------------------------------
+2837  #  Loop over __load_group
+2838  # ----------------------------------------------------------------------------------------------------
+2839   
+2840      TotTaxRev.l[t]$((1)) = load_TotTaxRev[t];
+2841   
+2842      PwT.l[t,s,n]$((d_tauD[s,n])) = load_PwT[t,s,n];
+2843   
+2844      vD.l[t,s,n]$(((gsvngs[n] and s_G[s] and tx0[t]))) = load_vD[t,s,n];
+2845   
+2846      g_tvc.l[s,n]$(((gsvngs[n] and s_G[s]))) = load_g_tvc[s,n];
+2848  ;
+2856   
+2857  # ----------------------------------------------------------------------------------------------------
+2858  #  Loop over __load_group
+2859  # ----------------------------------------------------------------------------------------------------
+2860   
+2861      parameter load_tauD[t,s,n] "";
+2862      load_tauD[t,s,n]$(((tauDendo[s,n] and t0[t]))) = 0;
+2863   
+2864    execute_load "db_ex1"
+2865  # ----------------------------------------------------------------------------------------------------
+2866  #  Loop over __load_group
+2867  # ----------------------------------------------------------------------------------------------------
+2868   load_tauD=tauD.l ;
+2869   
+2870  # ----------------------------------------------------------------------------------------------------
+2871  #  Loop over __load_group
+2872  # ----------------------------------------------------------------------------------------------------
+2873   
+2874      tauD.fx[t,s,n]$(((tauDendo[s,n] and t0[t]))) = load_tauD[t,s,n];
+2876  ;
+2884   
+2885  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 46
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2886  #  Loop over __load_group
+2887  # ----------------------------------------------------------------------------------------------------
+2888   
+2889      parameter load_qD[t,s,n] "";
+2890      load_qD[t,s,n]$((d_tauD[s,n])) = 0;
+2891   
+2892      parameter load_qS[t,s,n] "";
+2893      load_qS[t,s,n]$((d_tauS[s,n])) = 0;
+2894   
+2895      parameter load_vD[t,s,n] "";
+2896      load_vD[t,s,n]$(((s_tax[s] and n_tax[n]))) = 0;
+2897   
+2898      parameter load_tauS[t,s,n] "";
+2899      load_tauS[t,s,n]$((d_tauS[s,n])) = 0;
+2900   
+2901      parameter load_tauLump[t,s] "";
+2902      load_tauLump[t,s]$((d_tauLump[s])) = 0;
+2903   
+2904      parameter load_PbT[t,s,n] "";
+2905      load_PbT[t,s,n]$((d_tauS[s,n])) = 0;
+2906   
+2907      parameter load_Peq[t,n] "";
+2908      load_Peq[t,n]$((d_Peq[n])) = 0;
+2909   
+2910      parameter load_tauD[t,s,n] "";
+2911      load_tauD[t,s,n]$(((d_tauD[s,n] and (tx0E[t] or (t0[t] and not tauDendo[s,n]))))) = 0;
+2912   
+2913    execute_load "db_ex1"
+2914  # ----------------------------------------------------------------------------------------------------
+2915  #  Loop over __load_group
+2916  # ----------------------------------------------------------------------------------------------------
+2917   load_qD=qD.l  load_qS=qS.l  load_vD=vD.l  load_tauS=tauS.l  load_tauLump=tauLump.l  load_PbT=PbT.l  load_Peq=Peq.l  load_tauD=tauD.l ;
+2918   
+2919  # ----------------------------------------------------------------------------------------------------
+2920  #  Loop over __load_group
+2921  # ----------------------------------------------------------------------------------------------------
+2922   
+2923      qD.fx[t,s,n]$((d_tauD[s,n])) = load_qD[t,s,n];
+2924   
+2925      qS.fx[t,s,n]$((d_tauS[s,n])) = load_qS[t,s,n];
+2926   
+2927      vD.fx[t,s,n]$(((s_tax[s] and n_tax[n]))) = load_vD[t,s,n];
+2928   
+2929      tauS.fx[t,s,n]$((d_tauS[s,n])) = load_tauS[t,s,n];
+2930   
+2931      tauLump.fx[t,s]$((d_tauLump[s])) = load_tauLump[t,s];
+2932   
+2933      PbT.fx[t,s,n]$((d_tauS[s,n])) = load_PbT[t,s,n];
+2934   
+2935      Peq.fx[t,n]$((d_Peq[n])) = load_Peq[t,n];
+2936   
+2937      tauD.fx[t,s,n]$(((d_tauD[s,n] and (tx0E[t] or (t0[t] and not tauDendo[s,n]))))) = load_tauD[t,s,n];
+2939  ;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 47
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+2947   
+2948  # ----------------------------------------------------------------------------------------------------
+2949  #  Loop over __load_group
+2950  # ----------------------------------------------------------------------------------------------------
+2951   
+2952      parameter load_irate[t] "";
+2953      load_irate[t]$((1)) = 0;
+2954   
+2955      parameter load_vD[t,s,n] "";
+2956      load_vD[t,s,n]$(((gsvngs[n] and s_G[s] and t0[t]))) = 0;
+2957   
+2958    execute_load "db_ex1"
+2959  # ----------------------------------------------------------------------------------------------------
+2960  #  Loop over __load_group
+2961  # ----------------------------------------------------------------------------------------------------
+2962   load_irate=irate.l  load_vD=vD.l ;
+2963   
+2964  # ----------------------------------------------------------------------------------------------------
+2965  #  Loop over __load_group
+2966  # ----------------------------------------------------------------------------------------------------
+2967   
+2968      irate.fx[t]$((1)) = load_irate[t];
+2969   
+2970      vD.fx[t,s,n]$(((gsvngs[n] and s_G[s] and t0[t]))) = load_vD[t,s,n];
+2972  ;
+2973  ;
+2974   
+2975  # ----------------------------------------------------------------------------------------------------
+2976  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\G_blocks.gms
+2977  # ----------------------------------------------------------------------------------------------------
+2978   
+2979   
+2980  # -----------------------------------------------M_gov_G----------------------------------------------
+2981  #  Initialize M_gov_G equation block
+2982  # ----------------------------------------------------------------------------------------------------
+2983  EQUATION E_pwt_G[t,s,n];
+2984  E_pwt_G[t,s,n]$(d_taud[s,n] and txe[t])..       PwT[t,s,n]  =E=  Peq[t,n]+tauD[t,s,n];
+2985  EQUATION E_TTREV_G[t];
+2986  E_TTREV_G[t]$(txe[t])..         TotTaxRev[t]  =E=  sum([s,n]$(d_tauS[s,n]), tauS[t,s,n]*qS[t,s,n])+sum([s,n]$(d_tauD[s,n]), tauD[t,s,n]*qD[t,s,n])+sum(s$(d_tauLump[s]),tauLump[t,s]);
+2987  EQUATION E_lom_G[t,s,n];
+2988  E_lom_G[t,s,n]$(txe[t] and gsvngs[n] and s_g[s])..      vD[t+1,s,n]  =E=  (vD[t,s,n]*irate[t]+TotTaxRev[t])/((1+g_LR)*(1+infl_LR));
+2989  EQUATION E_tvc_G[t,s,n];
+2990  E_tvc_G[t,s,n]$(te[t] and gsvngs[n] and s_g[s])..       vD[t,s,n]  =E=  (1+g_tvc[s,n])*vD[t-1,s,n];
+2991   
+2992  # ----------------------------------------------------------------------------------------------------
+2993  #  Define M_gov_G model
+2994  # ----------------------------------------------------------------------------------------------------
+2995  Model M_gov_G /
+2996  E_pwt_G, E_TTREV_G, E_lom_G, E_tvc_G
+2997  /;
+2998   
+2999   
+3000  # ---------------------------------------------M_gcalib_G---------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 48
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+3001  #  Initialize M_gcalib_G equation block
+3002  # ----------------------------------------------------------------------------------------------------
+3003  EQUATION E_TR_G[t,s,n];
+3004  E_TR_G[t,s,n]$(s_tax[s] and n_tax[n] and t0[t])..       vD[t,s,n]  =E=  sum(nn$(d_tauS[s,nn]),tauS[t,s,nn]*qS[t,s,nn])+sum(nn$(d_tauD[s,nn]), tauD[t,s,nn]*qD[t,s,nn])+tauLump[t,s]$(d_tauLump[s]);
+3005   
+3006  # ----------------------------------------------------------------------------------------------------
+3007  #  Define M_gcalib_G model
+3008  # ----------------------------------------------------------------------------------------------------
+3009  Model M_gcalib_G /
+3010  E_TR_G
+3011  /;
+3012   
+3013  ;
+3014  ;
+3015   
+3016  # ----------------------------------------------------------------------------------------------------
+3017  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_CollectFile.gms
+3018  # ----------------------------------------------------------------------------------------------------
+3019   
+3020   
+3021  # ----------------------------------------------------------------------------------------------------
+3022  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_functions.gms
+3023  # ----------------------------------------------------------------------------------------------------
+3024   
+3025   
+3026  # ----------------------------------------------------------------------------------------------------
+3027  #  Define function: load_level
+3028  # ----------------------------------------------------------------------------------------------------
+3029   
+3030   
+3031   
+3032  # ----------------------------------------------------------------------------------------------------
+3033  #  Define function: load_fixed
+3034  # ----------------------------------------------------------------------------------------------------
+3035   
+3036   
+3037  ;
+3038   
+3039  # ----------------------------------------------------------------------------------------------------
+3040  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_sets.gms
+3041  # ----------------------------------------------------------------------------------------------------
+3042   
+3043  sets
+3044          alias_set
+3045          alias_map2
+3046          t
+3047          n
+3048          s
+3049  ;
+3050   
+3051   
+3052  sets
+3053          alias_[alias_set,alias_map2]
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 49
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+3054          t0[t]
+3055          tE[t]
+3056          tx0[t]
+3057          txE[t]
+3058          t0E[t]
+3059          tx0E[t]
+3060          n_equi[n]
+3061          d_qD[s,n]
+3062          d_qS[s,n]
+3063          Peq_endo[n]
+3064          qS_endo[s,n]
+3065  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE alias_set = 1:alias_set
+--- MERGE alias_map2 = 2:alias_map2
+--- MERGE t = 5:t
+--- MERGE n = 3:n
+--- MERGE s = 4:s
+--- MERGE t0 = 17:t0
+--- MERGE tE = 18:tE
+--- MERGE tx0 = 19:tx0
+--- MERGE txE = 20:txE
+--- MERGE t0E = 21:t0E
+--- MERGE tx0E = 22:tx0E
+--- MERGE n_equi = 125:n_equi
+--- LOAD  Peq_endo = 145:Peq_endo
+--- MERGE alias_ = 8:alias_
+--- MERGE d_qD = 131:d_qD
+--- MERGE d_qS = 132:d_qS
+--- LOAD  qS_endo = 146:qS_endo
+3087  ;
+3088   
+3089  # ----------------------------------------------------------------------------------------------------
+3090  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_parameters.gms
+3091  # ----------------------------------------------------------------------------------------------------
+3092   
+3093  parameters
+3094          R_LR
+3095          g_LR
+3096          infl_LR
+3097  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+--- MERGE R_LR = 47:R_LR
+--- MERGE g_LR = 48:g_LR
+--- MERGE infl_LR = 49:infl_LR
+3104  ;
+3105   
+3106  # ----------------------------------------------------------------------------------------------------
+3107  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_groups.gms
+3108  # ----------------------------------------------------------------------------------------------------
+3109   
+3110   
+3111  # -------------------------------------------GE_module_ge_t0------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 50
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+3112  #  Initialize GE_module_ge_t0 group
+3113  # ----------------------------------------------------------------------------------------------------
+3116   
+3117   
+3118  # ------------------------------------------GE_module_ge_tx0E-----------------------------------------
+3119  #  Initialize GE_module_ge_tx0E group
+3120  # ----------------------------------------------------------------------------------------------------
+3130   
+3131  # ----------------------------------------------------------------------------------------------------
+3132  #  Loop over __load_group
+3133  # ----------------------------------------------------------------------------------------------------
+3134   
+3135      parameter load_qS[t,s,n] "";
+3136      load_qS[t,s,n]$(((qS_endo[s,n] and t0[t]))) = 0;
+3137   
+3138      parameter load_Peq[t,n] "";
+3139      load_Peq[t,n]$(((Peq_endo[n] and t0[t]))) = 0;
+3140   
+3141    execute_load "db_ex1"
+3142  # ----------------------------------------------------------------------------------------------------
+3143  #  Loop over __load_group
+3144  # ----------------------------------------------------------------------------------------------------
+3145   load_qS=qS.l  load_Peq=Peq.l ;
+3146   
+3147  # ----------------------------------------------------------------------------------------------------
+3148  #  Loop over __load_group
+3149  # ----------------------------------------------------------------------------------------------------
+3150   
+3151      qS.l[t,s,n]$(((qS_endo[s,n] and t0[t]))) = load_qS[t,s,n];
+3152   
+3153      Peq.l[t,n]$(((Peq_endo[n] and t0[t]))) = load_Peq[t,n];
+3155  ;
+3163   
+3164  # ----------------------------------------------------------------------------------------------------
+3165  #  Loop over __load_group
+3166  # ----------------------------------------------------------------------------------------------------
+3167   
+3168      parameter load_qS[t,s,n] "";
+3169      load_qS[t,s,n]$(((qS_endo[s,n] and tx0E[t]))) = 0;
+3170   
+3171      parameter load_Peq[t,n] "";
+3172      load_Peq[t,n]$(((Peq_endo[n] and tx0E[t]))) = 0;
+3173   
+3174    execute_load "db_ex1"
+3175  # ----------------------------------------------------------------------------------------------------
+3176  #  Loop over __load_group
+3177  # ----------------------------------------------------------------------------------------------------
+3178   load_qS=qS.l  load_Peq=Peq.l ;
+3179   
+3180  # ----------------------------------------------------------------------------------------------------
+3181  #  Loop over __load_group
+3182  # ----------------------------------------------------------------------------------------------------
+3183   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 51
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+3184      qS.l[t,s,n]$(((qS_endo[s,n] and tx0E[t]))) = load_qS[t,s,n];
+3185   
+3186      Peq.l[t,n]$(((Peq_endo[n] and tx0E[t]))) = load_Peq[t,n];
+3188  ;
+3189  ;
+3190   
+3191  # ----------------------------------------------------------------------------------------------------
+3192  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\GE_module_blocks.gms
+3193  # ----------------------------------------------------------------------------------------------------
+3194   
+3195   
+3196  # ------------------------------------------M_GE_module_eqt0------------------------------------------
+3197  #  Initialize M_GE_module_eqt0 equation block
+3198  # ----------------------------------------------------------------------------------------------------
+3199  EQUATION E_equi_GE_module[t,n];
+3200  E_equi_GE_module[t,n]$(n_equi[n] and t0[t])..   sum(s$(d_qS[s,n]), qS[t,s,n])  =E=  sum(s$(d_qD[s,n]), qD[t,s,n]);
+3201   
+3202  # ----------------------------------------------------------------------------------------------------
+3203  #  Define M_GE_module_eqt0 model
+3204  # ----------------------------------------------------------------------------------------------------
+3205  Model M_GE_module_eqt0 /
+3206  E_equi_GE_module
+3207  /;
+3208   
+3209   
+3210  # -----------------------------------------M_GE_module_eqtx0E-----------------------------------------
+3211  #  Initialize M_GE_module_eqtx0E equation block
+3212  # ----------------------------------------------------------------------------------------------------
+3213  EQUATION E_equi_tx0E_GE_module[t,n];
+3214  E_equi_tx0E_GE_module[t,n]$(n_equi[n] and tx0e[t])..    sum(s$(d_qS[s,n]), qS[t,s,n])  =E=  sum(s$(d_qD[s,n]), qD[t,s,n]);
+3215   
+3216  # ----------------------------------------------------------------------------------------------------
+3217  #  Define M_GE_module_eqtx0E model
+3218  # ----------------------------------------------------------------------------------------------------
+3219  Model M_GE_module_eqtx0E /
+3220  E_equi_tx0E_GE_module
+3221  /;
+3222   
+3223  ;
+3224  ;
+3225   
+3226  # ----------------------------------------------------------------------------------------------------
+3227  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\RunFile.gms
+3228  # ----------------------------------------------------------------------------------------------------
+3229   
+3230   
+3231  # ----------------------------------------------------------------------------------------------------$FIX p_g_tech, p_g_vars_exo, p_ict_exo, HH_g_tech, HH_g_exo_static, HH_g_calib_endo, inv_g_tech, inv_g_vars_exo, itory_g_exo, itory_itory_exo, trad
+      e_g_tech, trade_g_exo_vars, G_g_exo, G_g_calib_endo, G_g_exo_dyn;
+3232  # ----------------------------------------------------------------------------------------------------
+3259   
+3260  # ----------------------------------------------------------------------------------------------------$UNFIX p_g_vars_endo, p_ict_endo, HH_g_endo_static, HH_g_endo_dyn, HH_g_calib_exo, inv_g_vars_endo, itory_g_endo, trade_g_endo_vars, G_g_endo, GE_m
+      odule_ge_t0, GE_module_ge_tx0E;
+3261  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 52
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+3286   
+3287  # ----------------------------------------------------------------------------------------------------
+3288  #  Define ex1_B model
+3289  # ----------------------------------------------------------------------------------------------------
+3290  Model ex1_B /
+3291  E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests, E_pw_p, E_lom_p, E_pk_p, E_Ktvc_p, E_outs_p, E_instcost_p, E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest, E_lom_HH, E_euler_
+      HH, E_tvc_HH, E_bdgt_HH, E_pw_HH, E_zp_HH_agg, E_qout_HH_agg, E_qnout_HH_agg, E_pw_inv, E_zp_out_nest, E_zp_nout_nest, E_q_out_nest, E_q_nout_nest, E_itory, E_fdemand_trade, E_pwt_G, E_TTREV_G, E_lom_G, E_tvc_G, E_equi_tx0E_GE_module, E_equi_GE_modu
+      le
+3292  /;
+3293   
+3294  scalars ex1_B_modelstat, ex1_B_solvestat;
+3295  solve ex1_B using CNS;
+3296  ex1_B_modelstat = ex1_B.modelstat; ex1_B_solvestat = ex1_B.solvestat;
+3297   
+3298  # ----------------------------------------------------------------------------------------------------$FIX p_g_tech_exo, p_g_tech_exo_dyn, p_gvars_exo, p_g_calib_exo, p_ict_endo, HH_g_tech_exo, HH_g_exo_static, HH_g_calib_exo, inv_g_tech_exo, inv_gv
+      ars_exo, inv_g_calib_exo, itory_g_exo, itory_itory_exo, trade_g_tech_exo, trade_g_exovars, trade_g_calib_exo, G_g_exo, G_g_exo_dyn, GE_module_ge_t0;
+3299  # ----------------------------------------------------------------------------------------------------
+3323   
+3324  # ----------------------------------------------------------------------------------------------------$UNFIX p_g_tech_endo, p_gvars_endo, p_ict_endo, HH_g_endo_static, HH_g_endo_dyn, HH_g_tech_endo, HH_g_calib_endo, inv_g_tech_endo, inv_gvars_endo, 
+      itory_g_endo, trade_g_endovars, trade_g_tech_endo, G_g_endo, G_g_calib_endo, GE_module_ge_tx0E;
+3325  # ----------------------------------------------------------------------------------------------------
+3358   
+3359  # ----------------------------------------------------------------------------------------------------
+3360  #  Define ex1_DC model
+3361  # ----------------------------------------------------------------------------------------------------
+3362  Model ex1_DC /
+3363  E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests, E_pw_p, E_lom_p, E_pk_p, E_Ktvc_p, E_outs_p, E_instcost_p, E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest, E_lom_HH, E_euler_
+      HH, E_tvc_HH, E_bdgt_HH, E_pw_HH, E_zp_HH_agg, E_qout_HH_agg, E_qnout_HH_agg, E_pw_inv, E_zp_out_nest, E_zp_nout_nest, E_q_out_nest, E_q_nout_nest, E_itory, E_fdemand_trade, E_pwt_G, E_TTREV_G, E_lom_G, E_tvc_G, E_TR_G, E_equi_tx0E_GE_module
+3364  /;
+3365   
+3366  ;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 53
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\CollectAndRun.gmy
+     2       87 GDXIN          1      87  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     3      146 GDXIN          1     146  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     4      870 GDXIN          1     870  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     5      918 GDXIN          1     918  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     6     1454 GDXIN          1    1454  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     7     1502 GDXIN          1    1502  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     8     2011 GDXIN          1    2011  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+     9     2067 GDXIN          1    2067  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+    10     2260 GDXIN          1    2260  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+    11     2293 GDXIN          1    2293  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+    12     2702 GDXIN          1    2702  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+    13     2761 GDXIN          1    2761  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+    14     3066 GDXIN          1    3066  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+    15     3098 GDXIN          1    3098  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\db_ex1.gdx
+
+
+COMPILATION TIME     =        0.016 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 54
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE ex1_B Using CNS From line 3295
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          229
+BLOCKS OF VARIABLES          28     SINGLE VARIABLES          415
+NON ZERO ELEMENTS         1,325     NON LINEAR N-Z            930
+DERIVATIVE POOL              20     CONSTANT POOL              19
+CODE LENGTH               1,896
+SINGLE =E|X= EQUS           229     SINGLE UNFIXED VARS       229
+
+
+GENERATION TIME      =        0.032 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
+
+
+EXECUTION TIME       =        0.047 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 55
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE ex1_B Using CNS From line 3295
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   ex1_B               
+     TYPE    CNS                 
+     SOLVER  CONOPT4             FROM LINE  3295
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      16 Solved                   
+
+ RESOURCE USAGE, LIMIT          0.000      1000.000
+ ITERATION COUNT, LIMIT         1    2000000000
+ EVALUATION ERRORS              0             0
+
+CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
+ 
+ 
+    C O N O P T   version 4.15
+    Copyright (C) ARKI Consulting and Development A/S
+                  Bagsvaerdvej 246 A
+                  DK-2880 Bagsvaerd, Denmark
+    Licensed to:  GAMS/CONOPT OEM License
+ 
+ 
+    The user model has 229 constraints and 415 variables
+    with 1325 Jacobian elements, 930 of which are nonlinear.
+ 
+    The pre-triangular part of the model has 28 constraints and 214 variables.
+ 
+    Preprocessed model has 201 constraints and 201 variables
+    with 797 Jacobian elements, 542 of which are nonlinear.
+ 
+ ** Feasible solution to a square system.
+ 
+ 
+ CONOPT time Total                            0.000 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
+ 
+
+
+**** REPORT SUMMARY :        0 INFEASIBLE
+                             0  DEPENDENT
+                             0     ERRORS
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:38 Page 56
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+
+
+USER: Medium MUD - 10 User License                   G200108/0001CA-WIN
+      DREAM, Danish Rational Economic Agents Model                DC620
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\CollectAndRun.gmy
+Output     C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\_gams_py_gjo0.lst
+Save       C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\_gams_py_gcp0.g0?
+
+**** WARNING - COMPILER OPTIONS ARE NON DEFAULT     EOLCOM # 
