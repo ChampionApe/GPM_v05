@@ -3,7 +3,6 @@ sets
 	alias_map2
 	n
 	s
-	t
 ;
 
 alias(n,nn,nnn);
@@ -18,12 +17,6 @@ sets
 	wT[s,n]
 	kno_out[s,n]
 	kno_inp[s,n]
-	t0[t]
-	tE[t]
-	tx0[t]
-	txE[t]
-	t0E[t]
-	tx0E[t]
 	map_lower_nests[s,n,nn]
 	kno_lower_nests[s,n]
 	bra_lower_nests[s,n]
@@ -40,35 +33,21 @@ sets
 	kno_no_upper_nest[s,n]
 	bra_o_upper_nest[s,n]
 	bra_no_upper_nest[s,n]
-	s_prod[s]
 	n_out[n]
-	dur[n]
-	dur2inv[n,nn]
-	inv[n]
-	ndur[n]
+	s_prod[s]
 	endo_PbT[s,n]
 	exo_mu[s,n,nn]
 ;
 
-$GDXIN %p_1%
+$GDXIN %p_0%
 $onMulti
 $load alias_set
 $load alias_map2
 $load n
 $load s
-$load t
 $load fg
-$load t0
-$load tE
-$load tx0
-$load txE
-$load t0E
-$load tx0E
-$load s_prod
 $load n_out
-$load dur
-$load inv
-$load ndur
+$load s_prod
 $load alias_
 $load map_all
 $load inp
@@ -93,7 +72,6 @@ $load out_upper_nest
 $load kno_no_upper_nest
 $load bra_o_upper_nest
 $load bra_no_upper_nest
-$load dur2inv
 $load endo_PbT
 $load exo_mu
 $GDXIN

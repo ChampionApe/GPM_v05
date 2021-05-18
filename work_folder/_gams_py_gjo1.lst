@@ -1,86 +1,74 @@
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 57
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 13
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
-3367  sets
-3368          alias_set
-3369          alias_map2
-3370          l1
-3371          t
-3372          s
-3373          n
-3374  ;
-3375   
-3376   
-3377  sets
-3378          alias_[alias_set,alias_map2]
-3379          qD_l1_subset[t,s,n]
-3380          Peq_l1_subset[t,n]
-3381          qS_l1_subset[t,s,n]
-3382          vD_l1_subset[t,s,n]
-3383          tauD_l1_subset[t,s,n]
-3384  ;
-3385   
+ 526  sets
+ 527          alias_set
+ 528          alias_map2
+ 529          l1
+ 530          s
+ 531          n
+ 532  ;
+ 533   
+ 534   
+ 535  sets
+ 536          alias_[alias_set,alias_map2]
+ 537          PwT_l1_subset[s,n]
+ 538          qS_l1_subset[s,n]
+ 539          tauS_l1_subset[s,n]
+ 540          tauLump_l1_subset[s]
+ 541  ;
+ 542   
 GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\shock.gdx
 --- MERGE alias_set = 1:alias_set
 --- MERGE alias_map2 = 2:alias_map2
 --- LOAD  l1 = 3:l1
---- MERGE t = 4:t
---- MERGE s = 5:s
---- MERGE n = 6:n
---- MERGE alias_ = 7:alias_
---- LOAD  qD_l1_subset = 8:qD_l1_subset
---- LOAD  Peq_l1_subset = 10:Peq_l1_subset
---- LOAD  qS_l1_subset = 12:qS_l1_subset
---- LOAD  vD_l1_subset = 14:vD_l1_subset
---- LOAD  tauD_l1_subset = 16:tauD_l1_subset
-3402   parameters
-3403          qD_l1[t,s,n,l1]
-3404          Peq_l1[t,n,l1]
-3405          qS_l1[t,s,n,l1]
-3406          vD_l1[t,s,n,l1]
-3407          tauD_l1[t,s,n,l1]
-3408  ;
-3409   
+--- MERGE s = 4:s
+--- MERGE n = 5:n
+--- LOAD  tauLump_l1_subset = 13:tauLump_l1_subset
+--- MERGE alias_ = 6:alias_
+--- LOAD  PwT_l1_subset = 7:PwT_l1_subset
+--- LOAD  qS_l1_subset = 9:qS_l1_subset
+--- LOAD  tauS_l1_subset = 11:tauS_l1_subset
+ 557   parameters
+ 558          PwT_l1[s,n,l1]
+ 559          qS_l1[s,n,l1]
+ 560          tauS_l1[s,n,l1]
+ 561          tauLump_l1[s,l1]
+ 562  ;
+ 563   
 GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\shock.gdx
---- LOAD  qD_l1 = 9:qD_l1
---- LOAD  Peq_l1 = 11:Peq_l1
---- LOAD  qS_l1 = 13:qS_l1
---- LOAD  vD_l1 = 15:vD_l1
---- LOAD  tauD_l1 = 17:tauD_l1
-3418   loop( (l1),    qD.fx[t,s,n]$(qD_l1_subset[t,s,n]) = qD_l1[t,s,n,l1];
-3419          Peq.fx[t,n]$(Peq_l1_subset[t,n]) = Peq_l1[t,n,l1];
-3420          qS.fx[t,s,n]$(qS_l1_subset[t,s,n]) = qS_l1[t,s,n,l1];
-3421          vD.fx[t,s,n]$(vD_l1_subset[t,s,n]) = vD_l1[t,s,n,l1];
-3422          tauD.fx[t,s,n]$(tauD_l1_subset[t,s,n]) = tauD_l1[t,s,n,l1];
-3423   
-3424   
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 58
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-C o m p i l a t i o n
-
-
-3425  solve ex1_DC using CNS;
-3426   
-3427  )
-3428   
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 59
+--- LOAD  PwT_l1 = 8:PwT_l1
+--- LOAD  qS_l1 = 10:qS_l1
+--- LOAD  tauS_l1 = 12:tauS_l1
+--- LOAD  tauLump_l1 = 14:tauLump_l1
+ 571   loop( (l1),    PwT.fx[s,n]$(PwT_l1_subset[s,n]) = PwT_l1[s,n,l1];
+ 572          qS.fx[s,n]$(qS_l1_subset[s,n]) = qS_l1[s,n,l1];
+ 573          tauS.fx[s,n]$(tauS_l1_subset[s,n]) = tauS_l1[s,n,l1];
+ 574          tauLump.fx[s]$(tauLump_l1_subset[s]) = tauLump_l1[s,l1];
+ 575   
+ 576   
+ 577  solve p_static_B using CNS;
+ 578   
+ 579  )
+ 580   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 14
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Include File Summary
 
 
    SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
 
-     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\ex1_DC.gms
-     2     3386 GDXIN          1      20  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\shock.gdx
-     3     3410 GDXIN          1      44  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\shock.gdx
+     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_B.gms
+     2      543 GDXIN          1      18  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\shock.gdx
+     3      564 GDXIN          1      39  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\shock.gdx
 
 
-COMPILATION TIME     =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 60
+COMPILATION TIME     =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 15
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_1
@@ -88,30 +76,30 @@ LOOPS                                   l1   l1_1
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.047 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.047 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_1
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 61
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 16
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -130,13 +118,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -144,16 +132,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 62
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 17
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_2
@@ -161,36 +148,36 @@ LOOPS                                   l1   l1_2
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.047 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.047 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_2
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 63
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 18
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
 
  RESOURCE USAGE, LIMIT          0.000      1000.000
- ITERATION COUNT, LIMIT         1    2000000000
+ ITERATION COUNT, LIMIT         2    2000000000
  EVALUATION ERRORS              0             0
 
 CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
@@ -203,13 +190,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -217,16 +204,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 64
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 19
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_3
@@ -234,36 +220,36 @@ LOOPS                                   l1   l1_3
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.047 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.047 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_3
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 65
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 20
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
 
  RESOURCE USAGE, LIMIT          0.000      1000.000
- ITERATION COUNT, LIMIT         1    2000000000
+ ITERATION COUNT, LIMIT         2    2000000000
  EVALUATION ERRORS              0             0
 
 CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
@@ -276,13 +262,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -290,16 +276,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 66
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 21
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_4
@@ -307,30 +292,30 @@ LOOPS                                   l1   l1_4
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_4
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 67
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 22
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -349,13 +334,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -363,16 +348,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 68
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 23
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_5
@@ -380,30 +364,30 @@ LOOPS                                   l1   l1_5
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_5
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 69
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 24
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -422,13 +406,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -436,16 +420,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 70
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 25
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_6
@@ -453,30 +436,30 @@ LOOPS                                   l1   l1_6
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.062 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.016 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.062 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.016 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_6
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 71
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 26
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -495,13 +478,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -509,16 +492,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 72
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 27
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_7
@@ -526,30 +508,30 @@ LOOPS                                   l1   l1_7
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_7
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 73
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 28
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -568,13 +550,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -582,16 +564,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 74
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 29
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_8
@@ -599,30 +580,30 @@ LOOPS                                   l1   l1_8
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_8
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 75
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 30
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -641,13 +622,13 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
@@ -655,16 +636,15 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
  CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 76
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 31
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_9
@@ -672,30 +652,30 @@ LOOPS                                   l1   l1_9
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.047 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.063 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_9
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 77
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 32
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
@@ -714,30 +694,29 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
  
- CONOPT time Total                            0.005 seconds
+ CONOPT time Total                            0.001 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
-             Interval derivative evals        0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 78
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 33
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE ex1_DC Using CNS From line 3425
+Model Statistics    SOLVE p_static_B Using CNS From line 577
 
 
 LOOPS                                   l1   l1_10
@@ -745,35 +724,35 @@ LOOPS                                   l1   l1_10
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS          35     SINGLE EQUATIONS          231
-BLOCKS OF VARIABLES          28     SINGLE VARIABLES          422
-NON ZERO ELEMENTS         1,386     NON LINEAR N-Z          1,004
-DERIVATIVE POOL              20     CONSTANT POOL              19
-CODE LENGTH               2,021
-SINGLE =E|X= EQUS           231     SINGLE UNFIXED VARS       231
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
+BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
+NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+DERIVATIVE POOL              20     CONSTANT POOL              16
+CODE LENGTH                 353
+SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
 
 
-GENERATION TIME      =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.031 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+EXECUTION TIME       =        0.000 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
                L O O P S                 l1 l1_10
 
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 79
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 34
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE ex1_DC Using CNS From line 3425
+Solution Report     SOLVE p_static_B Using CNS From line 577
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   ex1_DC              
+     MODEL   p_static_B          
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  3425
+     SOLVER  CONOPT4             FROM LINE  577
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
 
- RESOURCE USAGE, LIMIT          0.016      1000.000
+ RESOURCE USAGE, LIMIT          0.000      1000.000
  ITERATION COUNT, LIMIT         1    2000000000
  EVALUATION ERRORS              0             0
 
@@ -787,28 +766,27 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 231 constraints and 422 variables
-    with 1386 Jacobian elements, 1004 of which are nonlinear.
+    The user model has 34 constraints and 88 variables
+    with 208 Jacobian elements, 184 of which are nonlinear.
  
-    The pre-triangular part of the model has 87 constraints and 278 variables.
+    The pre-triangular part of the model has 0 constraints and 54 variables.
  
-    Preprocessed model has 144 constraints and 144 variables
-    with 524 Jacobian elements, 396 of which are nonlinear.
+    Preprocessed model has 34 constraints and 34 variables
+    with 120 Jacobian elements, 96 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
  
- CONOPT time Total                            0.004 seconds
+ CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
-             1st Derivative evaluations       0.001 = 25.0%
-             Interval derivative evals        0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
  
 
 
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              03/23/21 11:02:39 Page 80
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:23 Page 35
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
@@ -823,5 +801,5 @@ USER: Medium MUD - 10 User License                   G200108/0001CA-WIN
 **** FILE SUMMARY
 
 Restart    C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\_gams_py_gcp0.g00
-Input      C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\ex1_DC.gms
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_B.gms
 Output     C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\_gams_py_gjo1.lst
