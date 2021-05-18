@@ -8,14 +8,15 @@ import os
 import re
 import pandas as pd
 import numpy as np
+from pandas.core.indexes import base
 import DataBase
 
 
 
 #%% Load catalog
-testing = False
+testing = True
 if testing:
-    sheets = pd.read_excel(os.getcwd() + "/../examples/Data/techdata.xlsx", sheet_name=["inputdisp", "inputprices"])
+    sheets = pd.read_excel(os.getcwd() + "/../examples/Abatement/Data/techdata_new.xlsx", sheet_name=["inputdisp", "inputprices"])
     dict_with_techcats = sheets
     #inputdisp = sheets["inputdisp"]
     #inputprices = sheets["inputprices"]
@@ -62,7 +63,7 @@ def multiindex_series(idx_level_names, idx_name=None, series_name=None):
     elif idx_name is None and series_name is None:
         raise Exception("Supply either index name or series name")
     idx = pd.MultiIndex(levels=[[]]*len(idx_level_names), codes=[[]]*len(idx_level_names), names=idx_level_names)
-    ser = pd.Series(index=idx)
+    ser = pd.Series(index=idx, dtype=float)
     ser.rename(series_name, inplace=True)
     #ser.index.name = idx_name
     return ser
@@ -88,6 +89,17 @@ def intensity_or_share(techcat_type):
         mu_type = "share"
     return mu_type
     
+def find_key_from_value(d, value):
+    assert isinstance(d, dict)
+    out = []
+    for (k, v) in d.items():
+        if value in v:
+            out.append(k)
+    if len(out) == 1:
+        return out[0]
+    else:
+        raise Exception("Value exists in multiple keys")
+
 
 #%%
 
@@ -97,9 +109,9 @@ def load_techcats(dict_with_techcats):
     #The final output container
     output = {}
     inputprices = dict_with_techcats["inputprices"]
-   
 
-    testing=False
+
+    # testing=False
     if testing:
         techcat_type = "inputdisp"
 
@@ -124,6 +136,7 @@ def load_techcats(dict_with_techcats):
         tech_series = prefix + "_" + df["tech"].astype("str")
         techs = {str(tech):[] for tech in tech_series}
         techs_inputs = techs.copy()
+        techs_replace = techs.copy()
 
         unit_costs = pd.concat([tech_series, df["unit_cost"]], axis=1)
 
@@ -131,6 +144,9 @@ def load_techcats(dict_with_techcats):
         mu_type = intensity_or_share(techcat_type) #intensity or share
         input_cols = [col for col in df.columns if "input_" + mu_type + "_" in col]
         inputs = pd.Series([col[len("input_" + mu_type + "_"):] for col in input_cols])
+
+        #Replace energy mix
+        replace_cols = [col for col in df.columns if "replace_share_" in col]
 
         #Energy services / emission types
         upper_categories = {col[0:len(col)-len("_coverage_pot")]:[] for col in df.columns if "_coverage_pot" in col}
@@ -144,7 +160,7 @@ def load_techcats(dict_with_techcats):
         #Components object
         components = {}
 
-        testing=False
+        # testing=False
         if testing:
             i = 0
             tech = tech_series[0]
@@ -156,6 +172,11 @@ def load_techcats(dict_with_techcats):
             #Relevant inputs for technology
             tech_inputs = list(inputs[list(np.where(df[input_cols].iloc[i, :] > 0)[0])])
             techs_inputs[tech] = [tech + "_" + inp for inp in tech_inputs] + [tech + "_K"]
+            # if df[replace_cols].iloc[i, :].isna().all():
+            #     techs_replace[tech] = np.nan
+            # else:
+            techs_replace[tech] = df[replace_cols].iloc[i, :]
+
             energy_costs = 0
 
             if testing:
@@ -288,17 +309,55 @@ def load_techcats(dict_with_techcats):
         #There are no baseline components nor baseline technology goods in the end of pipe sector.
         if techcat_type == "inputdisp":
             #Add baseline elements to components, and inputs to baseline technology goods (U)
+
             baseline_U_inputs = {}
+            baseline_IO_technology = {}
+            baseline_IO_technology["baseline_IO_technology"] = []
+            if testing:
+                c = list(components.keys())[1]
             for c in components:
-                # E = c.split("_")[0]
-                components[c].append("U_" + prefix + "_" + c + "_base")
-                baseline_U_inputs["U_" + prefix + "_" + c + "_base"] = ["U_" + prefix + "_" + c + "_base_" + inp for inp in inputs] + ["U_" + prefix + "_" + c + "_base_K"]
+                base_U = "U_" + prefix + "_" + c + "_base"
+
+
+                #Check whether the underlying technologies have specified the fuels that they replace.
+                c_techs = [find_key_from_value(techs, U) for U in components[c]]
+                if testing:
+                    c_t = c_techs[0]
+                
+                replace_vectors_weight = 0
+                replace_vectors = pd.Series(index=replace_cols, dtype=float)
+                for c_t in c_techs:
+                    if not techs_replace[c_t].isna().all():
+                        replace_vectors_weight += 1
+                if replace_vectors_weight == 0:
+                    #Add the baseline_Us without replacement vectors to the output of the overall IO baseline tech
+                    baseline_IO_technology["baseline_IO_technology"].append(base_U)
+                else:
+                    replace_vectors_weight = 1/replace_vectors_weight 
+                    for c_t in c_techs:
+                        if techs_replace[c_t].isna().all():
+                            continue
+                        else:
+                            replace_vectors = pd.concat([replace_vectors, replace_vectors_weight*techs_replace[c_t]], axis=1).sum(axis=1)
+                    assert replace_vectors.sum() == 1
+                    replace_vectors = replace_vectors[replace_vectors > 0]
+                    baseline_U_inputs[base_U] = []
+                    if testing:
+                        inp = replace_vectors.index[0]
+                    for inp in replace_vectors.index:
+                        baseline_U_inputs[base_U] += [base_U + "_" + inp.split("replace_share_")[1]]
+                        mu[(base_U + "_" + inp.split("replace_share_")[1], base_U)] = replace_vectors[inp]
+                            
+                components[c].append(base_U)
+
+
                 #Add the latter to Q2P as well:
                 [Q2P.append(("U_" + prefix + "_" + c + "_base_" + inp, inp)) for inp in inputs]
                 Q2P.append(("U_" + prefix + "_" + c + "_base_K", "K"))
 
-            
         
+    
+    
             #Calculate mu-parameters for baseline components to be used below (they sum to 1 under E by construction):
             mu2 = mu.reset_index()
             mu2 = 1 - mu2.loc[mu2["nn"].isin(upper_categories.keys()), :].groupby("nn").sum()
@@ -307,10 +366,12 @@ def load_techcats(dict_with_techcats):
             for E in upper_categories:
                 upper_categories[E].append("C_" + E + "_base")
                 mu[("C_" + E + "_base", E)] = mu2.loc[E, "mu"]
-                baseline_C_inputs["C_" + E + "_base"] = ["C_" + E + "_base_" + inp for inp in inputs] + ["C_" + E + "_base_K"]
+                # baseline_C_inputs["C_" + E + "_base"] = ["C_" + E + "_base_" + inp for inp in inputs] + ["C_" + E + "_base_K"]
+                baseline_IO_technology["baseline_IO_technology"].append("C_" + E + "_base")
+                
                 #Add to Q2P
-                [Q2P.append(("C_" + E + "_base_" + inp, inp)) for inp in inputs]
-                Q2P.append(("C_" + E + "_base_K", "K"))
+                # [Q2P.append(("C_" + E + "_base_" + inp, inp)) for inp in inputs]
+                # Q2P.append(("C_" + E + "_base_K", "K"))
 
 
 
