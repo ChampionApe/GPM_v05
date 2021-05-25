@@ -1,4 +1,4 @@
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 1
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -10,12 +10,12 @@ C o m p i l a t i o n
    7  ;
    8   
    9  # ----------------------------------------------------------------------------------------------------
-  10  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_CollectFile.gms
+  10  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_CollectFile.gms
   11  # ----------------------------------------------------------------------------------------------------
   12   
   13   
   14  # ----------------------------------------------------------------------------------------------------
-  15  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_functions.gms
+  15  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_functions.gms
   16  # ----------------------------------------------------------------------------------------------------
   17   
   18   
@@ -33,430 +33,506 @@ C o m p i l a t i o n
   30  ;
   31   
   32  # ----------------------------------------------------------------------------------------------------
-  33  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_sets.gms
+  33  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_sets.gms
   34  # ----------------------------------------------------------------------------------------------------
   35   
   36  sets
   37          alias_set
   38          alias_map2
   39          n
-  40          s
-  41  ;
-  42   
-  43  alias(n,nn,nnn);
-  44   
-  45  sets
-  46          alias_[alias_set,alias_map2]
-  47          map_all[s,n,nn]
-  48          inp[s,n]
-  49          out[s,n]
-  50          int[s,n]
-  51          fg[n]
-  52          wT[s,n]
-  53          kno_out[s,n]
-  54          kno_inp[s,n]
-  55          map_lower_nests[s,n,nn]
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 2
+  40  ;
+  41   
+  42  alias(n,nn,nnn);
+  43   
+  44  sets
+  45          alias_[alias_set,alias_map2]
+  46          map_all[n,nn]
+  47          inp[n]
+  48          out[n]
+  49          int[n]
+  50          fg[n]
+  51          wT[n]
+  52          kno_out[n]
+  53          kno_inp[n]
+  54          map_T_inp[n,nn]
+  55          kno_T_inp[n]
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
-  56          kno_lower_nests[s,n]
-  57          bra_lower_nests[s,n]
-  58          inp_lower_nests[s,n]
-  59          out_lower_nests[s,n]
-  60          kno_no_lower_nests[s,n]
-  61          bra_o_lower_nests[s,n]
-  62          bra_no_lower_nests[s,n]
-  63          map_upper_nest[s,n,nn]
-  64          kno_upper_nest[s,n]
-  65          bra_upper_nest[s,n]
-  66          inp_upper_nest[s,n]
-  67          out_upper_nest[s,n]
-  68          kno_no_upper_nest[s,n]
-  69          bra_o_upper_nest[s,n]
-  70          bra_no_upper_nest[s,n]
-  71          n_out[n]
-  72          s_prod[s]
-  73          endo_PbT[s,n]
-  74          exo_mu[s,n,nn]
-  75  ;
-GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_0.gdx
+  56          bra_T_inp[n]
+  57          inp_T_inp[n]
+  58          out_T_inp[n]
+  59          kno_no_T_inp[n]
+  60          bra_o_T_inp[n]
+  61          bra_no_T_inp[n]
+  62          map_T_out[n,nn]
+  63          kno_T_out[n]
+  64          bra_T_out[n]
+  65          inp_T_out[n]
+  66          out_T_out[n]
+  67          bra_o_T_out[n]
+  68          bra_no_T_out[n]
+  69          map_C[n,nn]
+  70          kno_C[n]
+  71          bra_C[n]
+  72          inp_C[n]
+  73          out_C[n]
+  74          kno_no_C[n]
+  75          bra_o_C[n]
+  76          bra_no_C[n]
+  77          map_E[n,nn]
+  78          kno_E[n]
+  79          bra_E[n]
+  80          inp_E[n]
+  81          out_E[n]
+  82          kno_no_E[n]
+  83          bra_o_E[n]
+  84          bra_no_E[n]
+  85          n_out[n]
+  86          endo_PbT[n]
+  87          exo_mu[n,nn]
+  88  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_0.gdx
 --- LOAD  alias_set = 1:alias_set
 --- LOAD  alias_map2 = 2:alias_map2
 --- LOAD  n = 3:n
---- LOAD  s = 4:s
---- LOAD  fg = 12:fg
---- LOAD  n_out = 34:n_out
---- LOAD  s_prod = 35:s_prod
---- LOAD  alias_ = 7:alias_
---- LOAD  map_all = 8:map_all
---- LOAD  inp = 9:inp
---- LOAD  out = 10:out
---- LOAD  int = 11:int
---- LOAD  wT = 13:wT
---- LOAD  kno_out = 14:kno_out
---- LOAD  kno_inp = 15:kno_inp
---- LOAD  map_lower_nests = 18:map_lower_nests
---- LOAD  kno_lower_nests = 19:kno_lower_nests
---- LOAD  bra_lower_nests = 20:bra_lower_nests
---- LOAD  inp_lower_nests = 21:inp_lower_nests
---- LOAD  out_lower_nests = 22:out_lower_nests
---- LOAD  kno_no_lower_nests = 23:kno_no_lower_nests
---- LOAD  bra_o_lower_nests = 24:bra_o_lower_nests
---- LOAD  bra_no_lower_nests = 25:bra_no_lower_nests
---- LOAD  map_upper_nest = 26:map_upper_nest
---- LOAD  kno_upper_nest = 27:kno_upper_nest
---- LOAD  bra_upper_nest = 28:bra_upper_nest
---- LOAD  inp_upper_nest = 29:inp_upper_nest
---- LOAD  out_upper_nest = 30:out_upper_nest
---- LOAD  kno_no_upper_nest = 31:kno_no_upper_nest
---- LOAD  bra_o_upper_nest = 32:bra_o_upper_nest
---- LOAD  bra_no_upper_nest = 33:bra_no_upper_nest
---- LOAD  endo_PbT = 45:endo_PbT
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 3
+--- LOAD  inp = 8:inp
+--- LOAD  out = 9:out
+--- LOAD  int = 10:int
+--- LOAD  fg = 11:fg
+--- LOAD  wT = 12:wT
+--- LOAD  kno_out = 13:kno_out
+--- LOAD  kno_inp = 14:kno_inp
+--- LOAD  kno_T_inp = 21:kno_T_inp
+--- LOAD  bra_T_inp = 22:bra_T_inp
+--- LOAD  inp_T_inp = 23:inp_T_inp
+--- LOAD  out_T_inp = 24:out_T_inp
+--- LOAD  kno_no_T_inp = 25:kno_no_T_inp
+--- LOAD  bra_o_T_inp = 26:bra_o_T_inp
+--- LOAD  bra_no_T_inp = 27:bra_no_T_inp
+--- LOAD  kno_T_out = 29:kno_T_out
+--- LOAD  bra_T_out = 30:bra_T_out
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
---- LOAD  exo_mu = 46:exo_mu
- 113  ;
- 114   
- 115  # ----------------------------------------------------------------------------------------------------
- 116  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_parameters.gms
- 117  # ----------------------------------------------------------------------------------------------------
- 118   
- 119  ;
- 120   
- 121  # ----------------------------------------------------------------------------------------------------
- 122  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_groups.gms
- 123  # ----------------------------------------------------------------------------------------------------
- 124   
- 125   
- 126  # ----------------------------------------p_static_g_tech_endo----------------------------------------
- 127  #  Initialize p_static_g_tech_endo group
- 128  # ----------------------------------------------------------------------------------------------------
- 135   
- 136   
- 137  # -----------------------------------------p_static_g_tech_exo----------------------------------------
- 138  #  Initialize p_static_g_tech_exo group
- 139  # ----------------------------------------------------------------------------------------------------
+--- LOAD  inp_T_out = 31:inp_T_out
+--- LOAD  out_T_out = 32:out_T_out
+--- LOAD  bra_o_T_out = 33:bra_o_T_out
+--- LOAD  bra_no_T_out = 34:bra_no_T_out
+--- LOAD  kno_C = 36:kno_C
+--- LOAD  bra_C = 37:bra_C
+--- LOAD  inp_C = 38:inp_C
+--- LOAD  out_C = 39:out_C
+--- LOAD  kno_no_C = 40:kno_no_C
+--- LOAD  bra_o_C = 41:bra_o_C
+--- LOAD  bra_no_C = 42:bra_no_C
+--- LOAD  kno_E = 44:kno_E
+--- LOAD  bra_E = 45:bra_E
+--- LOAD  inp_E = 46:inp_E
+--- LOAD  out_E = 47:out_E
+--- LOAD  kno_no_E = 48:kno_no_E
+--- LOAD  bra_o_E = 49:bra_o_E
+--- LOAD  bra_no_E = 50:bra_no_E
+--- LOAD  n_out = 51:n_out
+--- LOAD  endo_PbT = 58:endo_PbT
+--- LOAD  alias_ = 6:alias_
+--- LOAD  map_all = 7:map_all
+--- LOAD  map_T_inp = 20:map_T_inp
+--- LOAD  map_T_out = 28:map_T_out
+--- LOAD  map_C = 35:map_C
+--- LOAD  map_E = 43:map_E
+--- LOAD  exo_mu = 59:exo_mu
+ 139  ;
+ 140   
+ 141  # ----------------------------------------------------------------------------------------------------
+ 142  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_parameters.gms
+ 143  # ----------------------------------------------------------------------------------------------------
+ 144   
+ 145  ;
  146   
- 147   
- 148  # -----------------------------------------p_static_g_endovars----------------------------------------
- 149  #  Initialize p_static_g_endovars group
- 150  # ----------------------------------------------------------------------------------------------------
- 159   
- 160   
- 161  # ----------------------------------------p_static_g_calib_exo----------------------------------------
- 162  #  Initialize p_static_g_calib_exo group
- 163  # ----------------------------------------------------------------------------------------------------
- 168   
- 169   
- 170  # -------------------------------------------p_static_g_tech------------------------------------------
- 171  #  Initialize p_static_g_tech group
- 172  # ----------------------------------------------------------------------------------------------------
- 175   
- 176   
- 177  # -----------------------------------------p_static_g_exovars-----------------------------------------
- 178  #  Initialize p_static_g_exovars group
- 179  # ----------------------------------------------------------------------------------------------------
+ 147  # ----------------------------------------------------------------------------------------------------
+ 148  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_groups.gms
+ 149  # ----------------------------------------------------------------------------------------------------
+ 150   
+ 151   
+ 152  # -------------------------------------------A1_g_tech_endo-------------------------------------------
+ 153  #  Initialize A1_g_tech_endo group
+ 154  # ----------------------------------------------------------------------------------------------------
+ 161   
+ 162   
+ 163  # --------------------------------------------A1_g_tech_exo-------------------------------------------
+ 164  #  Initialize A1_g_tech_exo group
+ 165  # ----------------------------------------------------------------------------------------------------
+ 172   
+ 173   
+ 174  # --------------------------------------------A1_g_endovars-------------------------------------------
+ 175  #  Initialize A1_g_endovars group
+ 176  # ----------------------------------------------------------------------------------------------------
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 185   
+ 186   
+ 187  # -------------------------------------------A1_g_calib_exo-------------------------------------------
+ 188  #  Initialize A1_g_calib_exo group
+ 189  # ----------------------------------------------------------------------------------------------------
+ 194   
  195   
- 196  # ----------------------------------------------------------------------------------------------------
- 197  #  Loop over __load_group
+ 196  # ----------------------------------------------A1_g_tech---------------------------------------------
+ 197  #  Initialize A1_g_tech group
  198  # ----------------------------------------------------------------------------------------------------
- 199   
- 200      parameter load_PwT[s,n] "";
- 201      load_PwT[s,n]$((int[s,n])) = 0;
+ 201   
  202   
- 203      parameter load_qD[s,n] "";
- 204      load_qD[s,n]$((int[s,n])) = 0;
- 205   
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 4
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-C o m p i l a t i o n
-
-
- 206      parameter load_PbT[s,n] "";
- 207      load_PbT[s,n]$((endo_PbT[s,n])) = 0;
- 208   
- 209    execute_load "p_0"
- 210  # ----------------------------------------------------------------------------------------------------
- 211  #  Loop over __load_group
- 212  # ----------------------------------------------------------------------------------------------------
- 213   load_PwT=PwT.l  load_qD=qD.l  load_PbT=PbT.l ;
- 214   
- 215  # ----------------------------------------------------------------------------------------------------
- 216  #  Loop over __load_group
- 217  # ----------------------------------------------------------------------------------------------------
- 218   
- 219      PwT.l[s,n]$((int[s,n])) = load_PwT[s,n];
- 220   
- 221      qD.l[s,n]$((int[s,n])) = load_qD[s,n];
- 222   
- 223      PbT.l[s,n]$((endo_PbT[s,n])) = load_PbT[s,n];
- 225  ;
- 233   
- 234  # ----------------------------------------------------------------------------------------------------
- 235  #  Loop over __load_group
+ 203  # --------------------------------------------A1_g_exovars--------------------------------------------
+ 204  #  Initialize A1_g_exovars group
+ 205  # ----------------------------------------------------------------------------------------------------
+ 221   
+ 222  # ----------------------------------------------------------------------------------------------------
+ 223  #  Loop over __load_group
+ 224  # ----------------------------------------------------------------------------------------------------
+ 225   
+ 226      parameter load_PwT[n] "";
+ 227      load_PwT[n]$((int[n])) = 0;
+ 228   
+ 229      parameter load_qD[n] "";
+ 230      load_qD[n]$((int[n])) = 0;
+ 231   
+ 232      parameter load_PbT[n] "";
+ 233      load_PbT[n]$((endo_PbT[n])) = 0;
+ 234   
+ 235    execute_load "A1_0"
  236  # ----------------------------------------------------------------------------------------------------
- 237   
- 238      parameter load_qD[s,n] "";
- 239      load_qD[s,n]$((inp[s,n])) = 0;
+ 237  #  Loop over __load_group
+ 238  # ----------------------------------------------------------------------------------------------------
+ 239   load_PwT=PwT.l  load_qD=qD.l  load_PbT=PbT.l ;
  240   
- 241      parameter load_PbT[s,n] "";
- 242      load_PbT[s,n]$(((out[s,n] and not endo_PbT[s,n]))) = 0;
- 243   
- 244      parameter load_Peq[n] "";
- 245      load_Peq[n]$((n_out[n])) = 0;
+ 241  # ----------------------------------------------------------------------------------------------------
+ 242  #  Loop over __load_group
+ 243  # ----------------------------------------------------------------------------------------------------
+ 244   
+ 245      PwT.l[n]$((int[n])) = load_PwT[n];
  246   
- 247    execute_load "p_0"
- 248  # ----------------------------------------------------------------------------------------------------
- 249  #  Loop over __load_group
- 250  # ----------------------------------------------------------------------------------------------------
- 251   load_qD=qD.l  load_PbT=PbT.l  load_Peq=Peq.l ;
- 252   
- 253  # ----------------------------------------------------------------------------------------------------
- 254  #  Loop over __load_group
- 255  # ----------------------------------------------------------------------------------------------------
- 256   
- 257      qD.l[s,n]$((inp[s,n])) = load_qD[s,n];
- 258   
- 259      PbT.l[s,n]$(((out[s,n] and not endo_PbT[s,n]))) = load_PbT[s,n];
- 260   
- 261      Peq.l[n]$((n_out[n])) = load_Peq[n];
- 263  ;
- 271   
- 272  # ----------------------------------------------------------------------------------------------------
- 273  #  Loop over __load_group
+ 247      qD.l[n]$((int[n])) = load_qD[n];
+ 248   
+ 249      PbT.l[n]$((endo_PbT[n])) = load_PbT[n];
+ 251  ;
+ 259   
+ 260  # ----------------------------------------------------------------------------------------------------
+ 261  #  Loop over __load_group
+ 262  # ----------------------------------------------------------------------------------------------------
+ 263   
+ 264      parameter load_qD[n] "";
+ 265      load_qD[n]$((inp[n])) = 0;
+ 266   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 267      parameter load_PbT[n] "";
+ 268      load_PbT[n]$(((out[n] and not endo_PbT[n]))) = 0;
+ 269   
+ 270      parameter load_Peq[n] "";
+ 271      load_Peq[n]$((n_out[n])) = 0;
+ 272   
+ 273    execute_load "A1_0"
  274  # ----------------------------------------------------------------------------------------------------
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 5
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-C o m p i l a t i o n
-
-
- 275   
- 276      parameter load_mu[s,n,nn] "";
- 277      load_mu[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = 0;
+ 275  #  Loop over __load_group
+ 276  # ----------------------------------------------------------------------------------------------------
+ 277   load_qD=qD.l  load_PbT=PbT.l  load_Peq=Peq.l ;
  278   
- 279      parameter load_markup[s,n] "";
- 280      load_markup[s,n]$((out[s,n])) = 0;
- 281   
- 282    execute_load "p_0"
- 283  # ----------------------------------------------------------------------------------------------------
- 284  #  Loop over __load_group
- 285  # ----------------------------------------------------------------------------------------------------
- 286   load_mu=mu.l  load_markup=markup.l ;
- 287   
- 288  # ----------------------------------------------------------------------------------------------------
- 289  #  Loop over __load_group
- 290  # ----------------------------------------------------------------------------------------------------
- 291   
- 292      mu.fx[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = load_mu[s,n,nn];
- 293   
- 294      markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
- 296  ;
+ 279  # ----------------------------------------------------------------------------------------------------
+ 280  #  Loop over __load_group
+ 281  # ----------------------------------------------------------------------------------------------------
+ 282   
+ 283      qD.l[n]$((inp[n])) = load_qD[n];
+ 284   
+ 285      PbT.l[n]$(((out[n] and not endo_PbT[n]))) = load_PbT[n];
+ 286   
+ 287      Peq.l[n]$((n_out[n])) = load_Peq[n];
+ 289  ;
+ 297   
+ 298  # ----------------------------------------------------------------------------------------------------
+ 299  #  Loop over __load_group
+ 300  # ----------------------------------------------------------------------------------------------------
+ 301   
+ 302      parameter load_mu[n,nn] "";
+ 303      load_mu[n,nn]$(((map_all[n,nn] and not exo_mu[n,nn]))) = 0;
  304   
- 305  # ----------------------------------------------------------------------------------------------------
- 306  #  Loop over __load_group
- 307  # ----------------------------------------------------------------------------------------------------
- 308   
- 309      parameter load_sigma[s,n] "";
- 310      load_sigma[s,n]$((kno_inp[s,n])) = 0;
- 311   
- 312      parameter load_eta[s,n] "";
- 313      load_eta[s,n]$((kno_out[s,n])) = 0;
- 314   
- 315      parameter load_mu[s,n,nn] "";
- 316      load_mu[s,n,nn]$((exo_mu[s,n,nn])) = 0;
+ 305      parameter load_markup[n] "";
+ 306      load_markup[n]$((out[n])) = 0;
+ 307   
+ 308    execute_load "A1_0"
+ 309  # ----------------------------------------------------------------------------------------------------
+ 310  #  Loop over __load_group
+ 311  # ----------------------------------------------------------------------------------------------------
+ 312   load_mu=mu.l  load_markup=markup.l ;
+ 313   
+ 314  # ----------------------------------------------------------------------------------------------------
+ 315  #  Loop over __load_group
+ 316  # ----------------------------------------------------------------------------------------------------
  317   
- 318    execute_load "p_0"
- 319  # ----------------------------------------------------------------------------------------------------
- 320  #  Loop over __load_group
- 321  # ----------------------------------------------------------------------------------------------------
- 322   load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l ;
- 323   
- 324  # ----------------------------------------------------------------------------------------------------
- 325  #  Loop over __load_group
- 326  # ----------------------------------------------------------------------------------------------------
- 327   
- 328      sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
- 329   
- 330      eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
- 331   
- 332      mu.fx[s,n,nn]$((exo_mu[s,n,nn])) = load_mu[s,n,nn];
- 334  ;
- 342   
- 343  # ----------------------------------------------------------------------------------------------------
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 6
+ 318      mu.fx[n,nn]$(((map_all[n,nn] and not exo_mu[n,nn]))) = load_mu[n,nn];
+ 319   
+ 320      markup.fx[n]$((out[n])) = load_markup[n];
+ 322  ;
+ 330   
+ 331  # ----------------------------------------------------------------------------------------------------
+ 332  #  Loop over __load_group
+ 333  # ----------------------------------------------------------------------------------------------------
+ 334   
+ 335      parameter load_sigma[n] "";
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 344  #  Loop over __load_group
+ 336      load_sigma[n]$((kno_inp[n])) = 0;
+ 337   
+ 338      parameter load_eta[n] "";
+ 339      load_eta[n]$((kno_out[n])) = 0;
+ 340   
+ 341      parameter load_mu[n,nn] "";
+ 342      load_mu[n,nn]$((exo_mu[n,nn])) = 0;
+ 343   
+ 344    execute_load "A1_0"
  345  # ----------------------------------------------------------------------------------------------------
- 346   
- 347      parameter load_mu[s,n,nn] "";
- 348      load_mu[s,n,nn]$(((exo_mu[s,n,nn]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn])))) = 0;
+ 346  #  Loop over __load_group
+ 347  # ----------------------------------------------------------------------------------------------------
+ 348   load_sigma=sigma.l  load_eta=eta.l  load_mu=mu.l ;
  349   
- 350      parameter load_markup[s,n] "";
- 351      load_markup[s,n]$((out[s,n])) = 0;
- 352   
- 353      parameter load_sigma[s,n] "";
- 354      load_sigma[s,n]$((kno_inp[s,n])) = 0;
+ 350  # ----------------------------------------------------------------------------------------------------
+ 351  #  Loop over __load_group
+ 352  # ----------------------------------------------------------------------------------------------------
+ 353   
+ 354      sigma.fx[n]$((kno_inp[n])) = load_sigma[n];
  355   
- 356      parameter load_eta[s,n] "";
- 357      load_eta[s,n]$((kno_out[s,n])) = 0;
- 358   
- 359    execute_load "p_0"
- 360  # ----------------------------------------------------------------------------------------------------
- 361  #  Loop over __load_group
- 362  # ----------------------------------------------------------------------------------------------------
- 363   load_mu=mu.l  load_markup=markup.l  load_sigma=sigma.l  load_eta=eta.l ;
- 364   
- 365  # ----------------------------------------------------------------------------------------------------
- 366  #  Loop over __load_group
- 367  # ----------------------------------------------------------------------------------------------------
+ 356      eta.fx[n]$((kno_out[n])) = load_eta[n];
+ 357   
+ 358      mu.fx[n,nn]$((exo_mu[n,nn])) = load_mu[n,nn];
+ 360  ;
  368   
- 369      mu.fx[s,n,nn]$(((exo_mu[s,n,nn]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn])))) = load_mu[s,n,nn];
- 370   
- 371      markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+ 369  # ----------------------------------------------------------------------------------------------------
+ 370  #  Loop over __load_group
+ 371  # ----------------------------------------------------------------------------------------------------
  372   
- 373      sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
- 374   
- 375      eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
- 377  ;
- 385   
+ 373      parameter load_mu[n,nn] "";
+ 374      load_mu[n,nn]$(((exo_mu[n,nn]) or ((map_all[n,nn] and not exo_mu[n,nn])))) = 0;
+ 375   
+ 376      parameter load_markup[n] "";
+ 377      load_markup[n]$((out[n])) = 0;
+ 378   
+ 379      parameter load_sigma[n] "";
+ 380      load_sigma[n]$((kno_inp[n])) = 0;
+ 381   
+ 382      parameter load_eta[n] "";
+ 383      load_eta[n]$((kno_out[n])) = 0;
+ 384   
+ 385    execute_load "A1_0"
  386  # ----------------------------------------------------------------------------------------------------
  387  #  Loop over __load_group
  388  # ----------------------------------------------------------------------------------------------------
- 389   
- 390      parameter load_PwT[s,n] "";
- 391      load_PwT[s,n]$((inp[s,n])) = 0;
- 392   
- 393      parameter load_qS[s,n] "";
- 394      load_qS[s,n]$((out[s,n])) = 0;
- 395   
- 396      parameter load_tauS[s,n] "";
- 397      load_tauS[s,n]$((out[s,n])) = 0;
+ 389   load_mu=mu.l  load_markup=markup.l  load_sigma=sigma.l  load_eta=eta.l ;
+ 390   
+ 391  # ----------------------------------------------------------------------------------------------------
+ 392  #  Loop over __load_group
+ 393  # ----------------------------------------------------------------------------------------------------
+ 394   
+ 395      mu.fx[n,nn]$(((exo_mu[n,nn]) or ((map_all[n,nn] and not exo_mu[n,nn])))) = load_mu[n,nn];
+ 396   
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 397      markup.fx[n]$((out[n])) = load_markup[n];
  398   
- 399      parameter load_tauLump[s] "";
- 400      load_tauLump[s]$((s_prod[s])) = 0;
- 401   
- 402    execute_load "p_0"
- 403  # ----------------------------------------------------------------------------------------------------
- 404  #  Loop over __load_group
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 7
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-C o m p i l a t i o n
-
-
- 405  # ----------------------------------------------------------------------------------------------------
- 406   load_PwT=PwT.l  load_qS=qS.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
- 407   
- 408  # ----------------------------------------------------------------------------------------------------
- 409  #  Loop over __load_group
- 410  # ----------------------------------------------------------------------------------------------------
+ 399      sigma.fx[n]$((kno_inp[n])) = load_sigma[n];
+ 400   
+ 401      eta.fx[n]$((kno_out[n])) = load_eta[n];
+ 403  ;
  411   
- 412      PwT.fx[s,n]$((inp[s,n])) = load_PwT[s,n];
- 413   
- 414      qS.fx[s,n]$((out[s,n])) = load_qS[s,n];
+ 412  # ----------------------------------------------------------------------------------------------------
+ 413  #  Loop over __load_group
+ 414  # ----------------------------------------------------------------------------------------------------
  415   
- 416      tauS.fx[s,n]$((out[s,n])) = load_tauS[s,n];
- 417   
- 418      tauLump.fx[s]$((s_prod[s])) = load_tauLump[s];
- 420  ;
- 421  ;
- 422   
- 423  # ----------------------------------------------------------------------------------------------------
- 424  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_blocks.gms
- 425  # ----------------------------------------------------------------------------------------------------
- 426   
+ 416      parameter load_PwT[n] "";
+ 417      load_PwT[n]$((inp[n])) = 0;
+ 418   
+ 419      parameter load_qS[n] "";
+ 420      load_qS[n]$((out[n])) = 0;
+ 421   
+ 422      parameter load_tauS[n] "";
+ 423      load_tauS[n]$((out[n])) = 0;
+ 424   
+ 425      parameter load_tauLump "";
+ 426      load_tauLump$((1)) = 0;
  427   
- 428  # --------------------------------------------M_lower_nests-------------------------------------------
- 429  #  Initialize M_lower_nests equation block
- 430  # ----------------------------------------------------------------------------------------------------
- 431  EQUATION E_zp_out_lower_nests[s,n];
- 432  E_zp_out_lower_nests[s,n]$(out_lower_nests[s,n])..      PbT[s,n]*qS[s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[s,nn]*PwT[s,nn]);
- 433  EQUATION E_zp_nout_lower_nests[s,n];
- 434  E_zp_nout_lower_nests[s,n]$(kno_no_lower_nests[s,n])..  PwT[s,n]*qD[s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[s,nn]*PwT[s,nn]);
- 435  EQUATION E_q_out_lower_nests[s,n];
- 436  E_q_out_lower_nests[s,n]$(bra_o_lower_nests[s,n])..     qD[s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PbT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qS[s,nn]);
- 437  EQUATION E_q_nout_lower_nests[s,n];
- 438  E_q_nout_lower_nests[s,n]$(bra_no_lower_nests[s,n])..   qD[s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PwT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qD[s,nn]);
+ 428    execute_load "A1_0"
+ 429  # ----------------------------------------------------------------------------------------------------
+ 430  #  Loop over __load_group
+ 431  # ----------------------------------------------------------------------------------------------------
+ 432   load_PwT=PwT.l  load_qS=qS.l  load_tauS=tauS.l  load_tauLump=tauLump.l ;
+ 433   
+ 434  # ----------------------------------------------------------------------------------------------------
+ 435  #  Loop over __load_group
+ 436  # ----------------------------------------------------------------------------------------------------
+ 437   
+ 438      PwT.fx[n]$((inp[n])) = load_PwT[n];
  439   
- 440  # ----------------------------------------------------------------------------------------------------
- 441  #  Define M_lower_nests model
- 442  # ----------------------------------------------------------------------------------------------------
- 443  Model M_lower_nests /
- 444  E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests
- 445  /;
- 446   
- 447   
- 448  # --------------------------------------------M_upper_nest--------------------------------------------
- 449  #  Initialize M_upper_nest equation block
- 450  # ----------------------------------------------------------------------------------------------------
- 451  EQUATION E_zp_out_upper_nest[s,n];
- 452  E_zp_out_upper_nest[s,n]$(out_upper_nest[s,n])..        PbT[s,n]*qS[s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[s,nn]*PwT[s,nn]);
- 453  EQUATION E_zp_nout_upper_nest[s,n];
- 454  E_zp_nout_upper_nest[s,n]$(kno_no_upper_nest[s,n])..    PwT[s,n]*qD[s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[s,nn]*PwT[s,nn]);
- 455  EQUATION E_q_out_upper_nest[s,n];
- 456  E_q_out_upper_nest[s,n]$(bra_o_upper_nest[s,n])..       qD[s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PbT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qS[s,nn]);
- 457  EQUATION E_q_nout_upper_nest[s,n];
- 458  E_q_nout_upper_nest[s,n]$(bra_no_upper_nest[s,n])..     qD[s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PwT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qD[s,nn]);
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 8
+ 440      qS.fx[n]$((out[n])) = load_qS[n];
+ 441   
+ 442      tauS.fx[n]$((out[n])) = load_tauS[n];
+ 443   
+ 444      tauLump.fx$((1)) = load_tauLump;
+ 446  ;
+ 447  ;
+ 448   
+ 449  # ----------------------------------------------------------------------------------------------------
+ 450  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_blocks.gms
+ 451  # ----------------------------------------------------------------------------------------------------
+ 452   
+ 453   
+ 454  # -----------------------------------------------M_T_inp----------------------------------------------
+ 455  #  Initialize M_T_inp equation block
+ 456  # ----------------------------------------------------------------------------------------------------
+ 457  EQUATION E_zp_out_T_inp[n];
+ 458  E_zp_out_T_inp[n]$(out_t_inp[n])..      PbT[n]*qS[n]  =E=  sum(nn$(map_T_inp[nn,n]), qD[nn]*PwT[nn]);
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 8
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
- 459   
- 460  # ----------------------------------------------------------------------------------------------------
- 461  #  Define M_upper_nest model
- 462  # ----------------------------------------------------------------------------------------------------
- 463  Model M_upper_nest /
- 464  E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest
- 465  /;
- 466   
- 467   
- 468  # --------------------------------------------M_p_static_pw-------------------------------------------
- 469  #  Initialize M_p_static_pw equation block
- 470  # ----------------------------------------------------------------------------------------------------
- 471  EQUATION E_pw_p_static[s,n];
- 472  E_pw_p_static[s,n]$(out[s,n])..         Peq[n]  =E=  (1+markup[s,n])*(PbT[s,n]*(1+tauLump[s]/sum(nn$(out[s,nn]), qS[s,nn]*PbT[s,nn]))+tauS[s,n]+0);
+ 459  EQUATION E_zp_nout_T_inp[n];
+ 460  E_zp_nout_T_inp[n]$(kno_no_t_inp[n])..  PwT[n]*qD[n]  =E=  sum(nn$(map_T_inp[nn,n]), qD[nn]*PwT[nn]);
+ 461  EQUATION E_q_out_T_inp[n];
+ 462  E_q_out_T_inp[n]$(bra_o_t_inp[n])..     qD[n]  =E=  sum(nn$(map_T_inp[n,nn]), mu[n,nn] * (PbT[nn]/PwT[n])**(sigma[nn]) * qS[nn]);
+ 463  EQUATION E_q_nout_T_inp[n];
+ 464  E_q_nout_T_inp[n]$(bra_no_t_inp[n])..   qD[n]  =E=  sum(nn$(map_T_inp[n,nn]), mu[n,nn] * (PwT[nn]/PwT[n])**(sigma[nn]) * qD[nn]);
+ 465   
+ 466  # ----------------------------------------------------------------------------------------------------
+ 467  #  Define M_T_inp model
+ 468  # ----------------------------------------------------------------------------------------------------
+ 469  Model M_T_inp /
+ 470  E_zp_out_T_inp, E_zp_nout_T_inp, E_q_out_T_inp, E_q_nout_T_inp
+ 471  /;
+ 472   
  473   
- 474  # ----------------------------------------------------------------------------------------------------
- 475  #  Define M_p_static_pw model
+ 474  # -----------------------------------------------M_T_out----------------------------------------------
+ 475  #  Initialize M_T_out equation block
  476  # ----------------------------------------------------------------------------------------------------
- 477  Model M_p_static_pw /
- 478  E_pw_p_static
- 479  /;
- 480   
- 481  ;
- 482  ;
+ 477  EQUATION E_zp_T_out[n];
+ 478  E_zp_T_out[n]$(kno_t_out[n])..  PwT[n]*qD[n]  =E=  sum(nn$(map_T_out[nn,n] and out[nn]), qS[nn]*PbT[nn])+sum(nn$(map_T_out[nn,n] and not out[nn]), qD[nn]*PwT[nn]);
+ 479  EQUATION E_q_out_T_out[n];
+ 480  E_q_out_T_out[n]$(bra_o_t_out[n])..     qS[n]  =E=  sum(nn$(map_T_out[n,nn]), mu[n,nn] * (PbT[n]/PwT[nn])**(-eta[nn]) * qD[nn]/(sum(nnn$(map_T_out[nnn,nn] and out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwT[nn])**(-eta[nn]))+sum(nnn$(map_T_out[nnn,nn] and not o
+      ut[nnn]), mu[nnn,nn]*(PwT[nnn]/PwT[nn])**(-eta[nn]))));
+ 481  EQUATION E_q_nout_T_out[n];
+ 482  E_q_nout_T_out[n]$(bra_no_t_out[n])..   qD[n]  =E=  sum(nn$(map_T_out[n,nn]), mu[n,nn] * (PwT[n]/PwT[nn])**(-eta[nn]) * qD[nn]/(sum(nnn$(map_T_out[nnn,nn] and out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwT[nn])**(-eta[nn]))+sum(nnn$(map_T_out[nnn,nn] and not o
+      ut[nnn]), mu[nnn,nn]*(PwT[nnn]/PwT[nn])**(-eta[nn]))));
  483   
  484  # ----------------------------------------------------------------------------------------------------
- 485  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\RunFile.gms
+ 485  #  Define M_T_out model
  486  # ----------------------------------------------------------------------------------------------------
- 487   
- 488   
- 489  # ----------------------------------------------------------------------------------------------------$FIX p_static_g_tech, p_static_g_exovars;
- 490  # ----------------------------------------------------------------------------------------------------
- 501   
- 502  # ----------------------------------------------------------------------------------------------------$UNFIX p_static_g_endovars, p_static_g_calib_exo;
- 503  # ----------------------------------------------------------------------------------------------------
- 514   
- 515  # ----------------------------------------------------------------------------------------------------
- 516  #  Define p_static_B model
- 517  # ----------------------------------------------------------------------------------------------------
- 518  Model p_static_B /
- 519  E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest, E_pw_p_static, E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests
- 520  /;
- 521   
- 522  scalars p_static_B_modelstat, p_static_B_solvestat;
- 523  solve p_static_B using CNS;
- 524  p_static_B_modelstat = p_static_B.modelstat; p_static_B_solvestat = p_static_B.solvestat;
- 525  ;
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/17/21 20:12:22 Page 9
+ 487  Model M_T_out /
+ 488  E_zp_T_out, E_q_out_T_out, E_q_nout_T_out
+ 489  /;
+ 490   
+ 491   
+ 492  # -------------------------------------------------M_C------------------------------------------------
+ 493  #  Initialize M_C equation block
+ 494  # ----------------------------------------------------------------------------------------------------
+ 495  EQUATION E_zp_out_C[n];
+ 496  E_zp_out_C[n]$(out_c[n])..      PbT[n]*qS[n]  =E=  sum(nn$(map_C[nn,n]), qD[nn]*PwT[nn]);
+ 497  EQUATION E_zp_nout_C[n];
+ 498  E_zp_nout_C[n]$(kno_no_c[n])..  PwT[n]*qD[n]  =E=  sum(nn$(map_C[nn,n]), qD[nn]*PwT[nn]);
+ 499  EQUATION E_q_out_C[n];
+ 500  E_q_out_C[n]$(bra_o_c[n])..     qD[n]  =E=  sum(nn$(map_C[n,nn]), mu[n,nn] * exp((PbT[nn]-PwT[n])*sigma[nn]) * qS[nn]/ sum(nnn$(map_C[nnn,nn]), mu[nnn,nn]*exp((PbT[nn]-PwT[nnn])*sigma[nn])));
+ 501  EQUATION E_q_nout_C[n];
+ 502  E_q_nout_C[n]$(bra_no_c[n])..   qD[n]  =E=  sum(nn$(map_C[n,nn]), mu[n,nn] * exp((PwT[nn]-PwT[n])*sigma[nn]) * qD[nn]/ sum(nnn$(map_C[nnn,nn]), mu[nnn,nn]*exp((PwT[nn]-PwT[nnn])*sigma[nn])));
+ 503   
+ 504  # ----------------------------------------------------------------------------------------------------
+ 505  #  Define M_C model
+ 506  # ----------------------------------------------------------------------------------------------------
+ 507  Model M_C /
+ 508  E_zp_out_C, E_zp_nout_C, E_q_out_C, E_q_nout_C
+ 509  /;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                               05/25/21 16:49:33 Page 9
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 510   
+ 511   
+ 512  # -------------------------------------------------M_E------------------------------------------------
+ 513  #  Initialize M_E equation block
+ 514  # ----------------------------------------------------------------------------------------------------
+ 515  EQUATION E_zp_out_E[n];
+ 516  E_zp_out_E[n]$(out_e[n])..      PbT[n]*qS[n]  =E=  sum(nn$(map_E[nn,n]), qD[nn]*PwT[nn]);
+ 517  EQUATION E_zp_nout_E[n];
+ 518  E_zp_nout_E[n]$(kno_no_e[n])..  PwT[n]*qD[n]  =E=  sum(nn$(map_E[nn,n]), qD[nn]*PwT[nn]);
+ 519  EQUATION E_q_out_E[n];
+ 520  E_q_out_E[n]$(bra_o_e[n])..     qD[n]  =E=  sum(nn$(map_E[n,nn]), mu[n,nn] * (PbT[nn]/PwT[n])**(sigma[nn]) * qS[nn] / sum(nnn$(map_E[nnn,nn]), mu[nnn,nn] * (PbT[nn]/PwT[nnn])**(sigma[nn])));
+ 521  EQUATION E_q_nout_E[n];
+ 522  E_q_nout_E[n]$(bra_no_e[n])..   qD[n]  =E=  sum(nn$(map_E[n,nn]), mu[n,nn] * (PwT[nn]/PwT[n])**(sigma[nn]) * qD[nn] / sum(nnn$(map_E[nnn,nn]), mu[nnn,nn] * (PwT[nn]/PwT[nnn])**(sigma[nn])));
+ 523   
+ 524  # ----------------------------------------------------------------------------------------------------
+ 525  #  Define M_E model
+ 526  # ----------------------------------------------------------------------------------------------------
+ 527  Model M_E /
+ 528  E_zp_out_E, E_zp_nout_E, E_q_out_E, E_q_nout_E
+ 529  /;
+ 530   
+ 531   
+ 532  # -----------------------------------------------M_A1_pw----------------------------------------------
+ 533  #  Initialize M_A1_pw equation block
+ 534  # ----------------------------------------------------------------------------------------------------
+ 535  EQUATION E_pw_A1[n];
+ 536  E_pw_A1[n]$(out[n])..   Peq[n]  =E=  (1+markup[n])*(PbT[n]*(1+tauLump/sum(nn$(out[nn]), qS[nn]*PbT[nn]))+tauS[n]+0);
+ 537   
+ 538  # ----------------------------------------------------------------------------------------------------
+ 539  #  Define M_A1_pw model
+ 540  # ----------------------------------------------------------------------------------------------------
+ 541  Model M_A1_pw /
+ 542  E_pw_A1
+ 543  /;
+ 544   
+ 545  ;
+ 546  ;
+ 547   
+ 548  # ----------------------------------------------------------------------------------------------------
+ 549  #  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\RunFile.gms
+ 550  # ----------------------------------------------------------------------------------------------------
+ 551   
+ 552   
+ 553  # ----------------------------------------------------------------------------------------------------$FIX A1_g_tech, A1_g_exovars;
+ 554  # ----------------------------------------------------------------------------------------------------
+ 565   
+ 566  # ----------------------------------------------------------------------------------------------------$UNFIX A1_g_endovars, A1_g_calib_exo;
+ 567  # ----------------------------------------------------------------------------------------------------
+ 578   
+ 579  # ----------------------------------------------------------------------------------------------------
+ 580  #  Define A1_B model
+ 581  # ----------------------------------------------------------------------------------------------------
+ 582  Model A1_B /
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/25/21 16:49:33 Page 10
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 583  E_zp_out_E, E_zp_nout_E, E_q_out_E, E_q_nout_E, E_zp_out_T_inp, E_zp_nout_T_inp, E_q_out_T_inp, E_q_nout_T_inp, E_zp_T_out, E_q_out_T_out, E_q_nout_T_out, E_pw_A1, E_zp_out_C, E_zp_nout_C, E_q_out_C, E_q_nout_C
+ 584  /;
+ 585   
+ 586  scalars A1_B_modelstat, A1_B_solvestat;
+ 587  solve A1_B using CNS;
+ 588  A1_B_modelstat = A1_B.modelstat; A1_B_solvestat = A1_B.solvestat;
+ 589  ;
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/25/21 16:49:33 Page 11
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Include File Summary
 
@@ -464,44 +540,44 @@ Include File Summary
    SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
 
      1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\CollectAndRun.gmy
-     2       76 GDXIN          1      76  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_0.gdx
+     2       89 GDXIN          1      89  C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_0.gdx
 
 
-COMPILATION TIME     =        0.032 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:22 Page 10
+COMPILATION TIME     =        0.015 SECONDS      3 MB  29.1.0 rbb4180b WEX-WEI
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/25/21 16:49:33 Page 12
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE p_static_B Using CNS From line 523
+Model Statistics    SOLVE A1_B Using CNS From line 587
 
 
 MODEL STATISTICS
 
-BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           34
-BLOCKS OF VARIABLES          10     SINGLE VARIABLES           88
-NON ZERO ELEMENTS           208     NON LINEAR N-Z            184
+BLOCKS OF EQUATIONS          16     SINGLE EQUATIONS           22
+BLOCKS OF VARIABLES          11     SINGLE VARIABLES           53
+NON ZERO ELEMENTS           144     NON LINEAR N-Z            129
 DERIVATIVE POOL              20     CONSTANT POOL              16
-CODE LENGTH                 353
-SINGLE =E|X= EQUS            34     SINGLE UNFIXED VARS        34
+CODE LENGTH                 314
+SINGLE =E|X= EQUS            22     SINGLE UNFIXED VARS        22
 
 
-GENERATION TIME      =        0.000 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
+GENERATION TIME      =        0.016 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
 
 
-EXECUTION TIME       =        0.000 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:22 Page 11
+EXECUTION TIME       =        0.032 SECONDS      4 MB  29.1.0 rbb4180b WEX-WEI
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/25/21 16:49:33 Page 13
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE p_static_B Using CNS From line 523
+Solution Report     SOLVE A1_B Using CNS From line 587
 
 
                S O L V E      S U M M A R Y
 
-     MODEL   p_static_B          
+     MODEL   A1_B                
      TYPE    CNS                 
-     SOLVER  CONOPT4             FROM LINE  523
+     SOLVER  CONOPT4             FROM LINE  587
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      16 Solved                   
 
- RESOURCE USAGE, LIMIT          0.047      1000.000
+ RESOURCE USAGE, LIMIT          0.000      1000.000
  ITERATION COUNT, LIMIT         1    2000000000
  EVALUATION ERRORS              0             0
 
@@ -515,19 +591,19 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
     Licensed to:  GAMS/CONOPT OEM License
  
  
-    The user model has 34 constraints and 88 variables
-    with 208 Jacobian elements, 184 of which are nonlinear.
+    The user model has 22 constraints and 53 variables
+    with 144 Jacobian elements, 129 of which are nonlinear.
  
-    The pre-triangular part of the model has 0 constraints and 54 variables.
+    The pre-triangular part of the model has 0 constraints and 31 variables.
  
-    Preprocessed model has 34 constraints and 34 variables
-    with 120 Jacobian elements, 96 of which are nonlinear.
+    Preprocessed model has 22 constraints and 22 variables
+    with 91 Jacobian elements, 76 of which are nonlinear.
  
  ** Feasible solution to a square system.
  
  
- CONOPT time Total                            0.027 seconds
-   of which: Function evaluations             0.001 =  3.7%
+ CONOPT time Total                            0.001 seconds
+   of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
  
 
@@ -535,7 +611,7 @@ CONOPT 4         29.1.0 rbb4180b Released Nov 15, 2019 WEI x86 64bit/MS Window
 **** REPORT SUMMARY :        0 INFEASIBLE
                              0  DEPENDENT
                              0     ERRORS
-GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/17/21 20:12:22 Page 12
+GAMS 29.1.0  rbb4180b Released Nov 15, 2019 WEX-WEI x86 64bit/MS Windows                                                                                                                                                              05/25/21 16:49:33 Page 14
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
@@ -551,6 +627,3 @@ USER: Medium MUD - 10 User License                   G200108/0001CA-WIN
 
 Input      C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\CollectAndRun.gmy
 Output     C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\_gams_py_gjo0.lst
-Save       C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\_gams_py_gcp0.g0?
-
-**** WARNING - COMPILER OPTIONS ARE NON DEFAULT     EOLCOM # 

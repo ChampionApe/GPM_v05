@@ -1,6 +1,6 @@
-$FIX p_static_g_tech, p_static_g_exovars;
-$UNFIX p_static_g_endovars, p_static_g_calib_exo;
-$Model p_static_B M_upper_nest, M_p_static_pw, M_lower_nests;
-scalars p_static_B_modelstat, p_static_B_solvestat;
-solve p_static_B using CNS;
-p_static_B_modelstat = p_static_B.modelstat; p_static_B_solvestat = p_static_B.solvestat;
+$FIX A1_g_tech, A1_g_exovars;
+$UNFIX A1_g_endovars, A1_g_calib_exo;
+$Model A1_B M_E, M_T_inp, M_T_out, M_A1_pw, M_C;
+scalars A1_B_modelstat, A1_B_solvestat;
+solve A1_B using CNS;
+A1_B_modelstat = A1_B.modelstat; A1_B_solvestat = A1_B.solvestat;

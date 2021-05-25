@@ -106,7 +106,7 @@ class CES_norm:
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
 		sigma2 = self.a('sigma',[(0,1)])
-		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1)]), self.a('map_',[(0,2)])
+		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1),(1,0)]), self.a('map_',[(0,2)])
 		PwT,PwT2,PwT3 = self.a('PwT'), self.a('PwT',[(0,1)]), self.a('PwT',[(0,2)])
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
@@ -120,9 +120,9 @@ class CES_norm:
 	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,sigma2,PwT,PwT2,PwT3,PbT2,qD,qD2,qS2,output=False):
 		""" ces demand """
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PwT2}/{PwT})**({sigma2}) * {qD2} / sum({nnn}$({map_3}), {mu_3} * ({PwT2}/{PwT3})**({sigma2})))"""
+			RHS = f"""sum({nn}$({map_}), {mu} * ({PwT2}/{PwT})**({sigma2}) * {qD2} / sum({nnn}$({map_3}), {mu3} * ({PwT2}/{PwT3})**({sigma2})))"""
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT2}/{PwT})**({sigma2}) * {qS2} / sum({nnn}$({map_3}), {mu_3} * ({PbT2}/{PwT3})**({sigma2})))"""
+			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT2}/{PwT})**({sigma2}) * {qS2} / sum({nnn}$({map_3}), {mu3} * ({PbT2}/{PwT3})**({sigma2})))"""
 		return equation(name,self.qD.doms(),conditions,qD,RHS)
 
 	def zero_profit(self,name,conditions,nn,map_,qD,qD2,qS,PbT,PwT,PwT2,output=False):
@@ -201,8 +201,8 @@ class CET_norm:
 		conditions = self.conditions if conditions is None else conditions
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
-		eta2 = self.a('eta',[(0,1)])
-		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1)]), self.a('map_',[(0,2)])
+		eta2,out2,out3 = self.a('eta',[(0,1)]),self.a('out',[(0,1)]),self.a('out',[(0,2)])
+		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1),(1,0)]), self.a('map_',[(0,2)])
 		PwT,PwT2,PwT3 = self.a('PwT'), self.a('PwT',[(0,1)]), self.a('PwT',[(0,2)])
 		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
@@ -302,8 +302,8 @@ class MNL_out:
 		conditions = self.conditions if conditions is None else conditions
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
-		eta2 = self.a('eta',[(0,1)])
-		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1)]), self.a('map_',[(0,2)])
+		eta2,out2,out3 = self.a('eta',[(0,1)]),self.a('out',[(0,1)]),self.a('out',[(0,2)])
+		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1),(1,0)]), self.a('map_',[(0,2)])
 		PwT,PwT2,PwT3 = self.a('PwT'), self.a('PwT',[(0,1)]), self.a('PwT',[(0,2)])
 		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])

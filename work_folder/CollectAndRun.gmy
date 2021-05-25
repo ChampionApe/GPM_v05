@@ -7,12 +7,12 @@ OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
 ;
 
 # ----------------------------------------------------------------------------------------------------
-#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_CollectFile.gms
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_CollectFile.gms
 # ----------------------------------------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------------------------------------
-#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_functions.gms
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_functions.gms
 # ----------------------------------------------------------------------------------------------------
 
 
@@ -30,136 +30,162 @@ OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
 ;
 
 # ----------------------------------------------------------------------------------------------------
-#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_sets.gms
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_sets.gms
 # ----------------------------------------------------------------------------------------------------
 
 sets
 	alias_set
 	alias_map2
 	n
-	s
 ;
 
 alias(n,nn,nnn);
 
 sets
 	alias_[alias_set,alias_map2]
-	map_all[s,n,nn]
-	inp[s,n]
-	out[s,n]
-	int[s,n]
+	map_all[n,nn]
+	inp[n]
+	out[n]
+	int[n]
 	fg[n]
-	wT[s,n]
-	kno_out[s,n]
-	kno_inp[s,n]
-	map_lower_nests[s,n,nn]
-	kno_lower_nests[s,n]
-	bra_lower_nests[s,n]
-	inp_lower_nests[s,n]
-	out_lower_nests[s,n]
-	kno_no_lower_nests[s,n]
-	bra_o_lower_nests[s,n]
-	bra_no_lower_nests[s,n]
-	map_upper_nest[s,n,nn]
-	kno_upper_nest[s,n]
-	bra_upper_nest[s,n]
-	inp_upper_nest[s,n]
-	out_upper_nest[s,n]
-	kno_no_upper_nest[s,n]
-	bra_o_upper_nest[s,n]
-	bra_no_upper_nest[s,n]
+	wT[n]
+	kno_out[n]
+	kno_inp[n]
+	map_T_inp[n,nn]
+	kno_T_inp[n]
+	bra_T_inp[n]
+	inp_T_inp[n]
+	out_T_inp[n]
+	kno_no_T_inp[n]
+	bra_o_T_inp[n]
+	bra_no_T_inp[n]
+	map_T_out[n,nn]
+	kno_T_out[n]
+	bra_T_out[n]
+	inp_T_out[n]
+	out_T_out[n]
+	bra_o_T_out[n]
+	bra_no_T_out[n]
+	map_C[n,nn]
+	kno_C[n]
+	bra_C[n]
+	inp_C[n]
+	out_C[n]
+	kno_no_C[n]
+	bra_o_C[n]
+	bra_no_C[n]
+	map_E[n,nn]
+	kno_E[n]
+	bra_E[n]
+	inp_E[n]
+	out_E[n]
+	kno_no_E[n]
+	bra_o_E[n]
+	bra_no_E[n]
 	n_out[n]
-	s_prod[s]
-	endo_PbT[s,n]
-	exo_mu[s,n,nn]
+	endo_PbT[n]
+	exo_mu[n,nn]
 ;
-$GDXIN %p_0%
+$GDXIN %A1_0%
 $onMulti
 $load alias_set
 $load alias_map2
 $load n
-$load s
-$load fg
-$load n_out
-$load s_prod
-$load alias_
-$load map_all
 $load inp
 $load out
 $load int
+$load fg
 $load wT
 $load kno_out
 $load kno_inp
-$load map_lower_nests
-$load kno_lower_nests
-$load bra_lower_nests
-$load inp_lower_nests
-$load out_lower_nests
-$load kno_no_lower_nests
-$load bra_o_lower_nests
-$load bra_no_lower_nests
-$load map_upper_nest
-$load kno_upper_nest
-$load bra_upper_nest
-$load inp_upper_nest
-$load out_upper_nest
-$load kno_no_upper_nest
-$load bra_o_upper_nest
-$load bra_no_upper_nest
+$load kno_T_inp
+$load bra_T_inp
+$load inp_T_inp
+$load out_T_inp
+$load kno_no_T_inp
+$load bra_o_T_inp
+$load bra_no_T_inp
+$load kno_T_out
+$load bra_T_out
+$load inp_T_out
+$load out_T_out
+$load bra_o_T_out
+$load bra_no_T_out
+$load kno_C
+$load bra_C
+$load inp_C
+$load out_C
+$load kno_no_C
+$load bra_o_C
+$load bra_no_C
+$load kno_E
+$load bra_E
+$load inp_E
+$load out_E
+$load kno_no_E
+$load bra_o_E
+$load bra_no_E
+$load n_out
 $load endo_PbT
+$load alias_
+$load map_all
+$load map_T_inp
+$load map_T_out
+$load map_C
+$load map_E
 $load exo_mu
 $GDXIN
 $offMulti
 ;
 
 # ----------------------------------------------------------------------------------------------------
-#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_parameters.gms
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_parameters.gms
 # ----------------------------------------------------------------------------------------------------
 
 ;
 
 # ----------------------------------------------------------------------------------------------------
-#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_groups.gms
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_groups.gms
 # ----------------------------------------------------------------------------------------------------
 
 
-# ----------------------------------------p_static_g_tech_endo----------------------------------------
-#  Initialize p_static_g_tech_endo group
+# -------------------------------------------A1_g_tech_endo-------------------------------------------
+#  Initialize A1_g_tech_endo group
 # ----------------------------------------------------------------------------------------------------
 $offlisting
-VARIABLE mu[s,n,nn] "";
-mu.L[s,n,nn]$((map_all[s,n,nn] and not exo_mu[s,n,nn])) = 0;
-VARIABLE markup[s,n] "";
-markup.L[s,n]$(out[s,n]) = 0;
+VARIABLE mu[n,nn] "";
+mu.L[n,nn]$((map_all[n,nn] and not exo_mu[n,nn])) = 0;
+VARIABLE markup[n] "";
+markup.L[n]$(out[n]) = 0;
 $onlisting
 
 
-# -----------------------------------------p_static_g_tech_exo----------------------------------------
-#  Initialize p_static_g_tech_exo group
+# --------------------------------------------A1_g_tech_exo-------------------------------------------
+#  Initialize A1_g_tech_exo group
 # ----------------------------------------------------------------------------------------------------
 $offlisting
-VARIABLE sigma[s,n] "";
-sigma.L[s,n]$(kno_inp[s,n]) = 0;
-VARIABLE eta[s,n] "";
-eta.L[s,n]$(kno_out[s,n]) = 0;
+VARIABLE sigma[n] "";
+sigma.L[n]$(kno_inp[n]) = 0;
+VARIABLE eta[n] "";
+eta.L[n]$(kno_out[n]) = 0;
 $onlisting
 
 
-# -----------------------------------------p_static_g_endovars----------------------------------------
-#  Initialize p_static_g_endovars group
+# --------------------------------------------A1_g_endovars-------------------------------------------
+#  Initialize A1_g_endovars group
 # ----------------------------------------------------------------------------------------------------
 $offlisting
-VARIABLE PwT[s,n] "";
-PwT.L[s,n]$(int[s,n]) = 0;
-VARIABLE qD[s,n] "";
-qD.L[s,n]$(int[s,n]) = 0;
-VARIABLE PbT[s,n] "";
-PbT.L[s,n]$(endo_PbT[s,n]) = 0;
+VARIABLE PwT[n] "";
+PwT.L[n]$(int[n]) = 0;
+VARIABLE qD[n] "";
+qD.L[n]$(int[n]) = 0;
+VARIABLE PbT[n] "";
+PbT.L[n]$(endo_PbT[n]) = 0;
 $onlisting
 
 
-# ----------------------------------------p_static_g_calib_exo----------------------------------------
-#  Initialize p_static_g_calib_exo group
+# -------------------------------------------A1_g_calib_exo-------------------------------------------
+#  Initialize A1_g_calib_exo group
 # ----------------------------------------------------------------------------------------------------
 $offlisting
 VARIABLE Peq[n] "";
@@ -167,23 +193,23 @@ Peq.L[n]$(n_out[n]) = 0;
 $onlisting
 
 
-# -------------------------------------------p_static_g_tech------------------------------------------
-#  Initialize p_static_g_tech group
+# ----------------------------------------------A1_g_tech---------------------------------------------
+#  Initialize A1_g_tech group
 # ----------------------------------------------------------------------------------------------------
 $offlisting
 $onlisting
 
 
-# -----------------------------------------p_static_g_exovars-----------------------------------------
-#  Initialize p_static_g_exovars group
+# --------------------------------------------A1_g_exovars--------------------------------------------
+#  Initialize A1_g_exovars group
 # ----------------------------------------------------------------------------------------------------
 $offlisting
-VARIABLE qS[s,n] "";
-qS.L[s,n]$(out[s,n]) = 0;
-VARIABLE tauS[s,n] "";
-tauS.L[s,n]$(out[s,n]) = 0;
-VARIABLE tauLump[s] "";
-tauLump.L[s]$(s_prod[s]) = 0;
+VARIABLE qS[n] "";
+qS.L[n]$(out[n]) = 0;
+VARIABLE tauS[n] "";
+tauS.L[n]$(out[n]) = 0;
+VARIABLE tauLump "";
+tauLump.L = 0;
 $onlisting
 $offlisting
   
@@ -197,16 +223,16 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    parameter load_PwT[s,n] "";
-    load_PwT[s,n]$((int[s,n])) = 0;
+    parameter load_PwT[n] "";
+    load_PwT[n]$((int[n])) = 0;
   
-    parameter load_qD[s,n] "";
-    load_qD[s,n]$((int[s,n])) = 0;
+    parameter load_qD[n] "";
+    load_qD[n]$((int[n])) = 0;
   
-    parameter load_PbT[s,n] "";
-    load_PbT[s,n]$((endo_PbT[s,n])) = 0;
+    parameter load_PbT[n] "";
+    load_PbT[n]$((endo_PbT[n])) = 0;
   
-  execute_load "%p_0%" 
+  execute_load "%A1_0%" 
 # ----------------------------------------------------------------------------------------------------
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
@@ -216,11 +242,11 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    PwT.l[s,n]$((int[s,n])) = load_PwT[s,n];
+    PwT.l[n]$((int[n])) = load_PwT[n];
   
-    qD.l[s,n]$((int[s,n])) = load_qD[s,n];
+    qD.l[n]$((int[n])) = load_qD[n];
   
-    PbT.l[s,n]$((endo_PbT[s,n])) = load_PbT[s,n];
+    PbT.l[n]$((endo_PbT[n])) = load_PbT[n];
 $onlisting
 ;
 $offlisting
@@ -235,16 +261,16 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    parameter load_qD[s,n] "";
-    load_qD[s,n]$((inp[s,n])) = 0;
+    parameter load_qD[n] "";
+    load_qD[n]$((inp[n])) = 0;
   
-    parameter load_PbT[s,n] "";
-    load_PbT[s,n]$(((out[s,n] and not endo_PbT[s,n]))) = 0;
+    parameter load_PbT[n] "";
+    load_PbT[n]$(((out[n] and not endo_PbT[n]))) = 0;
   
     parameter load_Peq[n] "";
     load_Peq[n]$((n_out[n])) = 0;
   
-  execute_load "%p_0%" 
+  execute_load "%A1_0%" 
 # ----------------------------------------------------------------------------------------------------
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
@@ -254,9 +280,9 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    qD.l[s,n]$((inp[s,n])) = load_qD[s,n];
+    qD.l[n]$((inp[n])) = load_qD[n];
   
-    PbT.l[s,n]$(((out[s,n] and not endo_PbT[s,n]))) = load_PbT[s,n];
+    PbT.l[n]$(((out[n] and not endo_PbT[n]))) = load_PbT[n];
   
     Peq.l[n]$((n_out[n])) = load_Peq[n];
 $onlisting
@@ -273,13 +299,13 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    parameter load_mu[s,n,nn] "";
-    load_mu[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = 0;
+    parameter load_mu[n,nn] "";
+    load_mu[n,nn]$(((map_all[n,nn] and not exo_mu[n,nn]))) = 0;
   
-    parameter load_markup[s,n] "";
-    load_markup[s,n]$((out[s,n])) = 0;
+    parameter load_markup[n] "";
+    load_markup[n]$((out[n])) = 0;
   
-  execute_load "%p_0%" 
+  execute_load "%A1_0%" 
 # ----------------------------------------------------------------------------------------------------
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
@@ -289,9 +315,9 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    mu.fx[s,n,nn]$(((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = load_mu[s,n,nn];
+    mu.fx[n,nn]$(((map_all[n,nn] and not exo_mu[n,nn]))) = load_mu[n,nn];
   
-    markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+    markup.fx[n]$((out[n])) = load_markup[n];
 $onlisting
 ;
 $offlisting
@@ -306,16 +332,16 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    parameter load_sigma[s,n] "";
-    load_sigma[s,n]$((kno_inp[s,n])) = 0;
+    parameter load_sigma[n] "";
+    load_sigma[n]$((kno_inp[n])) = 0;
   
-    parameter load_eta[s,n] "";
-    load_eta[s,n]$((kno_out[s,n])) = 0;
+    parameter load_eta[n] "";
+    load_eta[n]$((kno_out[n])) = 0;
   
-    parameter load_mu[s,n,nn] "";
-    load_mu[s,n,nn]$((exo_mu[s,n,nn])) = 0;
+    parameter load_mu[n,nn] "";
+    load_mu[n,nn]$((exo_mu[n,nn])) = 0;
   
-  execute_load "%p_0%" 
+  execute_load "%A1_0%" 
 # ----------------------------------------------------------------------------------------------------
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
@@ -325,11 +351,11 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
+    sigma.fx[n]$((kno_inp[n])) = load_sigma[n];
   
-    eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
+    eta.fx[n]$((kno_out[n])) = load_eta[n];
   
-    mu.fx[s,n,nn]$((exo_mu[s,n,nn])) = load_mu[s,n,nn];
+    mu.fx[n,nn]$((exo_mu[n,nn])) = load_mu[n,nn];
 $onlisting
 ;
 $offlisting
@@ -344,19 +370,19 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    parameter load_mu[s,n,nn] "";
-    load_mu[s,n,nn]$(((exo_mu[s,n,nn]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn])))) = 0;
+    parameter load_mu[n,nn] "";
+    load_mu[n,nn]$(((exo_mu[n,nn]) or ((map_all[n,nn] and not exo_mu[n,nn])))) = 0;
   
-    parameter load_markup[s,n] "";
-    load_markup[s,n]$((out[s,n])) = 0;
+    parameter load_markup[n] "";
+    load_markup[n]$((out[n])) = 0;
   
-    parameter load_sigma[s,n] "";
-    load_sigma[s,n]$((kno_inp[s,n])) = 0;
+    parameter load_sigma[n] "";
+    load_sigma[n]$((kno_inp[n])) = 0;
   
-    parameter load_eta[s,n] "";
-    load_eta[s,n]$((kno_out[s,n])) = 0;
+    parameter load_eta[n] "";
+    load_eta[n]$((kno_out[n])) = 0;
   
-  execute_load "%p_0%" 
+  execute_load "%A1_0%" 
 # ----------------------------------------------------------------------------------------------------
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
@@ -366,13 +392,13 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    mu.fx[s,n,nn]$(((exo_mu[s,n,nn]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn])))) = load_mu[s,n,nn];
+    mu.fx[n,nn]$(((exo_mu[n,nn]) or ((map_all[n,nn] and not exo_mu[n,nn])))) = load_mu[n,nn];
   
-    markup.fx[s,n]$((out[s,n])) = load_markup[s,n];
+    markup.fx[n]$((out[n])) = load_markup[n];
   
-    sigma.fx[s,n]$((kno_inp[s,n])) = load_sigma[s,n];
+    sigma.fx[n]$((kno_inp[n])) = load_sigma[n];
   
-    eta.fx[s,n]$((kno_out[s,n])) = load_eta[s,n];
+    eta.fx[n]$((kno_out[n])) = load_eta[n];
 $onlisting
 ;
 $offlisting
@@ -387,19 +413,19 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    parameter load_PwT[s,n] "";
-    load_PwT[s,n]$((inp[s,n])) = 0;
+    parameter load_PwT[n] "";
+    load_PwT[n]$((inp[n])) = 0;
   
-    parameter load_qS[s,n] "";
-    load_qS[s,n]$((out[s,n])) = 0;
+    parameter load_qS[n] "";
+    load_qS[n]$((out[n])) = 0;
   
-    parameter load_tauS[s,n] "";
-    load_tauS[s,n]$((out[s,n])) = 0;
+    parameter load_tauS[n] "";
+    load_tauS[n]$((out[n])) = 0;
   
-    parameter load_tauLump[s] "";
-    load_tauLump[s]$((s_prod[s])) = 0;
+    parameter load_tauLump "";
+    load_tauLump$((1)) = 0;
   
-  execute_load "%p_0%" 
+  execute_load "%A1_0%" 
 # ----------------------------------------------------------------------------------------------------
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
@@ -409,73 +435,111 @@ $onlisting
 #  Loop over __load_group
 # ----------------------------------------------------------------------------------------------------
 
-    PwT.fx[s,n]$((inp[s,n])) = load_PwT[s,n];
+    PwT.fx[n]$((inp[n])) = load_PwT[n];
   
-    qS.fx[s,n]$((out[s,n])) = load_qS[s,n];
+    qS.fx[n]$((out[n])) = load_qS[n];
   
-    tauS.fx[s,n]$((out[s,n])) = load_tauS[s,n];
+    tauS.fx[n]$((out[n])) = load_tauS[n];
   
-    tauLump.fx[s]$((s_prod[s])) = load_tauLump[s];
+    tauLump.fx$((1)) = load_tauLump;
 $onlisting
 ;
 ;
 
 # ----------------------------------------------------------------------------------------------------
-#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\p_static_blocks.gms
+#  Import file: C:\Users\sxj477\Documents\GitHub\GPM_v05\work_folder\A1_blocks.gms
 # ----------------------------------------------------------------------------------------------------
 
 
-# --------------------------------------------M_lower_nests-------------------------------------------
-#  Initialize M_lower_nests equation block
+# -----------------------------------------------M_T_inp----------------------------------------------
+#  Initialize M_T_inp equation block
 # ----------------------------------------------------------------------------------------------------
-EQUATION E_zp_out_lower_nests[s,n];
-E_zp_out_lower_nests[s,n]$(out_lower_nests[s,n]).. 	PbT[s,n]*qS[s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[s,nn]*PwT[s,nn]);
-EQUATION E_zp_nout_lower_nests[s,n];
-E_zp_nout_lower_nests[s,n]$(kno_no_lower_nests[s,n]).. 	PwT[s,n]*qD[s,n]  =E=  sum(nn$(map_lower_nests[s,nn,n]), qD[s,nn]*PwT[s,nn]);
-EQUATION E_q_out_lower_nests[s,n];
-E_q_out_lower_nests[s,n]$(bra_o_lower_nests[s,n]).. 	qD[s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PbT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qS[s,nn]);
-EQUATION E_q_nout_lower_nests[s,n];
-E_q_nout_lower_nests[s,n]$(bra_no_lower_nests[s,n]).. 	qD[s,n]  =E=  sum(nn$(map_lower_nests[s,n,nn]), mu[s,n,nn] * (PwT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qD[s,nn]);
+EQUATION E_zp_out_T_inp[n];
+E_zp_out_T_inp[n]$(out_t_inp[n]).. 	PbT[n]*qS[n]  =E=  sum(nn$(map_T_inp[nn,n]), qD[nn]*PwT[nn]);
+EQUATION E_zp_nout_T_inp[n];
+E_zp_nout_T_inp[n]$(kno_no_t_inp[n]).. 	PwT[n]*qD[n]  =E=  sum(nn$(map_T_inp[nn,n]), qD[nn]*PwT[nn]);
+EQUATION E_q_out_T_inp[n];
+E_q_out_T_inp[n]$(bra_o_t_inp[n]).. 	qD[n]  =E=  sum(nn$(map_T_inp[n,nn]), mu[n,nn] * (PbT[nn]/PwT[n])**(sigma[nn]) * qS[nn]);
+EQUATION E_q_nout_T_inp[n];
+E_q_nout_T_inp[n]$(bra_no_t_inp[n]).. 	qD[n]  =E=  sum(nn$(map_T_inp[n,nn]), mu[n,nn] * (PwT[nn]/PwT[n])**(sigma[nn]) * qD[nn]);
 
 # ----------------------------------------------------------------------------------------------------
-#  Define M_lower_nests model
+#  Define M_T_inp model
 # ----------------------------------------------------------------------------------------------------
-Model M_lower_nests /
-E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests
+Model M_T_inp /
+E_zp_out_T_inp, E_zp_nout_T_inp, E_q_out_T_inp, E_q_nout_T_inp
 /;
 
 
-# --------------------------------------------M_upper_nest--------------------------------------------
-#  Initialize M_upper_nest equation block
+# -----------------------------------------------M_T_out----------------------------------------------
+#  Initialize M_T_out equation block
 # ----------------------------------------------------------------------------------------------------
-EQUATION E_zp_out_upper_nest[s,n];
-E_zp_out_upper_nest[s,n]$(out_upper_nest[s,n]).. 	PbT[s,n]*qS[s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[s,nn]*PwT[s,nn]);
-EQUATION E_zp_nout_upper_nest[s,n];
-E_zp_nout_upper_nest[s,n]$(kno_no_upper_nest[s,n]).. 	PwT[s,n]*qD[s,n]  =E=  sum(nn$(map_upper_nest[s,nn,n]), qD[s,nn]*PwT[s,nn]);
-EQUATION E_q_out_upper_nest[s,n];
-E_q_out_upper_nest[s,n]$(bra_o_upper_nest[s,n]).. 	qD[s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PbT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qS[s,nn]);
-EQUATION E_q_nout_upper_nest[s,n];
-E_q_nout_upper_nest[s,n]$(bra_no_upper_nest[s,n]).. 	qD[s,n]  =E=  sum(nn$(map_upper_nest[s,n,nn]), mu[s,n,nn] * (PwT[s,nn]/PwT[s,n])**(sigma[s,nn]) * qD[s,nn]);
+EQUATION E_zp_T_out[n];
+E_zp_T_out[n]$(kno_t_out[n]).. 	PwT[n]*qD[n]  =E=  sum(nn$(map_T_out[nn,n] and out[nn]), qS[nn]*PbT[nn])+sum(nn$(map_T_out[nn,n] and not out[nn]), qD[nn]*PwT[nn]);
+EQUATION E_q_out_T_out[n];
+E_q_out_T_out[n]$(bra_o_t_out[n]).. 	qS[n]  =E=  sum(nn$(map_T_out[n,nn]), mu[n,nn] * (PbT[n]/PwT[nn])**(-eta[nn]) * qD[nn]/(sum(nnn$(map_T_out[nnn,nn] and out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwT[nn])**(-eta[nn]))+sum(nnn$(map_T_out[nnn,nn] and not out[nnn]), mu[nnn,nn]*(PwT[nnn]/PwT[nn])**(-eta[nn]))));
+EQUATION E_q_nout_T_out[n];
+E_q_nout_T_out[n]$(bra_no_t_out[n]).. 	qD[n]  =E=  sum(nn$(map_T_out[n,nn]), mu[n,nn] * (PwT[n]/PwT[nn])**(-eta[nn]) * qD[nn]/(sum(nnn$(map_T_out[nnn,nn] and out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwT[nn])**(-eta[nn]))+sum(nnn$(map_T_out[nnn,nn] and not out[nnn]), mu[nnn,nn]*(PwT[nnn]/PwT[nn])**(-eta[nn]))));
 
 # ----------------------------------------------------------------------------------------------------
-#  Define M_upper_nest model
+#  Define M_T_out model
 # ----------------------------------------------------------------------------------------------------
-Model M_upper_nest /
-E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest
+Model M_T_out /
+E_zp_T_out, E_q_out_T_out, E_q_nout_T_out
 /;
 
 
-# --------------------------------------------M_p_static_pw-------------------------------------------
-#  Initialize M_p_static_pw equation block
+# -------------------------------------------------M_C------------------------------------------------
+#  Initialize M_C equation block
 # ----------------------------------------------------------------------------------------------------
-EQUATION E_pw_p_static[s,n];
-E_pw_p_static[s,n]$(out[s,n]).. 	Peq[n]  =E=  (1+markup[s,n])*(PbT[s,n]*(1+tauLump[s]/sum(nn$(out[s,nn]), qS[s,nn]*PbT[s,nn]))+tauS[s,n]+0);
+EQUATION E_zp_out_C[n];
+E_zp_out_C[n]$(out_c[n]).. 	PbT[n]*qS[n]  =E=  sum(nn$(map_C[nn,n]), qD[nn]*PwT[nn]);
+EQUATION E_zp_nout_C[n];
+E_zp_nout_C[n]$(kno_no_c[n]).. 	PwT[n]*qD[n]  =E=  sum(nn$(map_C[nn,n]), qD[nn]*PwT[nn]);
+EQUATION E_q_out_C[n];
+E_q_out_C[n]$(bra_o_c[n]).. 	qD[n]  =E=  sum(nn$(map_C[n,nn]), mu[n,nn] * exp((PbT[nn]-PwT[n])*sigma[nn]) * qS[nn]/ sum(nnn$(map_C[nnn,nn]), mu[nnn,nn]*exp((PbT[nn]-PwT[nnn])*sigma[nn])));
+EQUATION E_q_nout_C[n];
+E_q_nout_C[n]$(bra_no_c[n]).. 	qD[n]  =E=  sum(nn$(map_C[n,nn]), mu[n,nn] * exp((PwT[nn]-PwT[n])*sigma[nn]) * qD[nn]/ sum(nnn$(map_C[nnn,nn]), mu[nnn,nn]*exp((PwT[nn]-PwT[nnn])*sigma[nn])));
 
 # ----------------------------------------------------------------------------------------------------
-#  Define M_p_static_pw model
+#  Define M_C model
 # ----------------------------------------------------------------------------------------------------
-Model M_p_static_pw /
-E_pw_p_static
+Model M_C /
+E_zp_out_C, E_zp_nout_C, E_q_out_C, E_q_nout_C
+/;
+
+
+# -------------------------------------------------M_E------------------------------------------------
+#  Initialize M_E equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_zp_out_E[n];
+E_zp_out_E[n]$(out_e[n]).. 	PbT[n]*qS[n]  =E=  sum(nn$(map_E[nn,n]), qD[nn]*PwT[nn]);
+EQUATION E_zp_nout_E[n];
+E_zp_nout_E[n]$(kno_no_e[n]).. 	PwT[n]*qD[n]  =E=  sum(nn$(map_E[nn,n]), qD[nn]*PwT[nn]);
+EQUATION E_q_out_E[n];
+E_q_out_E[n]$(bra_o_e[n]).. 	qD[n]  =E=  sum(nn$(map_E[n,nn]), mu[n,nn] * (PbT[nn]/PwT[n])**(sigma[nn]) * qS[nn] / sum(nnn$(map_E[nnn,nn]), mu[nnn,nn] * (PbT[nn]/PwT[nnn])**(sigma[nn])));
+EQUATION E_q_nout_E[n];
+E_q_nout_E[n]$(bra_no_e[n]).. 	qD[n]  =E=  sum(nn$(map_E[n,nn]), mu[n,nn] * (PwT[nn]/PwT[n])**(sigma[nn]) * qD[nn] / sum(nnn$(map_E[nnn,nn]), mu[nnn,nn] * (PwT[nn]/PwT[nnn])**(sigma[nn])));
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_E model
+# ----------------------------------------------------------------------------------------------------
+Model M_E /
+E_zp_out_E, E_zp_nout_E, E_q_out_E, E_q_nout_E
+/;
+
+
+# -----------------------------------------------M_A1_pw----------------------------------------------
+#  Initialize M_A1_pw equation block
+# ----------------------------------------------------------------------------------------------------
+EQUATION E_pw_A1[n];
+E_pw_A1[n]$(out[n]).. 	Peq[n]  =E=  (1+markup[n])*(PbT[n]*(1+tauLump/sum(nn$(out[nn]), qS[nn]*PbT[nn]))+tauS[n]+0);
+
+# ----------------------------------------------------------------------------------------------------
+#  Define M_A1_pw model
+# ----------------------------------------------------------------------------------------------------
+Model M_A1_pw /
+E_pw_A1
 /;
 
 ;
@@ -486,40 +550,40 @@ E_pw_p_static
 # ----------------------------------------------------------------------------------------------------
 
 
-# ----------------------------------------------------------------------------------------------------$FIX p_static_g_tech, p_static_g_exovars;
+# ----------------------------------------------------------------------------------------------------$FIX A1_g_tech, A1_g_exovars;
 # ----------------------------------------------------------------------------------------------------
 $offlisting
-mu.FX[s,n,nn]$((exo_mu[s,n,nn]) or ((map_all[s,n,nn] and not exo_mu[s,n,nn]))) = mu.L[s,n,nn];
-markup.FX[s,n]$(out[s,n]) = markup.L[s,n];
-sigma.FX[s,n]$(kno_inp[s,n]) = sigma.L[s,n];
-eta.FX[s,n]$(kno_out[s,n]) = eta.L[s,n];
-PwT.FX[s,n]$(inp[s,n]) = PwT.L[s,n];
-qS.FX[s,n]$(out[s,n]) = qS.L[s,n];
-tauS.FX[s,n]$(out[s,n]) = tauS.L[s,n];
-tauLump.FX[s]$(s_prod[s]) = tauLump.L[s];
+mu.FX[n,nn]$((exo_mu[n,nn]) or ((map_all[n,nn] and not exo_mu[n,nn]))) = mu.L[n,nn];
+markup.FX[n]$(out[n]) = markup.L[n];
+sigma.FX[n]$(kno_inp[n]) = sigma.L[n];
+eta.FX[n]$(kno_out[n]) = eta.L[n];
+PwT.FX[n]$(inp[n]) = PwT.L[n];
+qS.FX[n]$(out[n]) = qS.L[n];
+tauS.FX[n]$(out[n]) = tauS.L[n];
+tauLump.FX = tauLump.L;
 $onlisting
 
-# ----------------------------------------------------------------------------------------------------$UNFIX p_static_g_endovars, p_static_g_calib_exo;
+# ----------------------------------------------------------------------------------------------------$UNFIX A1_g_endovars, A1_g_calib_exo;
 # ----------------------------------------------------------------------------------------------------
 $offlisting
-PwT.lo[s,n]$(int[s,n]) = -inf;
-PwT.up[s,n]$(int[s,n]) = inf;
-qD.lo[s,n]$((inp[s,n]) or (int[s,n])) = -inf;
-qD.up[s,n]$((inp[s,n]) or (int[s,n])) = inf;
-PbT.lo[s,n]$(((out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n])) = -inf;
-PbT.up[s,n]$(((out[s,n] and not endo_PbT[s,n])) or (endo_PbT[s,n])) = inf;
+PwT.lo[n]$(int[n]) = -inf;
+PwT.up[n]$(int[n]) = inf;
+qD.lo[n]$((inp[n]) or (int[n])) = -inf;
+qD.up[n]$((inp[n]) or (int[n])) = inf;
+PbT.lo[n]$(((out[n] and not endo_PbT[n])) or (endo_PbT[n])) = -inf;
+PbT.up[n]$(((out[n] and not endo_PbT[n])) or (endo_PbT[n])) = inf;
 Peq.lo[n]$(n_out[n]) = -inf;
 Peq.up[n]$(n_out[n]) = inf;
 $onlisting
 
 # ----------------------------------------------------------------------------------------------------
-#  Define p_static_B model
+#  Define A1_B model
 # ----------------------------------------------------------------------------------------------------
-Model p_static_B /
-E_zp_out_upper_nest, E_zp_nout_upper_nest, E_q_out_upper_nest, E_q_nout_upper_nest, E_pw_p_static, E_zp_out_lower_nests, E_zp_nout_lower_nests, E_q_out_lower_nests, E_q_nout_lower_nests
+Model A1_B /
+E_zp_out_E, E_zp_nout_E, E_q_out_E, E_q_nout_E, E_zp_out_T_inp, E_zp_nout_T_inp, E_q_out_T_inp, E_q_nout_T_inp, E_zp_T_out, E_q_out_T_out, E_q_nout_T_out, E_pw_A1, E_zp_out_C, E_zp_nout_C, E_q_out_C, E_q_nout_C
 /;
 
-scalars p_static_B_modelstat, p_static_B_solvestat;
-solve p_static_B using CNS;
-p_static_B_modelstat = p_static_B.modelstat; p_static_B_solvestat = p_static_B.solvestat;
+scalars A1_B_modelstat, A1_B_solvestat;
+solve A1_B using CNS;
+A1_B_modelstat = A1_B.modelstat; A1_B_solvestat = A1_B.solvestat;
 ;
