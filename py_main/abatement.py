@@ -2,7 +2,7 @@ from gmspython import *
 import gams_production,global_settings
 
 class abate(gmspython):
-	def __init__(self,tech_db,nt=None,pickle_path=None,work_folder=None,kwargs_ns={},**kwargs_gs):
+	def __init__(self,tech_db=None,nt=None,pickle_path=None,work_folder=None,kwargs_ns={},**kwargs_gs):
 		databases = None if nt is None else [nt.database.copy()]
 		super().__init__(module='pr_static',pickle_path=pickle_path,work_folder=work_folder,databases=databases,**kwargs_gs)
 		if pickle_path is None:
