@@ -2,20 +2,21 @@ from gmspython import *
 import gams_production,global_settings
 
 class abate(gmspython):
-	def __init__(self,nt=None,pickle_path=None,work_folder=None,pw='pricewedge',kwargs_ns={},**kwargs_gs):
+	def __init__(self,tech_db,nt=None,pickle_path=None,work_folder=None,kwargs_ns={},**kwargs_gs):
 		databases = None if nt is None else [nt.database.copy()]
 		super().__init__(module='pr_static',pickle_path=pickle_path,work_folder=work_folder,databases=databases,**kwargs_gs)
 		if pickle_path is None:
 			self.version = nt.version
-			self.ns = {**self.ns, **self.namespace_global_sets(nt,kwargs_ns), **self.namespace_global_variables(kwargs_ns)}
+			self.ns = {**self.ns, **self.namespace_global_sets(nt,tech_db.symbols,kwargs_ns), **self.namespace_global_variables(kwargs_ns)}
 			self.ns_local = {**self.ns_local, **self.namespace_local_sets(nt)}
-			self.pw = getattr(gams_production,pw)()
+			self.simplesum = getattr(gams_production,"simplesum")()
 			for tree in nt.trees.values():
 				DataBase.GPM_database.merge_dbs(self.model.database,tree.database,'first')
+			DataBase.GPM_database.merge_dbs(self.model.database, tech_db, 'first')
 			self.add_default_subsets()
 
 	# ---			1: Retrieve namespace from nesting trees		--- #
-	def namespace_global_sets(self,nt,kwargs):
+	def namespace_global_sets(self,nt,tech_db_syms,kwargs):
 		""" retrieve attributes from global tree"""
 		std_sets = {setname: getattr(nt,setname) for setname in ('n','nn','nnn','inp','out','int','wT','map_all','kno_out','kno_inp','s') if setname in nt.__dict__}
 		self.sector = True if hasattr(nt,'s') else False
@@ -23,6 +24,8 @@ class abate(gmspython):
 		std_sets['exo_mu'] = df('exo_mu',kwargs)
 		std_sets['endo_PbT'] = df('endo_PbT',kwargs)
 		std_sets['n_out'] = df('n_out',kwargs)
+		for sym in tech_db_syms:
+			std_sets[sym] = sym
 		if self.sector is not False:
 			std_sets['s_prod'] = df('s_prod',kwargs)
 		return std_sets
@@ -38,7 +41,7 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PwT','PbT','qS','qD','mu','sigma','eta','Peq','markup','tauS','tauLump')
+		return ('PwT','PbT','qS','qD','mu','sigma','eta','Peq','markup','tauS','tauLump','qsumU','qsumX')
 
 	def namespace_local_sets(self,nt):
 		"""create namespace for each tree, by copying attributes."""
@@ -84,6 +87,10 @@ class abate(gmspython):
 			return pd.Series(0, index = self.get('out'), name = self.n(var))
 		elif var == 'tauLump':
 			return 0 if self.sector is False else pd.Series(0, index = self.get('s_prod'), name = self.n(var))
+		elif var == 'qsumU':
+			return pd.Series(10, index = self.get('sumUaggs'), name = self.n(var))
+		elif var == 'qsumX':
+			return pd.Series(10, index = self.get('sumXaggs'), name = self.n(var))
 
 	def add_calibration_subsets(self):
 		(self.model.database[self.ns['endo_PbT']],self.model.database[self.ns['exo_mu']]) = self.calib_subsets
@@ -110,58 +117,68 @@ class abate(gmspython):
 	# ---			3: Define groups	 		--- #
 
 	def group_conditions(self,group):
-		if group == 'g_tech_exo':
-			return [{'sigma': self.g('kno_inp'), 'eta': self.g('kno_out'), 'mu': self.g('exo_mu')}]
-		elif group == 'g_tech_endo':
-			return [{'mu': {'and': [self.g('map_all'), {'not': self.g('exo_mu')}]}, 'markup': self.g('out')}]
-		elif group == 'g_endovars':
-			return [{'PwT': self.g('int'), 'qD': self.g('int'), 'PbT': self.g('endo_PbT')}]
-		elif group == 'g_exovars':
-			return [{'PwT': self.g('inp'), 'qS': self.g('out'),'tauS': self.g('out'), 'tauLump': None if self.sector is False else self.g('s_prod')}]
-		elif group == 'g_calib_exo':
-			return [{'qD': self.g('inp'), 'PbT': {'and': [self.g('out'), {'not': self.g('endo_PbT')}]}, 'Peq': self.g('n_out')}]
-		elif group == 'g_tech':
-			return ['g_tech_endo','g_tech_exo']
-		elif group == "g_base_inp":
-			return ["all mus from baseline techs, input"]
-		 
+		#PARAMETERS
+		if group == 'g_params_alwaysexo':
+			return [{'sigma': [{"and": [self.g('kno_inp'), {"not":self.g("tech_endoincalib_sigma")}]}], 'mu':self.g("params_alwaysexo_mu"), 'eta': self.g('kno_out')}]
+			# return [{'sigma': self.g('kno_inp'), 'eta': self.g('kno_out'), 'mu': self.g('exo_mu')}]
+		elif group == 'g_params_endoincalib':
+			return [{"sigma": self.g("tech_endoincalib_sigma"), "mu":self.g("tech_endoincalib_mu")}, {'markup': self.g('out')}]
+		#PRICES
+		elif group == "g_prices_alwaysendo":
+			return [{'PwT': self.g('int'), 'PbT': self.g('endo_PbT')}]
+		elif group == 'g_prices_alwaysexo':
+			return [{'PwT': self.g('inp'), 'tauS': self.g('out'), 'tauLump': None if self.sector is False else self.g('s_prod')}]
+		elif group == 'g_prices_exoincalib':
+			return [{'PbT': {'and': [self.g('out'), {'not': self.g('endo_PbT')}]}, 'Peq': self.g('n_out')}]
+		#QUANTITIES
+		elif group == 'g_quants_alwaysendo':
+			return [{'qD': [{"and":[self.g('int'), self.g("inp"), {"not":self.g("endovars_exoincalib_C")}]}]}]
+		elif group == 'g_quants_alwaysexo':
+			return [{'qS': self.g('out')}]
+		elif group == 'g_quants_exoincalib':
+			return [{"qD":self.g("endovars_exoincalib_C"), "qsumU":self.g("sumUaggs"), "qsumX":self.g("sumXaggs")}]
+		#MINIMIZATION OBJECTS
+		elif group == "g_minobj":
+			[{"obj":None, "obj_vals_sigma":self.g("obj_vals_sigma"), "obj_vals_mu":self.g("obj_vals_mu")}]
+
 	@property
 	def exo_groups(self):
 		""" Collect exogenous groups """
 		n = self.model.settings.name+'_'
 		if self.state=='B':
-			return {n+g: self.add_group(g,n=n) for g in ('g_tech','g_exovars')}
+			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_params_endoincalib')}
 		elif self.state in ('SC','DC'):
-			return {n+g: self.add_group(g,n=n) for g in ('g_tech_exo','g_exovars','g_calib_exo')}
+			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_prices_exoincalib', 'g_quants_exoincalib')}
 
 	@property
 	def endo_groups(self):
 		""" Collect endogenous groups """
 		n = self.model.settings.name+'_'
 		if self.state=='B':
-			return {n+g: self.add_group(g,n=n) for g in ('g_endovars','g_calib_exo')}
+			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_prices_exoincalib', 'g_quants_exoincalib')}
 		elif self.state in ('SC','DC'):
-			return {n+g: self.add_group(g,n=n) for g in ('g_endovars','g_tech_endo')}
+			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_params_endoincalib')}
 
-	@property 
-	def sub_groups(self):
-		""" Collect groups that are subgroups of other groups; these are not written to list of exogenous/endogenous groups. """
-		n = self.model.settings.name+'_'
-		return {n+g: self.add_group(g,n=n) for g in ('g_tech_endo','g_tech_exo')}
+	# @property 
+	# def sub_groups(self):
+	# 	""" Collect groups that are subgroups of other groups; these are not written to list of exogenous/endogenous groups. """
+	# 	n = self.model.settings.name+'_'
+	# 	return {n+g: self.add_group(g,n=n) for g in ('g_tech_endo','g_tech_exo')}
 
 	# --- 		4: Define blocks 		--- #
 	@property
 	def blocktext(self):
-		return {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},**{f"M_{self.model.settings.name}_pw":self.init_pw()}}
+		return {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local}, **{f"M_{self.model.settings.name}_simplesum":self.init_simplesum()}}
 
 	@property
 	def mblocks(self):
-		return set([f"M_{tree}" for tree in self.ns_local]+[f"M_{self.model.settings.name}_pw"])
+		return set([f"M_{tree}" for tree in self.ns_local] + [f"M_{self.model.settings.name}_simplesum"])
+		# return set([f"M_{tree}" for tree in self.ns_local]+[f"M_{self.model.settings.name}_pw"])
 
-	def init_pw(self):
-		self.pw.add_symbols(self.model.database,self.ns)
-		self.pw.add_conditions(self.model.database)
-		return self.pw.run(self.model.settings.name)
+	def init_simplesum(self):
+		self.simplesum.add_symbols(self.model.database, self.ns)
+		self.simplesum.add_conditions()
+		return self.simplesum.run()
 
 	def eqtext(self,tree_name):
 		tree = self.ns_local[tree_name]

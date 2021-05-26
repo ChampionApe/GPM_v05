@@ -1,41 +1,50 @@
-$GROUP Abatement_g_tech_endo
-mu[n,nn]$((map_all[n,nn] and not exo_mu[n,nn])) ""
-markup[n]$(out[n]) ""
-;
-
-$GROUP Abatement_g_tech_exo
-sigma[n]$(kno_inp[n]) ""
-eta[n]$(kno_out[n]) ""
-mu[n,nn]$(exo_mu[n,nn]) ""
-;
-
-$GROUP Abatement_g_endovars
+$GROUP Abatement_g_prices_alwaysendo
 PwT[n]$(int[n]) ""
-qD[n]$(int[n]) ""
 PbT[n]$(endo_PbT[n]) ""
 ;
 
-$GROUP Abatement_g_calib_exo
-qD[n]$(inp[n]) ""
+$GROUP Abatement_g_quants_alwaysendo
+qD[n] ""
+;
+
+$GROUP Abatement_g_prices_exoincalib
 PbT[n]$((out[n] and not endo_PbT[n])) ""
 Peq[n]$(n_out[n]) ""
 ;
 
-$GROUP Abatement_g_tech
-Abatement_g_tech_endo
-Abatement_g_tech_exo
+$GROUP Abatement_g_quants_exoincalib
+qD[n]$(endovars_exoincalib_C[n]) ""
+qsumU[n]$(sumUaggs[n]) ""
+qsumX[n]$(sumXaggs[n]) ""
 ;
 
-$GROUP Abatement_g_exovars
+$GROUP Abatement_g_params_alwaysexo
+sigma[n] ""
+mu[n,nn]$(params_alwaysexo_mu[n,nn]) ""
+eta[n]$(kno_out[n]) ""
+;
+
+$GROUP Abatement_g_prices_alwaysexo
 PwT[n]$(inp[n]) ""
-qS[n]$(out[n]) ""
 tauS[n]$(out[n]) ""
 tauLump ""
 ;
 
-@load_level(Abatement_g_endovars,%qmark%%Abatement_0%");
-@load_level(Abatement_g_calib_exo,%qmark%%Abatement_0%");
-@load_fixed(Abatement_g_tech_endo,%qmark%%Abatement_0%");
-@load_fixed(Abatement_g_tech_exo,%qmark%%Abatement_0%");
-@load_fixed(Abatement_g_tech,%qmark%%Abatement_0%");
-@load_fixed(Abatement_g_exovars,%qmark%%Abatement_0%");
+$GROUP Abatement_g_quants_alwaysexo
+qS[n]$(out[n]) ""
+;
+
+$GROUP Abatement_g_params_endoincalib
+sigma[n]$(tech_endoincalib_sigma[n]) ""
+mu[n,nn]$(tech_endoincalib_mu[n,nn]) ""
+markup[n]$(out[n]) ""
+;
+
+@load_level(Abatement_g_prices_alwaysendo,%qmark%%Abatement_0%");
+@load_level(Abatement_g_quants_alwaysendo,%qmark%%Abatement_0%");
+@load_level(Abatement_g_prices_exoincalib,%qmark%%Abatement_0%");
+@load_level(Abatement_g_quants_exoincalib,%qmark%%Abatement_0%");
+@load_fixed(Abatement_g_params_alwaysexo,%qmark%%Abatement_0%");
+@load_fixed(Abatement_g_prices_alwaysexo,%qmark%%Abatement_0%");
+@load_fixed(Abatement_g_quants_alwaysexo,%qmark%%Abatement_0%");
+@load_fixed(Abatement_g_params_endoincalib,%qmark%%Abatement_0%");

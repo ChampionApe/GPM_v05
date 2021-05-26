@@ -106,7 +106,7 @@ class CES_norm:
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
 		sigma2 = self.a('sigma',[(0,1)])
-		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1)]), self.a('map_',[(0,2)])
+		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1), (1, 0)]), self.a('map_',[(0,2)])
 		PwT,PwT2,PwT3 = self.a('PwT'), self.a('PwT',[(0,1)]), self.a('PwT',[(0,2)])
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
@@ -120,9 +120,9 @@ class CES_norm:
 	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,sigma2,PwT,PwT2,PwT3,PbT2,qD,qD2,qS2,output=False):
 		""" ces demand """
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PwT2}/{PwT})**({sigma2}) * {qD2} / sum({nnn}$({map_3}), {mu_3} * ({PwT2}/{PwT3})**({sigma2})))"""
+			RHS = f"""sum({nn}$({map_}), {mu} * ({PwT2}/{PwT})**({sigma2}) * {qD2} / sum({nnn}$({map_3}), {mu3} * ({PwT2}/{PwT3})**({sigma2})))"""
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT2}/{PwT})**({sigma2}) * {qS2} / sum({nnn}$({map_3}), {mu_3} * ({PbT2}/{PwT3})**({sigma2})))"""
+			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT2}/{PwT})**({sigma2}) * {qS2} / sum({nnn}$({map_3}), {mu3} * ({PbT2}/{PwT3})**({sigma2})))"""
 		return equation(name,self.qD.doms(),conditions,qD,RHS)
 
 	def zero_profit(self,name,conditions,nn,map_,qD,qD2,qS,PbT,PwT,PwT2,output=False):
@@ -199,10 +199,11 @@ class CET_norm:
 
 	def run(self,name,conditions=None):
 		conditions = self.conditions if conditions is None else conditions
+		out2,out3 = self.a('out',[(0,1)]), self.a('out',[(0,2)])
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
 		eta2 = self.a('eta',[(0,1)])
-		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1)]), self.a('map_',[(0,2)])
+		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1), (1,0)]), self.a('map_',[(0,2)])
 		PwT,PwT2,PwT3 = self.a('PwT'), self.a('PwT',[(0,1)]), self.a('PwT',[(0,2)])
 		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
@@ -223,6 +224,7 @@ class CET_norm:
 	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwT,PwT2):
 		RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwT2})"""
 		return equation(name,self.PwT.doms(),conditions,f"{PwT}*{qD}",RHS)
+
 
 class MNL:
 	""" collection of price indices / demand systems for MNL nests """
@@ -324,6 +326,40 @@ class MNL_out:
 	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwT,PwT2):
 		RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwT2})"""
 		return equation(name,self.PwT.doms(),conditions,f"{PwT}*{qD}",RHS)
+
+class simplesum:
+	""" Collection of equations that define a variable as the simple sum of others """
+	def __init__(self):
+		pass
+
+	def add_symbols(self, db, ns):
+		[setattr(self,sym,db[ns[sym]]) for sym in ('n', 'sumUaggs', 'sumU2U', 'qsumU', 'sumXaggs', 'sumX2X', 'qsumX', 'qD')]
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
+		
+
+	def add_conditions(self):
+		self.conditions = {'sumUaggs': self.sumUaggs.write(), 'sumXaggs': self.sumXaggs.write()}
+
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+
+	def run(self):
+		nn = self.a("n", [(0, 1)])
+		sumUaggs, sumXaggs = "sumUaggs", "sumXaggs"
+		sumU2U, sumX2X = self.a("sumU2U"), self.a("sumX2X")
+		qsumU, qsumX = self.a("qsumU"), self.a("qsumX")
+		qD2 = self.a("qD", [(0, 1)])
+		name_sumU = "E_sumU"
+		name_sumX = "E_sumX"
+		text = self.simplesum(name_sumU, self.conditions["sumUaggs"], sumUaggs, sumU2U, qsumU, qD2, nn) + '\n\t'
+		text += self.simplesum(name_sumX, self.conditions["sumXaggs"], sumXaggs, sumX2X, qsumX, qD2, nn)
+		return text
+
+	def simplesum(self, name, conditions, agg, agg2ind, qagg, qD2, nn):
+		LHS = f"{qagg}"
+		RHS = f"sum({nn}$({agg2ind}), {qD2})"
+		return equation(name, getattr(self, agg).doms(), conditions, LHS, RHS)
 
 class pricewedge:
 	def __init__(self,**kwargs):

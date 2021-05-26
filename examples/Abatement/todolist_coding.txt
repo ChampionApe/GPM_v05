@@ -1,0 +1,2 @@
+- Opdater GPM_database.update_sets_from_vars således at den ikke sletter aliaser når clean_up=True. Dvs. undgå at den fjerne eksempelvis self.alias_dict.
+

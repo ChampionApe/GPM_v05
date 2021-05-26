@@ -47,14 +47,21 @@ sets
 	kno_no_ID_TX[n]
 	bra_o_ID_TX[n]
 	bra_no_ID_TX[n]
-	map_ID_CbaseX[n,nn]
-	kno_ID_CbaseX[n]
-	bra_ID_CbaseX[n]
-	inp_ID_CbaseX[n]
-	out_ID_CbaseX[n]
-	kno_no_ID_CbaseX[n]
-	bra_o_ID_CbaseX[n]
-	bra_no_ID_CbaseX[n]
+	map_ID_IOCU[n,nn]
+	kno_ID_IOCU[n]
+	bra_ID_IOCU[n]
+	inp_ID_IOCU[n]
+	out_ID_IOCU[n]
+	bra_o_ID_IOCU[n]
+	bra_no_ID_IOCU[n]
+	map_ID_IOX[n,nn]
+	kno_ID_IOX[n]
+	bra_ID_IOX[n]
+	inp_ID_IOX[n]
+	out_ID_IOX[n]
+	kno_no_ID_IOX[n]
+	bra_o_ID_IOX[n]
+	bra_no_ID_IOX[n]
 	map_ID_UbaseX[n,nn]
 	kno_ID_UbaseX[n]
 	bra_ID_UbaseX[n]
@@ -86,6 +93,16 @@ sets
 	kno_no_EOP_TX[n]
 	bra_o_EOP_TX[n]
 	bra_no_EOP_TX[n]
+	tech_endoincalib_sigma[n]
+	tech_endoincalib_mu[n,nn]
+	params_alwaysexo_mu[n,nn]
+	endovars_exoincalib_sumU[n,nn]
+	endovars_exoincalib_sumX[n,nn]
+	endovars_exoincalib_C[n]
+	sumUaggs[n]
+	sumU2U[n,nn]
+	sumXaggs[n]
+	sumX2X[n,nn]
 	n_out[n]
 	endo_PbT[n]
 	exo_mu[n,nn]
@@ -130,13 +147,19 @@ $load out_ID_TX
 $load kno_no_ID_TX
 $load bra_o_ID_TX
 $load bra_no_ID_TX
-$load kno_ID_CbaseX
-$load bra_ID_CbaseX
-$load inp_ID_CbaseX
-$load out_ID_CbaseX
-$load kno_no_ID_CbaseX
-$load bra_o_ID_CbaseX
-$load bra_no_ID_CbaseX
+$load kno_ID_IOCU
+$load bra_ID_IOCU
+$load inp_ID_IOCU
+$load out_ID_IOCU
+$load bra_o_ID_IOCU
+$load bra_no_ID_IOCU
+$load kno_ID_IOX
+$load bra_ID_IOX
+$load inp_ID_IOX
+$load out_ID_IOX
+$load kno_no_ID_IOX
+$load bra_o_ID_IOX
+$load bra_no_ID_IOX
 $load kno_ID_UbaseX
 $load bra_ID_UbaseX
 $load inp_ID_UbaseX
@@ -164,6 +187,10 @@ $load out_EOP_TX
 $load kno_no_EOP_TX
 $load bra_o_EOP_TX
 $load bra_no_EOP_TX
+$load tech_endoincalib_sigma
+$load endovars_exoincalib_C
+$load sumUaggs
+$load sumXaggs
 $load n_out
 $load endo_PbT
 $load alias_
@@ -172,11 +199,18 @@ $load map_ID_EC
 $load map_ID_CU
 $load map_ID_TU
 $load map_ID_TX
-$load map_ID_CbaseX
+$load map_ID_IOCU
+$load map_ID_IOX
 $load map_ID_UbaseX
 $load map_EOP_CU
 $load map_EOP_TU
 $load map_EOP_TX
+$load tech_endoincalib_mu
+$load params_alwaysexo_mu
+$load endovars_exoincalib_sumU
+$load endovars_exoincalib_sumX
+$load sumU2U
+$load sumX2X
 $load exo_mu
 $GDXIN
 $offMulti
