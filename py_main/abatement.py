@@ -1,5 +1,5 @@
 from gmspython import *
-import gams_production,global_settings
+import gams_abatement,global_settings
 
 class abate(gmspython):
 	def __init__(self,tech_db=None,nt=None,pickle_path=None,work_folder=None,kwargs_ns={},**kwargs_gs):
@@ -9,7 +9,8 @@ class abate(gmspython):
 			self.version = nt.version
 			self.ns = {**self.ns, **self.namespace_global_sets(nt,tech_db.symbols,kwargs_ns), **self.namespace_global_variables(kwargs_ns)}
 			self.ns_local = {**self.ns_local, **self.namespace_local_sets(nt)}
-			self.simplesum = getattr(gams_production,"simplesum")()
+			self.simplesum = getattr(gams_abatement,"simplesum")()
+			self.minimize_object = getattr(gams_abatement,"minimize_object")()
 			for tree in nt.trees.values():
 				DataBase.GPM_database.merge_dbs(self.model.database,tree.database,'first')
 			DataBase.GPM_database.merge_dbs(self.model.database, tech_db, 'first')
@@ -63,6 +64,8 @@ class abate(gmspython):
 					self.model.database[self.ns[var]] = self.default_var_series(var)
 		if self.ns['exo_mu'] not in self.model.database.symbols:
 			self.add_calibration_subsets()
+		if self.state == 'calibrate':
+			self.model.settings.set_conf('solve',self.add_solve + "\n")
 
 	def default_var_series(self,var):
 		if var=='PbT':
@@ -138,8 +141,10 @@ class abate(gmspython):
 		elif group == 'g_quants_exoincalib':
 			return [{"qD":self.g("endovars_exoincalib_C"), "qsumU":self.g("sumUaggs"), "qsumX":self.g("sumXaggs")}]
 		#MINIMIZATION OBJECTS
-		elif group == "g_minobj":
-			[{"obj":None, "obj_vals_sigma":self.g("obj_vals_sigma"), "obj_vals_mu":self.g("obj_vals_mu")}]
+		elif group == "g_minobj_exoincalib":
+			return [{"weight_mu":None, "weight_sigma":None, "minobj_sigma":self.g("minobj_sigma_subset"), "minobj_mu":self.g("minobj_mu_subset")}]
+		elif group == "g_minobj_endoincalib":
+			return [{"minobj":None}]
 
 	@property
 	def exo_groups(self):
@@ -147,8 +152,8 @@ class abate(gmspython):
 		n = self.model.settings.name+'_'
 		if self.state=='B':
 			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_params_endoincalib')}
-		elif self.state in ('SC','DC'):
-			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_prices_exoincalib', 'g_quants_exoincalib')}
+		elif self.state in ('calibrate','SC','DC'):
+			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_prices_exoincalib', 'g_quants_exoincalib', 'g_minobj_exoincalib')}
 
 	@property
 	def endo_groups(self):
@@ -156,8 +161,15 @@ class abate(gmspython):
 		n = self.model.settings.name+'_'
 		if self.state=='B':
 			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_prices_exoincalib', 'g_quants_exoincalib')}
-		elif self.state in ('SC','DC'):
-			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_params_endoincalib')}
+		elif self.state in ('calibrate', 'SC','DC'):
+			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_params_endoincalib', 'g_minobj_endoincalib')}
+
+	@property
+	def add_solve(self):
+		if self.state == 'calibrate':
+			return f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
+		else:
+			return None
 
 	# @property 
 	# def sub_groups(self):
@@ -168,21 +180,31 @@ class abate(gmspython):
 	# --- 		4: Define blocks 		--- #
 	@property
 	def blocktext(self):
-		return {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local}, **{f"M_{self.model.settings.name}_simplesum":self.init_simplesum()}}
+		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local}, **{f"M_{self.model.settings.name}_simplesum":self.init_simplesum()}}
+		if self.state == "calibrate":
+			blocks[f"M_{self.model.settings.name}_minobj"] = self.init_minimize_object()
+		return blocks
 
 	@property
 	def mblocks(self):
-		return set([f"M_{tree}" for tree in self.ns_local] + [f"M_{self.model.settings.name}_simplesum"])
-		# return set([f"M_{tree}" for tree in self.ns_local]+[f"M_{self.model.settings.name}_pw"])
+		blocks = [f"M_{tree}" for tree in self.ns_local] + [f"M_{self.model.settings.name}_simplesum"]
+		if self.state == "calibrate":
+			blocks += [f"M_{self.model.settings.name}_minobj"]
+		return set(blocks)
 
 	def init_simplesum(self):
 		self.simplesum.add_symbols(self.model.database, self.ns)
 		self.simplesum.add_conditions()
 		return self.simplesum.run()
 
+	def init_minimize_object(self):
+		self.minimize_object.add_symbols(self.model.database, self.ns)
+		return self.minimize_object.run()
+	
+
 	def eqtext(self,tree_name):
 		tree = self.ns_local[tree_name]
-		gams_class = getattr(gams_production,tree['type_f'])(version=tree['version'])
+		gams_class = getattr(gams_abatement,tree['type_f'])(version=tree['version'])
 		gams_class.add_symbols(self.model.database,tree,ns_global=self.ns)
 		gams_class.add_conditions(self.model.database,tree)
 		return gams_class.run(tree_name)

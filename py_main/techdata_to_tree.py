@@ -375,6 +375,7 @@ def load_techcats(dict_with_techcats):
 
         if techcat_type == "inputdisp":
             IO_tech_inputs = {"IO_tech":["IO_tech_" + inp for inp in inputs]}
+            IO_tech_inputs["IO_tech"].append("IO_tech_K")
             [Q2P.append(("IO_tech_" + inp, inp)) for inp in inputs]
             Q2P.append(("IO_tech_K", "K"))
 

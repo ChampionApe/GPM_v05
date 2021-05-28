@@ -99,6 +99,8 @@ sets
 	endovars_exoincalib_sumU[n,nn]
 	endovars_exoincalib_sumX[n,nn]
 	endovars_exoincalib_C[n]
+	minobj_mu_subset[n,nn]
+	minobj_sigma_subset[n]
 	sumUaggs[n]
 	sumU2U[n,nn]
 	sumXaggs[n]
@@ -189,6 +191,7 @@ $load bra_o_EOP_TX
 $load bra_no_EOP_TX
 $load tech_endoincalib_sigma
 $load endovars_exoincalib_C
+$load minobj_sigma_subset
 $load sumUaggs
 $load sumXaggs
 $load n_out
@@ -209,6 +212,7 @@ $load tech_endoincalib_mu
 $load params_alwaysexo_mu
 $load endovars_exoincalib_sumU
 $load endovars_exoincalib_sumX
+$load minobj_mu_subset
 $load sumU2U
 $load sumX2X
 $load exo_mu

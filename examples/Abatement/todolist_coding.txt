@@ -1,2 +1,7 @@
-- Opdater GPM_database.update_sets_from_vars således at den ikke sletter aliaser når clean_up=True. Dvs. undgå at den fjerne eksempelvis self.alias_dict.
+- Opdater GPM_database.update_sets_from_vars således at den ikke sletter aliaser når clean_up=True. Dvs. undgå at den fjerner eksempelvis self.alias_dict.
+
+- Lav en metode i gmspython som ændrer solve-statement. Således at man i childclasses såsom abate/production/pr_static kan tilføje en metode .add_solve, som ændrer "solve MODEL using CNS" til noget andet på en kontrolleret måde. 
+PS: Lige nu er det implementeret lidt ad-hoc i bunden af initialize_variables ved at der ændres i settings.conf
+
+- 
 
