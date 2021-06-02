@@ -2,6 +2,7 @@ sets
 	alias_set
 	alias_map2
 	n
+	l1
 ;
 
 alias(n,nn,nnn);
@@ -108,6 +109,8 @@ sets
 	n_out[n]
 	endo_PbT[n]
 	exo_mu[n,nn]
+	sigma_l1_subset[n]
+	eta_l1_subset[n]
 ;
 
 $GDXIN %Abatement_0%
@@ -115,6 +118,7 @@ $onMulti
 $load alias_set
 $load alias_map2
 $load n
+$load l1
 $load inp
 $load out
 $load int
@@ -196,6 +200,8 @@ $load sumUaggs
 $load sumXaggs
 $load n_out
 $load endo_PbT
+$load sigma_l1_subset
+$load eta_l1_subset
 $load alias_
 $load map_all
 $load map_ID_EC

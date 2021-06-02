@@ -381,19 +381,19 @@ class minimize_object:
 		minobj = self.a("minobj")
 		mu, sigma = self.a("mu"), self.a("sigma")
 		minobj_mu, minobj_sigma = self.a("minobj_mu"), self.a("minobj_sigma")
-		minobj_mu_subset, minobj_mu_subset2 = self.a("minobj_mu_subset"), self.a("minobj_mu_subset", [(0, 1)]) 
-		minobj_sigma_subset, minobj_sigma_subset2 = self.a("minobj_sigma_subset"), self.a("minobj_sigma_subset", [(0,1)])
+		minobj_mu_subset= self.a("minobj_mu_subset")
+		minobj_sigma_subset = self.a("minobj_sigma_subset")
 		weight_mu, weight_sigma = self.a("weight_mu"), self.a("weight_sigma")
-		return self.minimize_object(n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, minobj_mu_subset2, minobj_sigma_subset2, weight_mu, weight_sigma)
+		return self.minimize_object(n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma)
 
 
-	def minimize_object(self, n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, minobj_mu_subset2, minobj_sigma_subset2, weight_mu, weight_sigma):
+	def minimize_object(self, n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma):
 		LHS = f"{minobj}"
 		#RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), ({sigma} - {minobj_sigma})**2) + {weight_mu} * sum({n}$({minobj_mu_subset}), ({mu} - {minobj_mu})**2)" 
-		RHS = f"{weight_sigma} * sum({nn}$({minobj_sigma_subset2}), sum({n}$({minobj_sigma_subset}), Sqr({sigma} - {minobj_sigma}))) + {weight_mu} * sum({nn}$({minobj_mu_subset2}), sum({n}$({minobj_mu_subset}),  Sqr({mu} - {minobj_mu})))" 
+		RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), Sqr({sigma} - {minobj_sigma})) + {weight_mu} * sum([{n},{nn}]$({minobj_mu_subset}), Sqr({mu} - {minobj_mu}))" 
 		return equation("E_minobj", "", "", LHS, RHS)
-	
-	#E_minobj..  minobj =E= weight_sigma * sum(n$minobj_sigma_subset[n], (sigma[n] - sigmabar[n])**2) + weight_mu * sum(n$minobj_mu_subset[n, nn], (mu[n, nn] - mubar[n, nn])**2)
+	#[{n},{nn}]
+	#E_minobj..  minobj =E= weight_sigma * sum(n$minobj_sigma_subset[n], (sigma[n] - sigmabar[n])**2) + weight_mu * sum([n, nn]$minobj_mu_subset[n, nn], (mu[n, nn] - mubar[n, nn])**2)
 
 
 # class pricewedge:

@@ -60,5 +60,5 @@ $BLOCK M_Abatement_simplesum
 	E_sumX[n]$(sumXaggs[n])..	qsumX[n] =E= sum(nn$(sumX2X[n,nn]), qD[nn]);
 $ENDBLOCK
 $BLOCK M_Abatement_minobj 
-	E_minobj..	minobj =E= weight_sigma * sum(nn$(minobj_sigma_subset[nn]), sum(n$(minobj_sigma_subset[n]), Sqr(sigma[n] - minobj_sigma[n]))) + weight_mu * sum(nn$(minobj_mu_subset[nn,nn]), sum(n$(minobj_mu_subset[n,nn]),  Sqr(mu[n,nn] - minobj_mu[n,nn])));
+	E_minobj..	minobj =E= weight_sigma * sum(n$(minobj_sigma_subset[n]), Sqr(sigma[n] - minobj_sigma[n])) + weight_mu * sum([n,nn]$(minobj_mu_subset[n,nn]), Sqr(mu[n,nn] - minobj_mu[n,nn]));
 $ENDBLOCK
