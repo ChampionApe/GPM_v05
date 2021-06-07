@@ -2,7 +2,6 @@ sets
 	alias_set
 	alias_map2
 	n
-	l1
 ;
 
 alias(n,nn,nnn);
@@ -106,11 +105,13 @@ sets
 	sumU2U[n,nn]
 	sumXaggs[n]
 	sumX2X[n,nn]
+	map_M2X[n,nn]
+	M_subset[n]
+	map_M2C[n,nn]
+	EOP_C_subset[n]
 	n_out[n]
 	endo_PbT[n]
 	exo_mu[n,nn]
-	sigma_l1_subset[n]
-	eta_l1_subset[n]
 ;
 
 $GDXIN %Abatement_0%
@@ -118,7 +119,6 @@ $onMulti
 $load alias_set
 $load alias_map2
 $load n
-$load l1
 $load inp
 $load out
 $load int
@@ -198,10 +198,10 @@ $load endovars_exoincalib_C
 $load minobj_sigma_subset
 $load sumUaggs
 $load sumXaggs
+$load M_subset
+$load EOP_C_subset
 $load n_out
 $load endo_PbT
-$load sigma_l1_subset
-$load eta_l1_subset
 $load alias_
 $load map_all
 $load map_ID_EC
@@ -221,6 +221,8 @@ $load endovars_exoincalib_sumX
 $load minobj_mu_subset
 $load sumU2U
 $load sumX2X
+$load map_M2X
+$load map_M2C
 $load exo_mu
 $GDXIN
 $offMulti

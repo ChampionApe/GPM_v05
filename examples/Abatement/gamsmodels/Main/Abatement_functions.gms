@@ -26,3 +26,5 @@ $FUNCTION load_fixed({group}, {gdx}):
   $onlisting
 $ENDFUNCTION
 
+$FUNCTION std_pdf({x}): ((1/(sqrt(2*Pi)))*exp(-(Sqr({x}))/2)) $ENDFUNCTION
+
