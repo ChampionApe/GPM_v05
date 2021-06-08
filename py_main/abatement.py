@@ -16,9 +16,13 @@ class abate(gmspython):
 			DataBase.GPM_database.merge_dbs(self.model.database, tech_db, 'first')
 			self.add_default_subsets()
 
+	def use_EOP():
+		pass
+
 	# ---			1: Retrieve namespace from nesting trees		--- #
 	def namespace_global_sets(self,nt,tech_db_syms,kwargs):
 		""" retrieve attributes from global tree"""
+		#NOGET HER SKAL LAVE DE KORREKTE NAVNE OM TIL "ID_"
 		std_sets = {setname: getattr(nt,setname) for setname in ('n','nn','nnn','inp','out','int','wT','map_all','kno_out','kno_inp','s') if setname in nt.__dict__}
 		self.sector = True if hasattr(nt,'s') else False
 		std_sets['PwT_dom'] = nt.PwT_dom if self.version=='Q2P' else nt.wT
@@ -26,7 +30,7 @@ class abate(gmspython):
 		std_sets['endo_PbT'] = df('endo_PbT',kwargs)
 		std_sets['n_out'] = df('n_out',kwargs)
 		for sym in tech_db_syms:
-			std_sets[sym] = sym
+			std_sets[sym] = "ID_" + sym
 		if self.sector is not False:
 			std_sets['s_prod'] = df('s_prod',kwargs)
 		return std_sets
@@ -42,14 +46,14 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PwThat','PbT','qS','qD','mu','sigma','eta','Peq','markup','tauS','tauLump','qsumU','qsumX')
+		return ('PwThat','PbT','qS','qD','mu','sigma','eta','Peq','markup','qsumU','qsumX') #'tauS','tauLump'
 
 	def namespace_local_sets(self,nt):
 		"""create namespace for each tree, by copying attributes."""
 		return {tree: {attr: nt.trees[tree].__dict__[attr] for attr in nt.trees[tree].__dict__ if attr not in set(['tree','database']).union(nt.prune_trees)} for tree in nt.trees}
 
 	# ---			2: Initialize variables			--- #
-	# Note: The method 'intialiaze_variables' should be provided; however, how this works is optional.
+	# Note: The method 'initialize_variables' should be provided; however, how this works is optional.
 	def initialize_variables(self,**kwargs):
 		try:
 			if kwargs['check_variables'] is True:
@@ -86,10 +90,10 @@ class abate(gmspython):
 			return pd.Series(1, index = self.get('n_out'), name = self.n(var))
 		elif var == 'markup':
 			return pd.Series(0, index = self.get('out'), name = self.n(var))
-		elif var == 'tauS':
-			return pd.Series(0, index = self.get('out'), name = self.n(var))
-		elif var == 'tauLump':
-			return 0 if self.sector is False else pd.Series(0, index = self.get('s_prod'), name = self.n(var))
+		# elif var == 'tauS':
+		# 	return pd.Series(0, index = self.get('out'), name = self.n(var))
+		# elif var == 'tauLump':
+		# 	return 0 if self.sector is False else pd.Series(0, index = self.get('s_prod'), name = self.n(var))
 		elif var == 'qsumU':
 			return pd.Series(10, index = self.get('sumUaggs'), name = self.n(var))
 		elif var == 'qsumX':
@@ -167,7 +171,7 @@ class abate(gmspython):
 			return [{"pM":self.g("M_subset"), "PwT":self.g("inp")}]
 		elif group == "g_EOP_alwaysendo":
 			return [{"pMhat":self.g("M_subset"), "PwThat":self.g("inp")}]
-
+		#FJERN EOP VARIABLE i ID-MODE. 
 
 
 	@property
@@ -209,6 +213,7 @@ class abate(gmspython):
 		if self.state == "calibrate":
 			blocks[f"M_{self.model.settings.name}_minobj"] = self.init_minimize_object()
 		return blocks
+		#FJERN BLOCKS OM EOP i ID-mode
 
 	@property
 	def mblocks(self):
@@ -217,6 +222,7 @@ class abate(gmspython):
 		if self.state == "calibrate":
 			blocks += [f"M_{self.model.settings.name}_minobj"]
 		return set(blocks)
+		#FJERN BLOCKS OM EOP i ID-mode
 
 	def init_simplesum(self):
 		self.simplesum.add_symbols(self.model.database, self.ns)
