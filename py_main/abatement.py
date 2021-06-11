@@ -2,41 +2,54 @@ from gmspython import *
 import gams_abatement,global_settings
 
 class abate(gmspython):
-	def __init__(self,tech_db=None,nt=None,pickle_path=None,work_folder=None,kwargs_ns={},**kwargs_gs):
+	def __init__(self,tech_db=None,nt=None,pickle_path=None,work_folder=None,kwargs_ns={},use_EOP=False,**kwargs_gs):
 		databases = None if nt is None else [nt.database.copy()]
 		super().__init__(module='pr_static',pickle_path=pickle_path,work_folder=work_folder,databases=databases,**kwargs_gs)
 		if pickle_path is None:
 			self.version = nt.version
-			self.ns = {**self.ns, **self.namespace_global_sets(nt,tech_db.symbols,kwargs_ns), **self.namespace_global_variables(kwargs_ns)}
+			self.ns = {**self.ns, **self.namespace_global_sets(nt,tech_db.symbols,"ID",kwargs_ns), **self.namespace_global_variables(kwargs_ns)}
 			self.ns_local = {**self.ns_local, **self.namespace_local_sets(nt)}
-			for c in ["simplesum", "minimize_object", "EOP"]:
-				setattr(self, c, getattr(gams_abatement, c)())
+			# for c in ["EOP"]:
+			# 	setattr(self, c, getattr(gams_abatement, c)())
 			for tree in nt.trees.values():
 				DataBase.GPM_database.merge_dbs(self.model.database,tree.database,'first')
 			DataBase.GPM_database.merge_dbs(self.model.database, tech_db, 'first')
-			self.add_default_subsets()
+			# self.add_default_subsets()
+			if not (use_EOP == False):
+				self.init_EOP(use_EOP["tech_db"], use_EOP["nt"], kwargs_ns)
+			else:
+				self.use_EOP = False
 
-	def use_EOP():
-		pass
+
+	def init_EOP(self, tech_db, nt, kwargs_ns={}):
+		self.use_EOP = True
+		self.ns = {**self.ns, **self.namespace_global_sets(nt,tech_db.symbols,"EOP",kwargs_ns), **self.namespace_global_variables(kwargs_ns)}
+		self.ns_local = {**self.ns_local, **self.namespace_local_sets(nt)}
+		DataBase.GPM_database.merge_dbs(self.model.database,nt.database,'first')
+		for tree in nt.trees.values():
+			DataBase.GPM_database.merge_dbs(self.model.database,tree.database,'first')
+		DataBase.GPM_database.merge_dbs(self.model.database, tech_db, 'first')
+
+
 
 	# ---			1: Retrieve namespace from nesting trees		--- #
-	def namespace_global_sets(self,nt,tech_db_syms,kwargs):
+	def namespace_global_sets(self,nt,tech_db_syms,module,kwargs):
 		""" retrieve attributes from global tree"""
-		#NOGET HER SKAL LAVE DE KORREKTE NAVNE OM TIL "ID_"
-		std_sets = {setname: getattr(nt,setname) for setname in ('n','nn','nnn','inp','out','int','wT','map_all','kno_out','kno_inp','s') if setname in nt.__dict__}
+		std_sets = {**{setname: getattr(nt,setname) for setname in ('n','nn','nnn') if setname in nt.__dict__}, \
+					**{module + "_" + setname: getattr(nt, module + "_" + setname) for setname in ('inp','out','int','wT','map_all','kno_out','kno_inp') if module + "_" + setname in nt.__dict__}}
 		self.sector = True if hasattr(nt,'s') else False
-		std_sets['PwT_dom'] = nt.PwT_dom if self.version=='Q2P' else nt.wT
-		std_sets['exo_mu'] = df('exo_mu',kwargs)
-		std_sets['endo_PbT'] = df('endo_PbT',kwargs)
-		std_sets['n_out'] = df('n_out',kwargs)
+		#std_sets['PwT_dom'] = nt.PwT_dom if self.version=='Q2P' else getattr(nt, "ID_wT")
+		#std_sets['exo_mu'] = df('exo_mu',kwargs)
+		# std_sets['endo_PbT'] = df('endo_PbT',kwargs)
+		# std_sets['n_out'] = df('n_out',kwargs)
 		for sym in tech_db_syms:
-			std_sets[sym] = "ID_" + sym
+			std_sets[sym] = sym
 		if self.sector is not False:
 			std_sets['s_prod'] = df('s_prod',kwargs)
 		return std_sets
 
 	def add_default_subsets(self):
-		self.model.database[self.n('n_out')] = self.get('out').levels[-1] if isinstance(self.get('out'),pd.MultiIndex) else self.get('out')
+		# self.model.database[self.n('n_out')] = self.get('out').levels[-1] if isinstance(self.get('out'),pd.MultiIndex) else self.get('out')
 		if self.sector is not False:
 			self.model.database[self.n('s_prod')] = self.get('out').levels[0]
 
@@ -46,7 +59,7 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PwThat','PbT','qS','qD','mu','sigma','eta','Peq','markup','qsumU','qsumX') #'tauS','tauLump'
+		return ('PwThat','PbT','qS','qD','mu','sigma','eta','qsumU','qsumX', "PwT", "M0", "M", "phi")
 
 	def namespace_local_sets(self,nt):
 		"""create namespace for each tree, by copying attributes."""
@@ -66,91 +79,83 @@ class abate(gmspython):
 			for var in self.default_variables:
 				if self.ns[var] not in self.model.database.symbols:
 					self.model.database[self.ns[var]] = self.default_var_series(var)
-		if self.ns['exo_mu'] not in self.model.database.symbols:
-			self.add_calibration_subsets()
+		# if self.ns['exo_mu'] not in self.model.database.symbols:
+		# 	self.add_calibration_subsets()
 		if self.state == 'calibrate':
 			self.model.settings.set_conf('solve',self.add_solve + "\n")
 
-	def default_var_series(self,var):
+	def default_var_series(self,var,module="ID"):
 		if var=='PbT':
-			return pd.Series(1, index = self.get('out'), name = self.n(var))
+			return pd.Series(1, index = self.get(module + "_" + 'out'), name = self.n(var))
 		elif var == 'PwThat':
-			return pd.Series(1, index = self.get('PwT_dom'), name = self.n(var))
+			return pd.Series(1, index = self.get(module + "_" + 'wT'), name = self.n(var))
 		elif var == 'qS':
-			return pd.Series(1, index = self.get('out'), name = self.n(var))
+			return pd.Series(1, index = self.get(module + "_" + 'out'), name = self.n(var))
 		elif var == 'qD':
-			return pd.Series(1, index = self.get('wT'), name = self.n(var))
+			return pd.Series(1, index = self.get(module + "_" + 'wT'), name = self.n(var))
 		elif var == 'mu':
-			return pd.Series(1, index = self.get('map_all'), name=self.n(var))
+			return pd.Series(1, index = self.get(module + "_" + 'map_all'), name=self.n(var))
 		elif var == 'sigma':
-			return pd.Series(1, index = self.get('kno_inp'), name = self.n(var))
+			return pd.Series(0.8, index = self.get(module + "_" + 'kno_inp'), name = self.n(var))
 		elif var == 'eta':
-			return pd.Series(-1, index = self.get('kno_out'), name = self.n(var))
-		elif var == 'Peq':
-			return pd.Series(1, index = self.get('n_out'), name = self.n(var))
-		elif var == 'markup':
-			return pd.Series(0, index = self.get('out'), name = self.n(var))
-		# elif var == 'tauS':
-		# 	return pd.Series(0, index = self.get('out'), name = self.n(var))
-		# elif var == 'tauLump':
-		# 	return 0 if self.sector is False else pd.Series(0, index = self.get('s_prod'), name = self.n(var))
+			return pd.Series(-1, index = self.get(module + "_" + 'kno_out'), name = self.n(var))
 		elif var == 'qsumU':
-			return pd.Series(10, index = self.get('sumUaggs'), name = self.n(var))
+			return pd.Series(10, index = self.get(module + "_" + 'sumUaggs'), name = self.n(var))
 		elif var == 'qsumX':
-			return pd.Series(10, index = self.get('sumXaggs'), name = self.n(var))
+			return pd.Series(10, index = self.get(module + "_" + 'sumXaggs'), name = self.n(var))
 		elif var == "M0":
 			return pd.Series(5, index = self.get("M_subset"), name = self.n(var))
 		elif var == "phi":
 			return pd.Series(0.1, index = self.get("map_M2X"), name = self.n(var))
 		elif var == "PwT":
-			return pd.Series(1, index = self.get("inp"), name = self.n(var))
+			return pd.Series(1, index = self.get(module + "_" + "inp"), name = self.n(var))
 		
 
-	def add_calibration_subsets(self):
-		(self.model.database[self.ns['endo_PbT']],self.model.database[self.ns['exo_mu']]) = self.calib_subsets
+	# def add_calibration_subsets(self):
+	# 	(self.model.database[self.ns['endo_PbT']],self.model.database[self.ns['exo_mu']]) = self.calib_subsets
 
-	@property
-	def calib_subsets(self):
-		endo_pbt, exo_mu = empty_index(self.get('out')),empty_index(self.get('map_all'))
-		for tree in self.ns_local:
-			if self.n('type_io',tree=tree)=='input':
-				endo_pbt = endo_pbt.union(self.get('tree_out',tree=tree))
-				map_ = self.get('map_',tree=tree)
-				exo_mu = exo_mu.union(map_[(map_.droplevel(self.n('nn')).isin(self.get('int')))])
-			elif self.n('type_io',tree=tree)=='output':
-				map_ = self.get('map_',tree=tree)
-				tree_out = self.get('tree_out',tree=tree)
-				for x in self.get('knots',tree=tree):
-					z = map_[(map_.droplevel(self.n('n')).isin([x])) & (map_.droplevel(self.n('nn')).isin(tree_out))]
-					if not z.empty:
-						endo_pbt = endo_pbt.insert(0,z.droplevel(self.n('nn'))[0])
-						exo_mu = exo_mu.insert(0,z[0])
-				exo_mu = exo_mu.union(map_[~(map_.droplevel(self.n('nn')).isin(tree_out))])
-		return endo_pbt,exo_mu
+	# @property
+	# def calib_subsets(self):
+	# 	endo_pbt, exo_mu = empty_index(self.get('out')),empty_index(self.get('map_all'))
+	# 	for tree in self.ns_local:
+	# 		if self.n('type_io',tree=tree)=='input':
+	# 			endo_pbt = endo_pbt.union(self.get('tree_out',tree=tree))
+	# 			map_ = self.get('map_',tree=tree)
+	# 			exo_mu = exo_mu.union(map_[(map_.droplevel(self.n('nn')).isin(self.get('int')))])
+	# 		elif self.n('type_io',tree=tree)=='output':
+	# 			map_ = self.get('map_',tree=tree)
+	# 			tree_out = self.get('tree_out',tree=tree)
+	# 			for x in self.get('knots',tree=tree):
+	# 				z = map_[(map_.droplevel(self.n('n')).isin([x])) & (map_.droplevel(self.n('nn')).isin(tree_out))]
+	# 				if not z.empty:
+	# 					endo_pbt = endo_pbt.insert(0,z.droplevel(self.n('nn'))[0])
+	# 					exo_mu = exo_mu.insert(0,z[0])
+	# 			exo_mu = exo_mu.union(map_[~(map_.droplevel(self.n('nn')).isin(tree_out))])
+	# 	return endo_pbt,exo_mu
 
 	# ---			3: Define groups	 		--- #
-
+	# LAV GRUPPER KORREKTE IFT EOP!!!
 	def group_conditions(self,group):
 		#PARAMETERS
 		if group == 'g_params_alwaysexo':
-			return [{'sigma': [{"and": [self.g('kno_inp'), {"not":self.g("tech_endoincalib_sigma")}]}], 'mu':self.g("params_alwaysexo_mu"), 'eta': self.g('kno_out')}]
+			return [{'sigma': {"and": [self.g('ID_kno_inp'), {"not":self.g("ID_tech_endoincalib_sigma")}]}, 'mu':self.g("ID_params_alwaysexo_mu"), 'eta': self.g('ID_kno_out')}]
 			# return [{'sigma': self.g('kno_inp'), 'eta': self.g('kno_out'), 'mu': self.g('exo_mu')}]
 		elif group == 'g_params_endoincalib':
-			return [{"sigma": self.g("tech_endoincalib_sigma"), "mu":self.g("tech_endoincalib_mu")}, {'markup': self.g('out')}]
+			return [{"sigma": self.g("ID_tech_endoincalib_sigma"), "mu":self.g("ID_tech_endoincalib_mu")}]
 		#PRICES
 		elif group == "g_prices_alwaysendo":
-			return [{'PwThat': self.g('int'), 'PbT': self.g('endo_PbT')}]
+			return [{'PwThat': {"or":[self.g('ID_int'), self.g("ID_inp")]}, 'PbT': self.g('ID_out')}]
 		elif group == 'g_prices_alwaysexo':
-			return [{'tauS': self.g('out'), 'tauLump': None if self.sector is False else self.g('s_prod')}] #'PwThat': self.g('inp')
-		elif group == 'g_prices_exoincalib':
-			return [{'PbT': {'and': [self.g('out'), {'not': self.g('endo_PbT')}]}, 'Peq': self.g('n_out')}]
+			return [{"PwT":self.g("ID_inp")}] #'PwThat': self.g('inp')
+		# elif group == 'g_prices_exoincalib':
+		# 	return [{'PbT': {'and': [self.g('out'), {'not': self.g('PbT')}]}}] #'Peq': self.g('n_out')
 		#QUANTITIES
 		elif group == 'g_quants_alwaysendo':
-			return [{'qD': [{"and":[self.g('int'), self.g("inp"), {"not":self.g("endovars_exoincalib_C")}]}]}]
+			return [{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":self.g("ID_endovars_exoincalib_C")}]}}]
 		elif group == 'g_quants_alwaysexo':
-			return [{'qS': [{"and":[self.g('out'), {"not":self.g("EOP_C_subset")}]}]}]
+			return [{'qS': {"and":[self.g('ID_out')]}}]
 		elif group == 'g_quants_exoincalib':
-			return [{"qD":self.g("endovars_exoincalib_C"), "qsumU":self.g("sumUaggs"), "qsumX":self.g("sumXaggs")}]
+			return [{"qD":self.g("ID_endovars_exoincalib_C"), "qsumU":self.g("ID_sumUaggs"), "qsumX":self.g("ID_sumXaggs")}]
 		#MINIMIZATION OBJECTS
 		elif group == "g_minobj_exoincalib":
 			return [{"weight_mu":None, "weight_sigma":None, "minobj_sigma":self.g("minobj_sigma_subset"), "minobj_mu":self.g("minobj_mu_subset")}]
@@ -158,9 +163,11 @@ class abate(gmspython):
 			return [{"minobj":None}]
 		#EMISSION ACCOUNTS
 		elif group == "g_emissions_alwaysendo":
-			return [{"M0":self.g("M_subset"), "M":self.g("M_subset")}]
+			return [{"M0":self.g("M_subset")}]
 		elif group == "g_emissions_alwaysexo":
 			return [{"phi":self.g("map_M2X")}]
+		elif group == "g_emissions_endoinEOP":
+			return [{"M":self.g("M_subset")}]
 		#END-OF-PIPE ABATEMENT
 		elif group == "g_EOP_endogenousC":
 			return [{"qS":self.g("EOP_C_subset")}]
@@ -169,9 +176,8 @@ class abate(gmspython):
 		#END-OF-PIPE PRICES
 		elif group == "g_EOP_alwaysexo":
 			return [{"pM":self.g("M_subset"), "PwT":self.g("inp")}]
-		elif group == "g_EOP_alwaysendo":
-			return [{"pMhat":self.g("M_subset"), "PwThat":self.g("inp")}]
-		#FJERN EOP VARIABLE i ID-MODE. 
+		elif group == "g_prices_postabatement":
+			return [{"pMhat":self.g("M_subset")}]
 
 
 	@property
@@ -179,7 +185,10 @@ class abate(gmspython):
 		""" Collect exogenous groups """
 		n = self.model.settings.name+'_'
 		if self.state=='B':
-			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_params_endoincalib', 'g_emissions_alwaysexo', 'g_EOP_alwaysexo', 'g_EOP_endoincalib')}
+			gs = ('g_params_alwaysexo', 'g_quants_alwaysexo', 'g_prices_alwaysexo', 'g_params_endoincalib', 'g_emissions_alwaysexo', 'g_prices_postabatement')
+			if self.use_EOP:
+				gs = gs + ('g_EOP_alwaysexo', 'g_EOP_endoincalib')
+			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state in ('calibrate','SC','DC'):
 			return {n+g: self.add_group(g,n=n) for g in ('g_params_alwaysexo', 'g_prices_alwaysexo', 'g_quants_alwaysexo', 'g_prices_exoincalib', 'g_quants_exoincalib', 'g_minobj_exoincalib')}
 
@@ -188,7 +197,10 @@ class abate(gmspython):
 		""" Collect endogenous groups """
 		n = self.model.settings.name+'_'
 		if self.state=='B':
-			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_prices_exoincalib', 'g_quants_exoincalib', 'g_emissions_alwaysendo', "g_EOP_endogenousC", "g_EOP_alwaysendo")}
+			gs = ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_quants_exoincalib', 'g_emissions_alwaysendo')
+			if self.use_EOP:
+				gs = gs + ("g_EOP_endogenousC", "g_EOP_alwaysendo")
+			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state in ('calibrate', 'SC','DC'):
 			return {n+g: self.add_group(g,n=n) for g in ('g_prices_alwaysendo', 'g_quants_alwaysendo', 'g_params_endoincalib', 'g_minobj_endoincalib')}
 
@@ -208,39 +220,71 @@ class abate(gmspython):
 	# --- 		4: Define blocks 		--- #
 	@property
 	def blocktext(self):
-		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local}, **{f"M_{self.model.settings.name}_simplesum":self.init_simplesum()}}
-		blocks[f"M_{self.model.settings.name}_EOP"] = self.init_EOP()
+		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("ID_")}, \
+					**{f"M_{self.model.settings.name}_simplesumU_ID":self.init_simplesumU("ID"), \
+						f"M_{self.model.settings.name}_simplesumX_ID":self.init_simplesumX("ID")}}
+		blocks[f"M_{self.model.settings.name}_emissionaccounts"] = self.init_emission_accounts()
+		if self.use_EOP:
+			{**blocks, **{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("EOP_")}}
+			blocks[f"M_{self.model.settings.name}_EOP"] = self.init_EOP_eqs()
+			blocks[f"M_{self.model.settings.name}_simplesumU_EOP"] = self.init_simplesumU("EOP")
+			blocks[f"M_{self.model.settings.name}_simplesumX_EOP"] = self.init_simplesumX("EOP")
 		if self.state == "calibrate":
 			blocks[f"M_{self.model.settings.name}_minobj"] = self.init_minimize_object()
 		return blocks
-		#FJERN BLOCKS OM EOP i ID-mode
 
 	@property
 	def mblocks(self):
-		blocks = [f"M_{tree}" for tree in self.ns_local] + [f"M_{self.model.settings.name}_simplesum"]
-		blocks += [f"M_{self.model.settings.name}_EOP"]
+		blocks = [f"M_{tree}" for tree in self.ns_local if tree.startswith("ID_")] + [f"M_{self.model.settings.name}_simplesumU_ID"]
+		blocks += [f"M_{self.model.settings.name}_emissionaccounts"]
+		if self.use_EOP:
+			blocks += [f"M_{tree}" for tree in self.ns_local if tree.startswith("EOP_")]
+			blocks += [f"M_{self.model.settings.name}_EOP"] + [f"M_{self.model.settings.name}_simplesumU_EOP"]
+			blocks += [f"M_{self.model.settings.name}_simplesumX_EOP"]
+		else:
+			blocks += [f"M_{self.model.settings.name}_simplesumX_ID"]
+		
 		if self.state == "calibrate":
 			blocks += [f"M_{self.model.settings.name}_minobj"]
 		return set(blocks)
-		#FJERN BLOCKS OM EOP i ID-mode
 
-	def init_simplesum(self):
-		self.simplesum.add_symbols(self.model.database, self.ns)
-		self.simplesum.add_conditions()
-		return self.simplesum.run()
-
-	def init_minimize_object(self):
-		self.minimize_object.add_symbols(self.model.database, self.ns)
-		return self.minimize_object.run()
+	def init_simplesumU(self,module="ID"):
+		simplesumU = getattr(gams_abatement, "simplesumU")(module=module)
+		simplesumU.add_symbols(self.model.database, self.ns)
+		simplesumU.add_conditions()
+		return simplesumU.run()
 	
-	def init_EOP(self):
-		self.EOP.add_symbols(self.model.database, self.ns)
-		self.EOP.add_conditions()
-		return self.EOP.run("EOP")
+	def init_simplesumX(self, module="ID"):
+		simplesumX = getattr(gams_abatement, "simplesumX")(module=module)
+		simplesumX.add_symbols(self.model.database, self.ns)
+		simplesumX.add_conditions()
+		return simplesumX.run()
+
+	def init_emission_accounts(self, module="ID"):
+		emission_accounts = getattr(gams_abatement, "emission_accounts")(module=module)
+		emission_accounts.add_symbols(self.model.database, self.ns)
+		emission_accounts.add_conditions()
+		return emission_accounts.run("emission_accounts")
+
+	def init_minimize_object(self, module="ID"):
+		minimize_object = getattr(gams_abatement, "minimize_object")(module=module)
+		minimize_object.add_symbols(self.model.database, self.ns)
+		return minimize_object.run()
+	
+
+	def init_EOP_eqs(self):
+		EOP = getattr(gams_abatement, "EOP")()
+		EOP.add_symbols(self.model.database, self.ns)
+		EOP.add_conditions()
+		return EOP.run("EOP")
 
 	def eqtext(self,tree_name):
 		tree = self.ns_local[tree_name]
-		gams_class = getattr(gams_abatement,tree['type_f'])(version=tree['version'])
+		if "ID" in tree_name:
+			module = "ID"
+		elif "EOP" in tree_name:
+			module = "EOP"
+		gams_class = getattr(gams_abatement,tree['type_f'])(version=tree['version'], module=module)
 		gams_class.add_symbols(self.model.database,tree,ns_global=self.ns)
 		gams_class.add_conditions(self.model.database,tree)
 		return gams_class.run(tree_name)
