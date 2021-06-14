@@ -413,11 +413,11 @@ class simplesumX:
 		return equation(name, self.qsumX.doms(), condition, LHS, RHS)
 
 class minimize_object:
-	def __init__(self, state="ID"):
+	def __init__(self, state="IDcalibrate"):
 		self.state = state
 
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "minobj", "mu", "minobj_mu", "sigma", "minobj_sigma", "minobj_sigma_subset", "minobj_mu_subset", "weight_sigma", "weight_mu")]
+		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "minobj", "mu", "minobj_mu", "sigma", "minobj_sigma", "ID_minobj_sigma_subset", "ID_minobj_mu_subset", "weight_sigma", "weight_mu")]
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def a(self,attr,lot_indices=[],l='',lag={}):
@@ -431,20 +431,32 @@ class minimize_object:
 		n, nn = self.a("n"), self.a("n", [(0,1)])
 		minobj = self.a("minobj")
 		mu, sigma = self.a("mu"), self.a("sigma")
-		minobj_mu, minobj_sigma = self.a("minobj_mu"), self.a("minobj_sigma")
-		minobj_mu_subset= self.a("minobj_mu_subset")
-		minobj_sigma_subset = self.a("minobj_sigma_subset")
+		#ID
+		ID_minobj_mu, ID_minobj_sigma = self.a("ID_minobj_mu"), self.a("ID_minobj_sigma")
+		ID_minobj_mu_subset = self.a("ID_minobj_mu_subset")
+		ID_minobj_sigma_subset = self.a("ID_minobj_sigma_subset")
+		#EOP
+		EOP_minobj_mu, EOP_minobj_sigma = self.a("EOP_minobj_mu"), self.a("EOP_minobj_sigma")
+		EOP_minobj_mu_subset = self.a("EOP_minobj_mu_subset")
+		EOP_minobj_sigma_subset = self.a("EOP_minobj_sigma_subset")
 		weight_mu, weight_sigma = self.a("weight_mu"), self.a("weight_sigma")
-		return self.minimize_object(n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma)
+		if self.state == "IDcalibrate":
+			return self.ID_minimize_object(n, nn, minobj, mu, sigma, ID_minobj_mu, ID_minobj_sigma, ID_minobj_mu_subset, ID_minobj_sigma_subset, weight_mu, weight_sigma)
+		elif self.state == "EOPcalibrate":
+			return self.EOP_minimize_object(n, nn, minobj, mu, sigma, ID_minobj_mu, EOP_minobj_mu, ID_minobj_sigma, EOP_minobj_sigma, ID_minobj_mu_subset, \
+											EOP_minobj_mu_subset, ID_minobj_sigma_subset, EOP_minobj_sigma_subset, weight_mu, weight_sigma)
 
-
-	def minimize_object(self, n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma):
+	def ID_minimize_object(self, n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma):
 		LHS = f"{minobj}"
-		#RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), ({sigma} - {minobj_sigma})**2) + {weight_mu} * sum({n}$({minobj_mu_subset}), ({mu} - {minobj_mu})**2)" 
 		RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), Sqr({sigma} - {minobj_sigma})) + {weight_mu} * sum([{n},{nn}]$({minobj_mu_subset}), Sqr({mu} - {minobj_mu}))" 
-		return equation("E_minobj", "", "", LHS, RHS)
-	#[{n},{nn}]
-	#E_minobj..  minobj =E= weight_sigma * sum(n$minobj_sigma_subset[n], (sigma[n] - sigmabar[n])**2) + weight_mu * sum([n, nn]$minobj_mu_subset[n, nn], (mu[n, nn] - mubar[n, nn])**2)
+		return equation("E_ID_minobj", "", "", LHS, RHS)
+
+	def EOP_minimize_object(self, n, nn, minobj, mu, sigma, ID_minobj_mu, EOP_minobj_mu, ID_minobj_sigma, EOP_minobj_sigma, ID_minobj_mu_subset, \
+							EOP_minobj_mu_subset, ID_minobj_sigma_subset, EOP_minobj_sigma_subset, weight_mu, weight_sigma):
+		LHS = f"{minobj}"
+		RHS = f"{weight_sigma} * (sum({n}$({ID_minobj_sigma_subset}), Sqr({sigma} - {ID_minobj_sigma})) + sum({n}$({EOP_minobj_sigma_subset}), Sqr({sigma} - {EOP_minobj_sigma}))) +\n" +\
+				f"{weight_mu} * (sum([{n}, {nn}]$({ID_minobj_mu_subset}), Sqr({mu} - {ID_minobj_mu})) + sum([{n},{nn}]$({EOP_minobj_mu_subset}), Sqr({mu} - {EOP_minobj_mu})))"
+		return equation("E_EOP_minobj", "", "", LHS, RHS)
 
 class emission_accounts:
 	def __init__(self, state="ID"):
