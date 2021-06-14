@@ -225,7 +225,7 @@ class gmspython:
 		if state=='all':
 			[setattr(self.model.settings,attr,self.model.settings.std_settings()[attr]) for attr in ['conf']];
 		elif state is not None:
-			[setattr(self.model.settings['conf'][attr],attr,self.model.settings.std_configuration(state=state)[attr]) for attr in ['blocks','g_endo','g_exo']];
+			[setattr(self.model.settings.conf[state][attr],attr,self.model.settings.std_configuration(state=state)[attr]) for attr in ['blocks','g_endo','g_exo']];
 
 	def calibrate_sneaky(self,db_star, name_base = 'baseline', name_calib = 'calib', kwargs_init = {}, overwrite = False,**kwargs):
 		self.initialize_variables(**kwargs_init)

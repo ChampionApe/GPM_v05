@@ -85,7 +85,7 @@ sets
 	ID_minobj_sigma_subset[n]
 	ID_sumUaggs[n]
 	ID_sumU2U[n,nn]
-	ID_sumXaggs[n]
+	sumXaggs[n]
 	sumX2X[n,nn]
 	ID_sumX2X[n,nn]
 	map_M2X[n,nn]
@@ -125,9 +125,7 @@ sets
 	bra_no_EOP_TX[n]
 	EOP_sumUaggs[n]
 	EOP_sumU2U[n,nn]
-	EOP_sumXaggs[n]
 	map_M2C[n,nn]
-	EOP_C_subset[n]
 ;
 
 $GDXIN %ID_0%
@@ -200,7 +198,7 @@ $load ID_tech_endoincalib_sigma
 $load ID_endovars_exoincalib_C
 $load ID_minobj_sigma_subset
 $load ID_sumUaggs
-$load ID_sumXaggs
+$load sumXaggs
 $load M_subset
 $load EOP_inp
 $load EOP_out
@@ -232,8 +230,6 @@ $load kno_no_EOP_TX
 $load bra_o_EOP_TX
 $load bra_no_EOP_TX
 $load EOP_sumUaggs
-$load EOP_sumXaggs
-$load EOP_C_subset
 $load alias_
 $load ID_map_all
 $load map_ID_EC

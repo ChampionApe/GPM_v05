@@ -19,10 +19,10 @@ def ign_KeyError(dict_,key):
 
 class CES:
 	""" collection of price indices / demand systems for ces nests """
-	def __init__(self,version='std',module=None,**kwargs):
+	def __init__(self,version='std',state=None,**kwargs):
 		""" Add version of the model """
 		self.version = version
-		self.module = module
+		self.state = state
 
 	def add_symbols(self,db,ns_local,ns_global={},dynamic=False):
 		""" add gpy_symbols with writing methods. ns is a namespace to update symbol names if they are nonstandard """
@@ -77,10 +77,10 @@ class CES:
 
 class CES_norm:
 	""" collection of price indices / demand systems for ces nests """
-	def __init__(self,version='std',module=None,**kwargs):
+	def __init__(self,version='std',state=None,**kwargs):
 		""" Add version of the model """
 		self.version = version
-		self.module = module
+		self.state = state
 
 	def add_symbols(self,db,ns_local,ns_global={},dynamic=False):
 		""" add gpy_symbols with writing methods. ns is a namespace to update symbol names if they are nonstandard """
@@ -137,9 +137,9 @@ class CES_norm:
 
 class CET:
 	""" collection of equations for CET nests """
-	def __init__(self,version='std',module="ID",**kwargs):
+	def __init__(self,version='std',state="ID",**kwargs):
 		self.version = version
-		self.module = module
+		self.state = state
 
 	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
 		for sym in ['map_']:
@@ -147,7 +147,7 @@ class CET:
 		for sym in ('PbT','PwThat','qD','qS','mu','eta','n'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		for sym in ['out']:
-			setattr(self, self.module + "_" + sym, db[df(self.module + "_" + sym, ns_global)])
+			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def add_conditions(self,db,ns_tree):
@@ -159,7 +159,7 @@ class CET:
 
 	def run(self,name,conditions=None):
 		conditions = self.conditions if conditions is None else conditions
-		nn,mu,eta2,out2 = self.a('n',[(0,1)]),self.a('mu'),self.a('eta',[(0,1)]),self.a(self.module + "_" + 'out',[(0,1)])
+		nn,mu,eta2,out2 = self.a('n',[(0,1)]),self.a('mu'),self.a('eta',[(0,1)]),self.a(self.state + "_" + 'out',[(0,1)])
 		map_,map_2 = self.a('map_'),self.a('map_',[(0,1),(1,0)])
 		PwThat, PwThat2 = self.a('PwThat'),self.a('PwThat',[(0,1)])
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
@@ -184,10 +184,10 @@ class CET:
 
 class CET_norm:
 	""" collection of price indices / demand systems for CET nests """
-	def __init__(self,version='std',module="ID",**kwargs):
+	def __init__(self,version='std',state="ID",**kwargs):
 		""" Add version of the model """
 		self.version = version
-		self.module = module
+		self.state = state
 
 	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
 		for sym in ['map_']:
@@ -195,7 +195,7 @@ class CET_norm:
 		for sym in ('PbT','PwThat','qD','qS','mu','eta','n'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		for sym in ['out']:
-			setattr(self, self.module + "_" + sym, db[df(self.module + "_" + sym, ns_global)])
+			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def add_conditions(self,db,ns_tree):
@@ -207,7 +207,7 @@ class CET_norm:
 
 	def run(self,name,conditions=None):
 		conditions = self.conditions if conditions is None else conditions
-		out2,out3 = self.a(self.module + "_" + 'out',[(0,1)]), self.a(self.module + "_" + 'out',[(0,2)])
+		out2,out3 = self.a(self.state + "_" + 'out',[(0,1)]), self.a(self.state + "_" + 'out',[(0,2)])
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
 		eta2 = self.a('eta',[(0,1)])
@@ -236,10 +236,10 @@ class CET_norm:
 
 class MNL:
 	""" collection of price indices / demand systems for MNL nests """
-	def __init__(self,version='std',module=None,**kwargs):
+	def __init__(self,version='std',state=None,**kwargs):
 		""" Add version of the model """
 		self.version = version
-		self.module = module
+		self.state = state
 
 	def add_symbols(self,db,ns_local,ns_global={}):
 		""" add gpy_symbols with writing methods. ns is a namespace to update symbol names if they are nonstandard """
@@ -291,10 +291,10 @@ class MNL:
 
 class MNL_out:
 	""" collection of price indices / demand systems for CET nests """
-	def __init__(self,version='std',module="ID",**kwargs):
+	def __init__(self,version='std',state="ID",**kwargs):
 		""" Add version of the model """
 		self.version = version
-		self.module = module
+		self.state = state
 
 	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
 		for sym in ['map_']:
@@ -302,7 +302,7 @@ class MNL_out:
 		for sym in ('PbT','PwThat','qD','qS','mu','eta','n'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		for sym in ['out']:
-			setattr(self, self.module + "_" + sym, db[df(self.module + "_" + sym, ns_global)])
+			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def add_conditions(self,db,ns_tree):
@@ -316,7 +316,7 @@ class MNL_out:
 		conditions = self.conditions if conditions is None else conditions
 		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
 		mu,mu3 = self.a('mu'), self.a('mu',[(0,2)])
-		eta2,out2,out3 = self.a('eta',[(0,1)]),self.a(self.module + "_" + 'out',[(0,1)]),self.a(self.module + "_" + 'out',[(0,2)])
+		eta2,out2,out3 = self.a('eta',[(0,1)]),self.a(self.state + "_" + 'out',[(0,1)]),self.a(self.state + "_" + 'out',[(0,2)])
 		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1),(1,0)]), self.a('map_',[(0,2)])
 		PwThat,PwThat2,PwThat3 = self.a('PwThat'), self.a('PwThat',[(0,1)]), self.a('PwThat',[(0,2)])
 		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
@@ -341,16 +341,16 @@ class MNL_out:
 
 class simplesumU:
 	""" Collection of equations that define a variable as the simple sum of others """
-	def __init__(self, module="ID"):
-		self.module = module
+	def __init__(self, state="ID"):
+		self.state = state
 
 	def add_symbols(self, db, ns):
 		[setattr(self,sym,db[ns[sym]]) for sym in ('n', 'qsumU', 'qD')]
-		[setattr(self, self.module + "_" + sym, db[df(self.module + "_" + sym, ns)]) for sym in ['sumUaggs', 'sumU2U']]
+		[setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns)]) for sym in ['sumUaggs', 'sumU2U']]
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
 
 	def add_conditions(self):
-		self.conditions = {'sumUaggs': getattr(self, self.module + "_" + "sumUaggs").write()}
+		self.conditions = {'sumUaggs': getattr(self, self.state + "_" + "sumUaggs").write()}
 
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
@@ -358,11 +358,11 @@ class simplesumU:
 
 	def run(self):
 		nn = self.a("n", [(0, 1)])
-		sumUaggs = self.module + "_" + "sumUaggs"
-		sumU2U= self.a(self.module + "_" + "sumU2U")
+		sumUaggs = self.state + "_" + "sumUaggs"
+		sumU2U= self.a(self.state + "_" + "sumU2U")
 		qsumU= self.a("qsumU")
 		qD2 = self.a("qD", [(0, 1)])
-		name_sumU = "E_sumU" + "_" + self.module
+		name_sumU = "E_sumU" + "_" + self.state
 		text = self.simplesum(name_sumU, self.conditions["sumUaggs"], sumUaggs, sumU2U, qsumU, qD2, nn)
 		return text
 
@@ -373,15 +373,15 @@ class simplesumU:
 
 class simplesumX:
 	""" Collection of equations that define a variable as the simple sum of others """
-	def __init__(self, module="ID"):
-		self.module = module
+	def __init__(self, state="ID"):
+		self.state = state
 
 	def add_symbols(self, db, ns):
 		[setattr(self,sym,db[ns[sym]]) for sym in ('n', 'qsumX', 'qD')]
 		[setattr(self, sym, db[df(sym, ns)]) for sym in ['sumXaggs']]
-		if self.module == "ID":
+		if self.state == "ID":
 			[setattr(self, sym, db[df(sym, ns)]) for sym in ['ID_sumX2X']]
-		elif self.module == "EOP":
+		elif self.state == "EOP":
 			[setattr(self, sym, db[df(sym, ns)]) for sym in ['sumX2X']] #Both mappings so we can construct two blocks
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
 		
@@ -395,14 +395,14 @@ class simplesumX:
 
 	def run(self):
 		nn = self.a("n", [(0, 1)])
-		# sumXaggs = self.module + "_" + "sumXaggs"
+		# sumXaggs = self.state + "_" + "sumXaggs"
 		qsumX = self.a("qsumX")
 		qD2 = self.a("qD", [(0, 1)])
 
-		if self.module == "ID":
+		if self.state == "ID":
 			ID_sumX2X = self.a("ID_sumX2X")
 			text = self.simplesum("E_sumX_ID", self.conditions["sumXaggs"], ID_sumX2X, qsumX, qD2, nn)
-		elif self.module == "EOP":
+		elif self.state == "EOP":
 			sumX2X = self.a("sumX2X")
 			text = self.simplesum("E_sumX", self.conditions["sumXaggs"], sumX2X, qsumX, qD2, nn)
 		return text
@@ -413,8 +413,8 @@ class simplesumX:
 		return equation(name, self.qsumX.doms(), condition, LHS, RHS)
 
 class minimize_object:
-	def __init__(self, module="ID"):
-		self.module = module
+	def __init__(self, state="ID"):
+		self.state = state
 
 	def add_symbols(self,db,ns):
 		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "minobj", "mu", "minobj_mu", "sigma", "minobj_sigma", "minobj_sigma_subset", "minobj_mu_subset", "weight_sigma", "weight_mu")]
@@ -447,12 +447,14 @@ class minimize_object:
 	#E_minobj..  minobj =E= weight_sigma * sum(n$minobj_sigma_subset[n], (sigma[n] - sigmabar[n])**2) + weight_mu * sum([n, nn]$minobj_mu_subset[n, nn], (mu[n, nn] - mubar[n, nn])**2)
 
 class emission_accounts:
-	def __init__(self, module="ID"):
-		self.module = module
+	def __init__(self, state="ID"):
+		self.state = state
 
 	def add_symbols(self, db, ns):
-		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "phi", "M0", "map_M2X", "M_subset", "sumXaggs", \
-													"qsumX", "pMhat", "PwT", "PwThat", "ID_inp")]
+		syms = ("n", "phi", "M0", "map_M2X", "M_subset", "sumXaggs", "qsumX", "pMhat", "PwT", "PwThat", "ID_inp")
+		if self.state == "EOP":
+			syms += ("EOP_inp",)
+		[setattr(self,sym,db[ns[sym]]) for sym in syms]
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def a(self,attr,lot_indices=[],l='',lag={}):
@@ -460,7 +462,9 @@ class emission_accounts:
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 
 	def add_conditions(self):
-		self.conditions = {'M_subset': self.M_subset.write(), "PwThat":self.ID_inp.write()}
+		self.conditions = {'M_subset': self.M_subset.write(), "ID_PwThat":self.ID_inp.write()}
+		if self.state == "EOP":
+			self.conditions["EOP_PwThat"] = self.EOP_inp.write()
 
 	def run(self, name):
 		n, nn = self.a("n"), self.a("n", [(0,1)])
@@ -481,8 +485,11 @@ class emission_accounts:
 		PwThat = self.a("PwThat")
 		PwT = self.a("PwT")
 		pMhat, pMhat2 = self.a("pMhat"), self.a("pMhat", [(0,1)])
-		text = self.preabatement_emissions(name, self.conditions["M_subset"], nn, phi, M0, sumXaggs, qsumX) + "\n\t"
-		text += self.adjusted_inputprice(name, self.conditions["PwThat"], PwThat, PwT, nn, map_M2X2, phi2, pMhat2)
+		if self.state == "ID":
+			text = self.preabatement_emissions(name, self.conditions["M_subset"], nn, phi, M0, sumXaggs, qsumX) + "\n\t"
+			text += self.adjusted_inputprice(name, "ID", self.conditions["ID_PwThat"], PwThat, PwT, nn, map_M2X2, phi2, pMhat2)
+		elif self.state == "EOP":
+			text = self.adjusted_inputprice(name, "EOP", self.conditions["EOP_PwThat"], PwThat, PwT, nn, map_M2X2, phi2, pMhat2)
 		return text
 
 	def preabatement_emissions(self, name, condition, nn, phi, M0, sumXaggs, qsumX):
@@ -490,10 +497,10 @@ class emission_accounts:
 		RHS = f"sum({nn}$({sumXaggs}), {phi}*{qsumX})"
 		return equation(f"E_preabatementM_{name}", self.M0.doms(), condition, LHS, RHS)
 
-	def adjusted_inputprice(self, name, condition, PwThat, PwT, nn, map_M2X, phi, pMhat):
+	def adjusted_inputprice(self, name, state, condition, PwThat, PwT, nn, map_M2X, phi, pMhat):
 		LHS = f"{PwThat}"
 		RHS = f"{PwT} + sum({nn}$({map_M2X}), {phi} * {pMhat})"
-		return equation(f"E_adjusted_inputprice_{name}", self.PwThat.doms(), condition, LHS, RHS)
+		return equation("E_" + state + f"_adjusted_inputprice_{name}", self.PwThat.doms(), condition, LHS, RHS)
 
 class EOP:
 	def __init__(self):
@@ -501,7 +508,7 @@ class EOP:
 
 	def add_symbols(self, db, ns):
 		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "phi", "M", "M0", "map_M2C", "map_M2X", "M_subset", "sumXaggs", \
-													"qsumX", "qS", "theta", "muG", "sigmaG", "pM", "PbT", "EOP_C_subset", "pMhat", "PwT", "PwThat")]
+													"qsumX", "qS", "theta", "muG", "sigmaG", "pM", "PbT", "EOP_out", "pMhat", "PwT", "PwThat")]
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def a(self,attr,lot_indices=[],l='',lag={}):
@@ -509,7 +516,7 @@ class EOP:
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 
 	def add_conditions(self):
-		self.conditions = {'M_subset': self.M_subset.write(), "C_subset":self.EOP_C_subset.write()}
+		self.conditions = {'M_subset': self.M_subset.write(), "C_subset":self.EOP_out.write()}
 
 	def run(self, name):
 		n, nn = self.a("n"), self.a("n", [(0,1)])
@@ -528,16 +535,14 @@ class EOP:
 		# PwThat = self.a("PwThat")
 		# PwT = self.a("PwT")
 		pMhat = self.a("pMhat")
-		# text = self.preabatement_emissions(name, self.conditions["M_subset"], nn, phi, M0, sumXaggs, qsumX) + "\n\t"
 		text = self.postabatement_emissions(name, self.conditions["M_subset"], nn, M0, M, map_M2C, qS2) + "\n\t"
 		text += self.endogenous_abatementC(name, self.conditions["C_subset"], qS, nn, M02, map_M2C2, theta, pM2, PbT, muG, sigmaG) + "\n\t"
-		# text += self.adjusted_inputprice(name, self.conditions["PwThat"], PwThat, PwT, nn, map_M2X2, phi2, pMhat2) + "\n\t"
 		text += self.adjusted_emission_price(name, self.conditions["M_subset"], pMhat, pM, nn, map_M2C, theta2, PbT2, muG2, sigmaG2)
 		return text
 	
 	def adjusted_emission_price(self, name, condition, pMhat, pM, nn, map_M2C, theta, PbT, muG, sigmaG):
 		LHS = f"{pMhat}"
-		RHS = f"{pM}*(1 - sum({nn}${map_M2C}, {theta} * errorf( ({pM} - {PbT} + {muG}) / ({sigmaG})))) + \n sum({nn}${map_M2C}, errorf( ({pM} - {PbT} + {muG}) / ({sigmaG})) * ({PbT} + {muG} - Sqr({sigmaG}) * (@std_pdf(({pM} - {PbT} - {muG})/{sigmaG}) / errorf(({pM} - {PbT} - {muG})/{sigmaG}))))"
+		RHS = f"{pM}*(1 - sum({nn}${map_M2C}, {theta} * errorf( ({pM} - {PbT} + {muG}) / ({sigmaG})))) + \n sum({nn}${map_M2C}, {theta} * errorf( ({pM} - {PbT} + {muG}) / ({sigmaG})) * ({PbT} + {muG} - Sqr({sigmaG}) * (@std_pdf(({pM} - {PbT} - {muG})/{sigmaG}) / errorf(({pM} - {PbT} - {muG})/{sigmaG}))))"
 		return equation(f"E_adjusted_emission_price_{name}", self.pMhat.doms(), condition, LHS, RHS)
 
 	def postabatement_emissions(self, name, condition, nn, M0, M, map_M2C, qS):
