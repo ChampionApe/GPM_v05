@@ -43,7 +43,7 @@ class nt:
 		self.branches_from_tree()
 		self.inputs_from_tree()
 		self.outputs_from_tree()
-		self.database.update_aliased_sets(add_aliases=True)
+		self.database.update_aliased_sets(ign_alias=False)
 		if self.version =='Q2P':
 			self.version_Q2P(Q2P,**kwargs)
 		self.apply_namespace()

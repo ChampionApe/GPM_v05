@@ -240,7 +240,7 @@ class GPM_database:
 
 	@staticmethod
 	def PM_from_gdx(db):
-		return PM_database(database = {gpy_symbol(symbol).name: gpy_symbol(symbol) for symbol in db},name=db.name)
+		return PM_database(database = {gpy_symbol(symbol).name: gpy_symbol(symbol) for symbol in db if type_(symbol)},name=db.name)
 
 	def update_with_ws(self,workspace,dict_):
 		if workspace is None:
@@ -321,13 +321,19 @@ class GPM_database:
 		return self.series.__len__()
 
 	def __getitem__(self,item):
-		return self.series[item]
+		try:
+			return self.series[item]
+		except KeyError:
+			return self.series[self.alias(item)]
 
 	def __setitem__(self,name,value):
 		self.series.__setitem__(name,value)
 
 	def get(self,item):
-		return self.series[item].vals
+		try:
+			return self.series[item].vals
+		except KeyError:
+			return self.series[self.alias(item)].vals.rename(item)
 
 	@staticmethod
 	def symbols_(db):
@@ -363,7 +369,7 @@ class GPM_database:
 
 	@property
 	def types(self):
-		return {symbol.name: symbol.gtype for symbol in self.series}	
+		return {symbol.name: symbol.gtype for symbol in self.series}
 
 	def copy(self,dropattrs=['database'],**kwargs):
 		""" return copy of database. Ignore elements in dropattrs."""
@@ -383,6 +389,10 @@ class GPM_database:
 	@property
 	def alias_dict0(self):
 		return {key: self.alias_dict[key].insert(0,key) for key in self.alias_dict}
+
+	@property
+	def alias_notin_db(self):
+		return set(self.get('alias_map2'))-set(self.sets['sets'])
 
 	def alias_all(self,x):
 		if x in self.get('alias_set').union(self.get('alias_map2')):
@@ -407,6 +417,10 @@ class GPM_database:
 		"""
 		return np.unique([self.alias(name) for name in self[x].index.names]).tolist()
 
+	def vardom(self,set_):
+		""" Return a dictionary with keys = aliases of the set 'x', and values = list of variables defined over the set/alias"""
+		return {set_i: [x for x in self.variables['variables']+self.parameters['parameters'] if set_i in self[x].domains] for set_i in self.alias_all(set_)}
+		
 	###################################################################################################
 	###								3: Add/merge symbols from databases. 							###
 	###################################################################################################
@@ -490,39 +504,46 @@ class GPM_database:
 	###								4.1: UPDATE DOMAINS FROM OTHER SYMBOLS	 						###
 	###################################################################################################
 
-	def update_all_sets(self,clean_up=True,include_mappings=False,exemptions=[]):
-		self.update_sets_from_vars(clean_up=clean_up,include_mappings=include_mappings,exemptions=exemptions)
+	def update_all_sets(self,clean_up=True,include_mappings=False,ign_alias=False):
+		self.update_sets_from_vars(clean_up=clean_up,include_mappings=include_mappings,ign_alias=ign_alias)
 		self.update_subsets_from_sets()
-		self.update_maps_from_sets()
+		self.update_maps_from_sets(ign_alias=ign_alias)
 
-	def update_sets_from_vars(self,clean_up=True,include_mappings=False,exemptions=[]):
+	def update_sets_from_vars(self,clean_up=True,include_mappings=False,ign_alias=False):
 		if clean_up:
 			for set_ in self.sets['sets']:
 				self.series[set_].vals = pd.Index([],name=set_)
 		if include_mappings:
-			[self.update_sets_from_index(self[symbol].index) for symbol in self.variables['variables']+self.parameters['parameters']+self.sets['mappings']];
+			[self.update_sets_from_index(self[symbol].index,ign_alias=ign_alias) for symbol in self.variables['variables']+self.parameters['parameters']+self.sets['mappings']];
 		else:
-			[self.update_sets_from_index(self[symbol].index) for symbol in self.variables['variables']+self.parameters['parameters']];
-		self.update_aliased_sets()
+			[self.update_sets_from_index(self[symbol].index,ign_alias=ign_alias) for symbol in self.variables['variables']+self.parameters['parameters']];
+		self.update_aliased_sets(ign_alias=False)
 
-	def update_aliased_sets(self,add_aliases=False):
+	def update_aliased_sets(self,ign_alias=False):
 		for set_i in self.alias_dict:
 			all_elements = set.union(*[set(self.get(set_ij)) for set_ij in self.alias_dict0[set_i] if set_ij in self.sets['sets']])
 			for set_ij in self.alias_dict0[set_i]:
-				if add_aliases is False:
+				if ign_alias is False:
 					if set_ij in self.sets['sets']:
 						self[set_ij].vals = pd.Index(all_elements,name=set_ij)
 				else:
 					self[set_ij] = pd.Index(all_elements,name=set_ij)
 
-	def update_sets_from_index(self,index_):
-		[GPM_database.add_or_merge(self.series,index_.get_level_values(set_).unique(),'first') for set_ in index_.names];
+	def update_sets_from_index(self,index_,ign_alias=False):
+		""" The ign_alias=True ignores the indices defined over aliased sets that are not defined in the db"""
+		if ign_alias:
+			[GPM_database.add_or_merge(self.series,index_.get_level_values(set_).unique(),'first') for set_ in set(index_.names)-self.alias_notin_db];
+		else:
+			[GPM_database.add_or_merge(self.series,index_.get_level_values(set_).unique(),'first') for set_ in index_.names];
 
 	def update_subsets_from_sets(self):
 		for x in self.sets['subsets']:
-			self[x].vals = self[x].vals[self[x].vals.isin(self.get(self[x].vals.name))]
+			self[x].vals = self[x].vals[self[x].vals.isin(self.get(self.alias(self[x].vals.name)))]
 
-	def update_maps_from_sets(self):
-		for x in self.sets['mappings']:
-			for y in self[x].domains:
-				self[x].vals = self[x].vals[self[x].vals.get_level_values(y).isin(self.get(y))]
+	def update_maps_from_sets(self,ign_alias=False):
+		if ign_alias:
+			for x in self.sets['mappings']:
+				[self.__setitem__(x,self[x].vals[self[x].vals.get_level_values(y).isin(self.get(self.alias(y)))]) for y in set(self[x].domains)-self.alias_notin_db];
+		else:
+			for x in self.sets['mappings']:
+				[self.__setitem__(x,self[x].vals[self[x].vals.get_level_values(y).isin(self.get(self.alias(y)))]) for y in self[x].domains];				

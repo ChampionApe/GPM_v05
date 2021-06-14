@@ -223,9 +223,9 @@ class gmspython:
 	def reset_settings(self,state=None):
 		[setattr(self.model.settings,attr,self.model.settings.std_settings()[attr]) for attr in ['run_file','collect_file']];
 		if state=='all':
-			[setattr(self.model.settings,attr,self.model.settings.std_settings()[attr]) for attr in ['conf']];
+			[self.model.settings.conf.__setitem__(state,self.model.settings.std_configuration(state=state)) for state in self.model.settings.conf];
 		elif state is not None:
-			[setattr(self.model.settings['conf'][attr],attr,self.model.settings.std_configuration(state=state)[attr]) for attr in ['blocks','g_endo','g_exo']];
+			self.model.settings.conf.__setitem__(state,self.model.settings.std_configuration(state=state))
 
 	def calibrate_sneaky(self,db_star, name_base = 'baseline', name_calib = 'calib', kwargs_init = {}, overwrite = False,**kwargs):
 		self.initialize_variables(**kwargs_init)

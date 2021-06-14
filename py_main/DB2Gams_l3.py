@@ -2,7 +2,7 @@ from DB2Gams_l2 import *
 import ShockFunction
 
 class gams_model:
-	def __init__(self,pickle_path=None,gsettings=None,opt_file=None,opt_file_name='temp',execute_name='CollectAndRun.gms',**kwargs):
+	def __init__(self,pickle_path=None,gsettings=None,opt_file=None,opt_file_name='conopt4',execute_name='CollectAndRun.gms',**kwargs):
 		""" initialize gams model from path to pickle, gsettings ∈ {gams_settings,pickle_path} object."""
 		if pickle_path is not None:
 			with open(pickle_path, "rb") as file:
@@ -40,7 +40,7 @@ class gams_model:
 		self.__dict__ = dict_
 		self.add_options(opt_file=self.opt_file)
 
-	def add_options(self,opt_file=None,name='temp'):
+	def add_options(self,opt_file=None,name='conopt4'):
 		self.opt = default_opt(self.ws,name=end_w_opt(name)) if opt_file is None else self.ws.add_options(opt_file=opt_file)
 		self.opt_file = end_w_opt(name) if opt_file is None else opt_file
 		self.export_settings['opt'] = opt_file if opt_file is not None else end_w_opt(name)
@@ -97,7 +97,7 @@ class gams_model:
 	def add_job(self,options={}):
 		"""
 		Given a model_instance is created, this creates a GamsJob by compiling the self.model.collect_file
-		using Precompiler from the dreamtools package. The GamsJob is added as an attribute self.job.
+		usisng Precompiler from the dreamtools package. The GamsJob is added as an attribute self.job.
 		"""
 		self.compile_collect_file()
 		self.job = self.ws.add_job_from_file(self.work_folder+'\\'+end_w_gms(self.settings.collect_file).replace('.gms','.gmy'),**options)
