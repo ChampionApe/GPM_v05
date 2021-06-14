@@ -126,6 +126,12 @@ class gams_settings:
 	def set_conf(self,k,v):
 		self.conf[self.state][k] = v
 
+	def clean_g_exo(self,all_conf=True):
+		if all_conf is True:
+			[self.conf[k].__setitem__('g_exo',self.conf[k]['g_exo']-self.conf[k]['g_endo']) for k in self.conf.keys()];
+		else:
+			self.set_conf('g_exo', self.get_conf('g_exo')-self.get_conf('g_endo'))
+
 	###################################################################################################
 	###										0: Pickling settings 									###
 	###################################################################################################

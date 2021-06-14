@@ -25,4 +25,3 @@ $FUNCTION load_fixed({group}, {gdx}):
   $ENDLOOP
   $onlisting
 $ENDFUNCTION
-

@@ -13,7 +13,7 @@ def append_index_with_1dindex(index1,index2):
 def prepend_index_with_1dindex(index1,index2):
 	return pd.MultiIndex.from_tuples([(b,)+a for a in index1 for b in index2],names=index2.names+index1.names) if isinstance(index1,pd.MultiIndex) else pd.MultiIndex.from_tuples([(b,a) for a in index1 for b in index2],names=index2.names+index1.names)
 
-def add_grid_to_series(vals_init,vals_end,linspace_index,name,gridtype='linear',phi=1):
+def add_grid_to_series(vals_init,vals_end,linspace_index,name,gridtype='linear',phi=1,scalar=False):
 	"""
 	vals_init and vals_end are pandas series defined over a common index.
 	linspace_index is a pandas index of the relevant length of the desired linspace.
@@ -25,7 +25,10 @@ def add_grid_to_series(vals_init,vals_end,linspace_index,name,gridtype='linear',
 		apply_grid = lambda x0,xN,N: rust_space(x0,xN,N,phi)
 	elif gridtype=='pol':
 		apply_grid = lambda x0,xN,N: pol_space(x0,xN,N,phi)
-	return pd.concat([pd.Series(apply_grid(vals_init.values[i],vals_end.values[i],len(linspace_index)), index = append_index_with_1dindex(vals_init.index[vals_init.index.isin([vals_init.index[i]])],linspace_index),name=name) for i in range(len(vals_init))])
+	if scalar is False:
+		return pd.concat([pd.Series(apply_grid(vals_init.values[i],vals_end.values[i],len(linspace_index)), index = append_index_with_1dindex(vals_init.index[vals_init.index.isin([vals_init.index[i]])],linspace_index),name=name) for i in range(len(vals_init))])
+	elif scalar is True:
+		return pd.Series(apply_grid(vals_init,vals_end,len(linspace_index)),index = linspace_index,name=name)
 
 def add_linspace_to_series(vals_init,vals_end,linspace_index,name):
 	return pd.concat([pd.Series(np.linspace(vals_init.values[i],vals_end.values[i],num=len(linspace_index)),index = append_index_with_1dindex(vals_init.index[vals_init.index.isin([vals_init.index[i]])],linspace_index),name=name) for i in range(len(vals_init))])
@@ -59,8 +62,8 @@ def sneaky_db(db0,db_star,diff=False,shock_name='shock',n_steps=10,loop_name='l1
 	shock_db = DataBase.GPM_database(workspace=db0.workspace,**{'name': shock_name})
 	shock_db[loop_name] = loop_name+'_'+pd.Index(range(1,n_steps+1),name=loop_name).astype(str)
 	if update_variables=='all':
-		update_variables = [var for var in db0.variables['variables'] if var in db_star.variables['variables']];
-	for var in update_variables:
+		update_variables = [var for var in db0.variables_flat if var in db_star.variables_flat];
+	for var in set(update_variables).intersection(set(db0.variables['variables'])):
 		common_index = db_star.get(var).index.intersection(db0.get(var).index)
 		symbol_star,symbol0 = db_star.get(var)[db_star[var].index.isin(common_index)], db0.get(var)[db0[var].index.isin(common_index)]
 		if diff is True:
@@ -69,6 +72,12 @@ def sneaky_db(db0,db_star,diff=False,shock_name='shock',n_steps=10,loop_name='l1
 		if not symbol_star.empty:
 			shock_db[nl(var,loop_name,subset=True)] = symbol_star.index
 			shock_db[nl(var,loop_name)] = DataBase.gpy_symbol(add_grid_to_series(symbol0.sort_index(), symbol_star.sort_index(), shock_db.get(loop_name), nl(var,loop_name),gridtype=gridtype,phi=phi),**{'gtype': 'parameter'})
+	for var in set(update_variables).intersection(set(db0.variables['scalar_variables'])):
+		if diff is True and (abs(db0.get(var)-db_star.get(var))>error):
+			pass
+		else:
+			shock_db[nl(var,loop_name,subset=True)] = shock_db.get(loop_name)
+			shock_db[nl(var,loop_name)] = DataBase.gpy_symbol(add_grid_to_series(db0.get(var),db_star.get(var),shock_db.get(loop_name),nl(var,loop_name),gridtype=gridtype,phi=phi,scalar=True),**{'gtype':'parameter'})
 	shock_db.update_all_sets()
 	shock_db.merge_internal()
 	return shock_db,{'shock_name': shock_name, 'n_steps': n_steps, 'loop_name': loop_name, 'update_variables': update_variables, 'clean_up': clean_up, 'gridtype': gridtype, 'phi': phi}
