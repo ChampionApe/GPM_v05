@@ -16,10 +16,12 @@ class abate(gmspython):
 			DataBase.GPM_database.merge_dbs(self.model.database, tech_db, 'first')
 			# self.add_default_subsets()
 			if isinstance(use_EOP, dict):
-				self.setstate("EOP")
+				self.use_EOP = True
+				# self.setstate("EOP", init=False)
 				self.init_EOP(use_EOP["tech_db"], use_EOP["nt"], kwargs_ns)
 			else:
-				self.setstate("ID")
+				self.use_EOP = False
+				# self.setstate("ID", init=False)
 
 
 	def init_EOP(self, tech_db, nt, kwargs_ns={}):
@@ -95,13 +97,15 @@ class abate(gmspython):
 			return pd.Series(1, index = self.get('ID_map_all'), name=self.n(var))
 		elif var == 'sigma':
 			ser = pd.Series(0.0001, index = self.get("ID_kno_inp"), name = self.n(var))
-			if self.state == "EOP":
+			# if self.state == "EOP":
+			if self.use_EOP:
 				ser = pd.concat([ser, pd.Series(0.0001, index = self.get("knots", tree="EOP_TX"), name = self.n(var))])
 				ser = pd.concat([ser, pd.Series(2, index = self.get("knots", tree="EOP_CU"), name = self.n(var))])
 			return ser
 		elif var == 'eta':
 			ser = pd.Series(-0.0001, index = self.get("ID_kno_out"), name = self.n(var))
-			if self.state == "EOP":
+			# if self.state == "EOP":
+			if self.use_EOP:
 				ser = pd.concat([ser, pd.Series(-2, index = self.get("EOP_kno_out"), name = self.n(var))])
 			return ser
 		elif var == 'qsumU':
@@ -195,7 +199,8 @@ class abate(gmspython):
 		n = self.model.settings.name+'_'
 		if self.state=='B':
 			gs = ('g_ID_params_alwaysexo', 'g_ID_params_endoincalib', 'g_ID_prices_alwaysexo', "g_prices_alwaysexo", 'g_ID_quants_alwaysexo', 'g_emissions_alwaysexo')
-			if self.state == "EOP":
+			# if self.state == "EOP":
+			if self.use_EOP:
 				gs = gs + ('g_EOP_params_alwaysexo', 'g_EOP_params_endoincalib', 'g_EOP_prices_alwaysexo')
 			else:
 				gs = gs + ('g_prices_endogenouswithEOP', "g_emissions_endoinEOP")
@@ -209,7 +214,8 @@ class abate(gmspython):
 		n = self.model.settings.name+'_'
 		if self.state=='B':
 			gs = ('g_ID_prices_alwaysendo', 'g_ID_quants_alwaysendo', 'g_ID_quants_exoincalib', 'g_emissions_alwaysendo')
-			if self.state == "EOP":
+			# if self.state == "EOP":
+			if self.use_EOP:
 				gs = gs + ("g_EOP_prices_alwaysendo", 'g_prices_endogenouswithEOP', "g_EOP_quants_alwaysendo", "g_EOP_quants_exoincalib", "g_emissions_endoinEOP")
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state in ('calibrate', 'SC','DC'):
@@ -235,7 +241,8 @@ class abate(gmspython):
 					**{f"M_{self.model.settings.name}_simplesumU_ID":self.init_simplesumU("ID"), \
 						f"M_{self.model.settings.name}_simplesumX_ID":self.init_simplesumX("ID"), \
 						f"M_ID_{self.model.settings.name}_emissionaccounts":self.init_emission_accounts("ID")}}
-		if self.state == "EOP":
+		# if self.state == "EOP":
+		if self.use_EOP:
 			blocks[f"M_EOP_{self.model.settings.name}_emissionaccounts"] = self.init_emission_accounts("EOP")
 			blocks = {**blocks, **{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("EOP_")}}
 			blocks[f"M_{self.model.settings.name}_EOP"] = self.init_EOP_eqs()
@@ -249,7 +256,8 @@ class abate(gmspython):
 	def mblocks(self):
 		blocks = [f"M_{tree}" for tree in self.ns_local if tree.startswith("ID_")] + [f"M_{self.model.settings.name}_simplesumU_ID"]
 		blocks += [f"M_ID_{self.model.settings.name}_emissionaccounts"]
-		if self.state == "EOP":
+		# if self.state == "EOP":
+		if self.use_EOP:
 			blocks += [f"M_{tree}" for tree in self.ns_local if tree.startswith("EOP_")]
 			blocks += [f"M_{self.model.settings.name}_EOP"] + [f"M_{self.model.settings.name}_simplesumU_EOP"]
 			blocks += [f"M_{self.model.settings.name}_simplesumX_EOP"]
