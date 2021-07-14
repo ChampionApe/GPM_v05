@@ -286,7 +286,10 @@ class GPM_database:
 
 	def __setstate__(self,dict_):
 		self.__dict__ = dict_
-		self.workspace = gams.GamsWorkspace(working_directory=self.work_folder)
+		try:
+			self.workspace = gams.GamsWorkspace(working_directory=self.work_folder)
+		except FileNotFoundError:
+			self.workspace = gams.GamsWorkspace(working_directory=os.getcwd())
 		if 'database' not in self.export_settings['dropattrs']:
 			self.database = self.workspace.add_database_from_gdx(self.export_settings['data_folder']+'\\'+self.name+'.gdx')
 		else:

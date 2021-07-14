@@ -38,6 +38,17 @@ $BLOCK M_ID_UbaseX
 	E_q_out_ID_UbaseX[n]$(bra_o_ID_UbaseX[n])..	qD[n] =E= sum(nn$(map_ID_UbaseX[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
 	E_q_nout_ID_UbaseX[n]$(bra_no_ID_UbaseX[n])..	qD[n] =E= sum(nn$(map_ID_UbaseX[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
+$BLOCK M_ID_Y_in 
+	E_zp_out_ID_Y_in[n]$(ID_out_ID_Y_in[n])..	PbT[n]*qS[n] =E= sum(nn$(map_ID_Y_in[nn,n]), qD[nn]*PwThat[nn]);
+	E_zp_nout_ID_Y_in[n]$(kno_no_ID_Y_in[n])..	PwThat[n]*qD[n] =E= sum(nn$(map_ID_Y_in[nn,n]), qD[nn]*PwThat[nn]);
+	E_q_out_ID_Y_in[n]$(bra_o_ID_Y_in[n])..	qD[n] =E= sum(nn$(map_ID_Y_in[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
+	E_q_nout_ID_Y_in[n]$(bra_no_ID_Y_in[n])..	qD[n] =E= sum(nn$(map_ID_Y_in[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
+$ENDBLOCK
+$BLOCK M_ID_Y_out 
+	E_zp_ID_Y_out[n]$(kno_ID_Y_out[n])..	PwThat[n]*qD[n] =E= sum(nn$(map_ID_Y_out[nn,n] and ID_out[nn]), qS[nn]*PbT[nn])+sum(nn$(map_ID_Y_out[nn,n] and not ID_out[nn]), qD[nn]*PwThat[nn]);
+	E_q_out_ID_Y_out[n]$(bra_o_ID_Y_out[n])..	qS[n] =E= sum(nn$(map_ID_Y_out[n,nn]), mu[n,nn] * (PbT[n]/PwThat[nn])**(-eta[nn]) * qD[nn]);
+	E_q_nout_ID_Y_out[n]$(bra_no_ID_Y_out[n])..	qD[n] =E= sum(nn$(map_ID_Y_out[n,nn]), mu[n,nn] * (PwThat[n]/PwThat[nn])**(-eta[nn]) * qD[nn]);
+$ENDBLOCK
 $BLOCK M_Abatement_simplesumU_ID 
 	E_sumU_ID[n]$(ID_sumUaggs[n])..	qsumU[n] =E= sum(nn$(ID_sumU2U[n,nn]), qD[nn]);
 $ENDBLOCK

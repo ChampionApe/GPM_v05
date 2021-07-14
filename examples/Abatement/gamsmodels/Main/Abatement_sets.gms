@@ -4,7 +4,7 @@ sets
 	n
 ;
 
-alias(n,nn,nnn);
+alias(n,nn,nnn,nnnn,nnnnn);
 
 sets
 	alias_[alias_set,alias_map2]
@@ -77,12 +77,29 @@ sets
 	kno_no_ID_UbaseX[n]
 	bra_o_ID_UbaseX[n]
 	bra_no_ID_UbaseX[n]
+	map_ID_Y_in[n,nn]
+	kno_ID_Y_in[n]
+	bra_ID_Y_in[n]
+	inp_ID_Y_in[n]
+	out_ID_Y_in[n]
+	ID_out_ID_Y_in[n]
+	kno_no_ID_Y_in[n]
+	bra_o_ID_Y_in[n]
+	bra_no_ID_Y_in[n]
+	map_ID_Y_out[n,nn]
+	kno_ID_Y_out[n]
+	bra_ID_Y_out[n]
+	inp_ID_Y_out[n]
+	out_ID_Y_out[n]
+	ID_out_ID_Y_out[n]
+	bra_o_ID_Y_out[n]
+	bra_no_ID_Y_out[n]
 	ID_params_alwaysexo_mu[n,nn]
 	ID_endovars_exoincalib_C[n]
 	ID_tech_endoincalib_mu[n,nn]
 	ID_tech_endoincalib_sigma[n]
-	ID_minobj_mu_subset[n,nn]
-	ID_minobj_sigma_subset[n]
+	minobj_mu_subset[n,nn]
+	minobj_sigma_subset[n]
 	ID_sumUaggs[n]
 	ID_sumU2U[n,nn]
 	sumXaggs[n]
@@ -195,9 +212,24 @@ $load ID_out_ID_UbaseX
 $load kno_no_ID_UbaseX
 $load bra_o_ID_UbaseX
 $load bra_no_ID_UbaseX
+$load kno_ID_Y_in
+$load bra_ID_Y_in
+$load inp_ID_Y_in
+$load out_ID_Y_in
+$load ID_out_ID_Y_in
+$load kno_no_ID_Y_in
+$load bra_o_ID_Y_in
+$load bra_no_ID_Y_in
+$load kno_ID_Y_out
+$load bra_ID_Y_out
+$load inp_ID_Y_out
+$load out_ID_Y_out
+$load ID_out_ID_Y_out
+$load bra_o_ID_Y_out
+$load bra_no_ID_Y_out
 $load ID_endovars_exoincalib_C
 $load ID_tech_endoincalib_sigma
-$load ID_minobj_sigma_subset
+$load minobj_sigma_subset
 $load ID_sumUaggs
 $load sumXaggs
 $load M_subset
@@ -240,9 +272,11 @@ $load map_ID_TX
 $load map_ID_IOCU
 $load map_ID_IOX
 $load map_ID_UbaseX
+$load map_ID_Y_in
+$load map_ID_Y_out
 $load ID_params_alwaysexo_mu
 $load ID_tech_endoincalib_mu
-$load ID_minobj_mu_subset
+$load minobj_mu_subset
 $load ID_sumU2U
 $load sumX2X
 $load ID_sumX2X

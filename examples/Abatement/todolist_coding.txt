@@ -3,5 +3,5 @@
 - Lav en metode i gmspython som ændrer solve-statement. Således at man i childclasses såsom abate/production/pr_static kan tilføje en metode .add_solve, som ændrer "solve MODEL using CNS" til noget andet på en kontrolleret måde. 
 PS: Lige nu er det implementeret lidt ad-hoc i bunden af initialize_variables ved at der ændres i settings.conf
 
-- 
+- Gør således at hver state får sin egen run-fil, og collect-fil (ligesom de allerede har med blocks, groups etc.). Det medfører at man slipper for at køre m.reset_settings() efter man har skiftet state. Lige nu er dette nødvendigt, da den eksisterende run- og collect-fil fra den anden state vil forblive brugt og ikke nulstillet.
 

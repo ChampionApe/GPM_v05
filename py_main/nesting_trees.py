@@ -19,6 +19,8 @@ class nt:
 		self.n = 'n'
 		self.nn = 'nn'
 		self.nnn = 'nnn'
+		self.nnnn = 'nnnn'
+		self.nnnnn = 'nnnnn'
 		self.map_ = 'map_'+self.name # map branches to knots
 		self.kno = 'kno_'+self.name # knots 
 		self.bra = 'bra_'+self.name # branches
@@ -30,7 +32,7 @@ class nt:
 			self.type_f = 'CES' # set default type to ces
 		elif self.type_io=='output' and 'type_f' not in kwargs:
 			self.type_f = 'CET' # set default type to cet
-		self.database = DataBase.GPM_database(alias=pd.MultiIndex.from_tuples([(self.n, self.nn), (self.n, self.nnn)]),**{**{'name': self.name},**kwargs_database})
+		self.database = DataBase.GPM_database(alias=pd.MultiIndex.from_tuples([(self.n, self.nn), (self.n, self.nnn), (self.n, self.nnnn), (self.n, self.nnnnn)]),**{**{'name': self.name},**kwargs_database})
 
 	def apply_namespace(self):
 		if self.temp_namespace is not None:
