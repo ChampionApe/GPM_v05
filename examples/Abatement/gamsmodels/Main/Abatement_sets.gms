@@ -51,14 +51,14 @@ sets
 	kno_no_ID_TX[n]
 	bra_o_ID_TX[n]
 	bra_no_ID_TX[n]
-	map_ID_IOCU[n,nn]
-	kno_ID_IOCU[n]
-	bra_ID_IOCU[n]
-	inp_ID_IOCU[n]
-	out_ID_IOCU[n]
-	ID_out_ID_IOCU[n]
-	bra_o_ID_IOCU[n]
-	bra_no_ID_IOCU[n]
+	map_ID_BU[n,nn]
+	kno_ID_BU[n]
+	bra_ID_BU[n]
+	inp_ID_BU[n]
+	out_ID_BU[n]
+	ID_out_ID_BU[n]
+	bra_o_ID_BU[n]
+	bra_no_ID_BU[n]
 	map_ID_IOX[n,nn]
 	kno_ID_IOX[n]
 	bra_ID_IOX[n]
@@ -68,15 +68,6 @@ sets
 	kno_no_ID_IOX[n]
 	bra_o_ID_IOX[n]
 	bra_no_ID_IOX[n]
-	map_ID_UbaseX[n,nn]
-	kno_ID_UbaseX[n]
-	bra_ID_UbaseX[n]
-	inp_ID_UbaseX[n]
-	out_ID_UbaseX[n]
-	ID_out_ID_UbaseX[n]
-	kno_no_ID_UbaseX[n]
-	bra_o_ID_UbaseX[n]
-	bra_no_ID_UbaseX[n]
 	map_ID_Y_in[n,nn]
 	kno_ID_Y_in[n]
 	bra_ID_Y_in[n]
@@ -95,6 +86,7 @@ sets
 	bra_o_ID_Y_out[n]
 	bra_no_ID_Y_out[n]
 	ID_params_alwaysexo_mu[n,nn]
+	ID_endovars_exoincalib_E[n]
 	ID_endovars_exoincalib_C[n]
 	ID_tech_endoincalib_mu[n,nn]
 	ID_tech_endoincalib_sigma[n]
@@ -102,9 +94,13 @@ sets
 	minobj_sigma_subset[n]
 	ID_sumUaggs[n]
 	ID_sumU2U[n,nn]
-	sumXaggs[n]
-	sumX2X[n,nn]
-	ID_sumX2X[n,nn]
+	sumXinEaggs[n]
+	sumXrestaggs[n]
+	map_sumXrest2X_ID[n,nn]
+	map_sumXinE2X[n,nn]
+	map_sumXinE2E[n,nn]
+	map_sumXinE2baselineinputs[n,nn]
+	map_U2E[n,nn]
 	map_M2X[n,nn]
 	M_subset[n]
 	EOP_map_all[n,nn]
@@ -143,6 +139,7 @@ sets
 	EOP_params_alwaysexo_mu[n,nn]
 	EOP_sumUaggs[n]
 	EOP_sumU2U[n,nn]
+	map_sumXrest2X_EOP[n,nn]
 	map_M2C[n,nn]
 ;
 
@@ -189,13 +186,13 @@ $load ID_out_ID_TX
 $load kno_no_ID_TX
 $load bra_o_ID_TX
 $load bra_no_ID_TX
-$load kno_ID_IOCU
-$load bra_ID_IOCU
-$load inp_ID_IOCU
-$load out_ID_IOCU
-$load ID_out_ID_IOCU
-$load bra_o_ID_IOCU
-$load bra_no_ID_IOCU
+$load kno_ID_BU
+$load bra_ID_BU
+$load inp_ID_BU
+$load out_ID_BU
+$load ID_out_ID_BU
+$load bra_o_ID_BU
+$load bra_no_ID_BU
 $load kno_ID_IOX
 $load bra_ID_IOX
 $load inp_ID_IOX
@@ -204,14 +201,6 @@ $load ID_out_ID_IOX
 $load kno_no_ID_IOX
 $load bra_o_ID_IOX
 $load bra_no_ID_IOX
-$load kno_ID_UbaseX
-$load bra_ID_UbaseX
-$load inp_ID_UbaseX
-$load out_ID_UbaseX
-$load ID_out_ID_UbaseX
-$load kno_no_ID_UbaseX
-$load bra_o_ID_UbaseX
-$load bra_no_ID_UbaseX
 $load kno_ID_Y_in
 $load bra_ID_Y_in
 $load inp_ID_Y_in
@@ -227,11 +216,13 @@ $load out_ID_Y_out
 $load ID_out_ID_Y_out
 $load bra_o_ID_Y_out
 $load bra_no_ID_Y_out
+$load ID_endovars_exoincalib_E
 $load ID_endovars_exoincalib_C
 $load ID_tech_endoincalib_sigma
 $load minobj_sigma_subset
 $load ID_sumUaggs
-$load sumXaggs
+$load sumXinEaggs
+$load sumXrestaggs
 $load M_subset
 $load EOP_inp
 $load EOP_out
@@ -269,17 +260,19 @@ $load map_ID_EC
 $load map_ID_CU
 $load map_ID_TU
 $load map_ID_TX
-$load map_ID_IOCU
+$load map_ID_BU
 $load map_ID_IOX
-$load map_ID_UbaseX
 $load map_ID_Y_in
 $load map_ID_Y_out
 $load ID_params_alwaysexo_mu
 $load ID_tech_endoincalib_mu
 $load minobj_mu_subset
 $load ID_sumU2U
-$load sumX2X
-$load ID_sumX2X
+$load map_sumXrest2X_ID
+$load map_sumXinE2X
+$load map_sumXinE2E
+$load map_sumXinE2baselineinputs
+$load map_U2E
 $load map_M2X
 $load EOP_map_all
 $load map_EOP_CU
@@ -287,6 +280,7 @@ $load map_EOP_TU
 $load map_EOP_TX
 $load EOP_params_alwaysexo_mu
 $load EOP_sumU2U
+$load map_sumXrest2X_EOP
 $load map_M2C
 $GDXIN
 $offMulti

@@ -371,6 +371,57 @@ class simplesumU:
 		RHS = f"sum({nn}$({agg2ind}), {qD2})"
 		return equation(name, getattr(self, agg).doms(), conditions, LHS, RHS)
 
+class sumXinE:
+	def __init__(self):
+		pass
+
+	def add_symbols(self, db, ns):
+		[setattr(self,sym,db[ns[sym]]) for sym in ('n', 'nn', 'nnn', 'nnnn', 'nnnnn', 'qsumX', 'qD', 'map_sumXinE2baselineinputs', \
+												   'sumXinEaggs', 'map_sumXinE2E','map_U2E', 'map_sumXinE2X')]
+
+		[setattr(self, sym, db[sym]) for sym in ('kno_ID_TU', 'map_ID_TU', 'map_ID_TX')] #lavet dårligt, bruger ikke namespace lige pt.
+		# [setattr(self, sym, db[df(sym, ns)]) for sym in ['sumXinEaggs', 'sumXrestaggs']]
+		# if self.state == "ID":
+		# 	[setattr(self, sym, db[df(sym, ns)]) for sym in ['map_sumXrest2X_ID']]
+		# elif self.state == "EOP":
+		# 	[setattr(self, sym, db[df(sym, ns)]) for sym in ['map_sumXrest2X']] #Both mappings so we can construct two blocks
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
+		
+	def add_conditions(self):
+		self.conditions = {'sumXinEaggs': getattr(self, "sumXinEaggs").write()}
+
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+
+	def run(self):
+		nn, nnn, nnnn, nnnnn = self.a("n", [(0, 1)]), self.a("n", [(0, 2)]), self.a("n", [(0, 3)]), self.a("n", [(0, 4)])
+		
+		qsumX = self.a("qsumX")
+		map_sumXinE2baselineinputs = self.a("map_sumXinE2baselineinputs")
+		qD2, qD3, qD4, qD5 = self.a("qD", [(0, 1)]), self.a("qD", [(0, 2)]), self.a("qD", [(0, 3)]), self.a("qD", [(0, 4)])
+		map_sumXinE2E = self.a("map_sumXinE2E")
+		kno_ID_TU = self.a("kno_ID_TU", [(0, 2)])
+		map_ID_TU = self.a("map_ID_TU", [(0, 3), (1, 2)])
+		map_U2E = self.a("map_U2E", [(0, 3)])
+		map_sumXinE2X = self.a("map_sumXinE2X", [(0, 0), (1, 4)])
+		map_ID_TX = self.a("map_ID_TX", [(0, 4), (1, 2)])
+
+		text = self.sumXinE("E_sumXinE", self.conditions["sumXinEaggs"], qsumX, nn, map_sumXinE2baselineinputs, \
+							qD2, map_sumXinE2E, nnn, kno_ID_TU, nnnn, map_ID_TU, map_U2E, qD4, qD3, nnnnn, map_sumXinE2X, map_ID_TX, qD5)
+		return text
+
+	def sumXinE(self, name, condition, qsumX, nn, map_sumXinE2baselineinputs, qD2, map_sumXinE2E, nnn, kno_ID_TU, nnnn, map_ID_TU, map_U2E, qD4, qD3, nnnnn, map_sumXinE2X, map_ID_TX, qD5):
+		LHS = f"{qsumX}"
+		RHS = f"sum({nn}$({map_sumXinE2baselineinputs}), {qD2})"
+		RHS += f" + sum({nn}$({map_sumXinE2E}), sum({nnn}$({kno_ID_TU}), sum({nnnn}$({map_ID_TU} and {map_U2E}), {qD4}) / {qD3} * sum({nnnnn}$({map_sumXinE2X} and {map_ID_TX}), {qD5})))"
+		return equation(name, self.qsumX.doms(), condition, LHS, RHS)
+
+#NY LIGNING SKREVET AF FRA TAVLE: 
+	#E_sumXiNE[n]$(sumXinEaggs[n])..   qsumX[n] = sum(nn$sumXinE2baselineinputs[n, nn], qD[nn]) + sum(nn$suMXinE2E[n, nn], sum(nnn$kno_ID_TU[nnn], [sum(nnnn$map_ID_TU[nnnn, nnn] and map_U2E[nnnn, nn], 
+	#                                            qD[nnnn]]/qD[nnn] * sum(nnnnn$sumXinE2X[n, nnnnn] and map_ID_TX[nnnnn, nnn], qD[nnnnn])
+	#)))
+
 class simplesumX:
 	""" Collection of equations that define a variable as the simple sum of others """
 	def __init__(self, state="ID"):
@@ -378,15 +429,15 @@ class simplesumX:
 
 	def add_symbols(self, db, ns):
 		[setattr(self,sym,db[ns[sym]]) for sym in ('n', 'qsumX', 'qD')]
-		[setattr(self, sym, db[df(sym, ns)]) for sym in ['sumXaggs']]
+		[setattr(self, sym, db[df(sym, ns)]) for sym in ['sumXinEaggs', 'sumXrestaggs']]
 		if self.state == "ID":
-			[setattr(self, sym, db[df(sym, ns)]) for sym in ['ID_sumX2X']]
+			[setattr(self, sym, db[df(sym, ns)]) for sym in ['map_sumXrest2X_ID']]
 		elif self.state == "EOP":
-			[setattr(self, sym, db[df(sym, ns)]) for sym in ['sumX2X']] #Both mappings so we can construct two blocks
+			[setattr(self, sym, db[df(sym, ns)]) for sym in ['map_sumXrest2X_EOP']] #Both mappings so we can construct two blocks
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
 		
 	def add_conditions(self):
-		self.conditions = {'sumXaggs': getattr(self, "sumXaggs").write()}
+		self.conditions = {'sumXrestaggs': getattr(self, "sumXrestaggs").write()}
 
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
@@ -399,11 +450,11 @@ class simplesumX:
 		qD2 = self.a("qD", [(0, 1)])
 
 		if self.state == "ID":
-			ID_sumX2X = self.a("ID_sumX2X")
-			text = self.simplesum("E_sumX_ID", self.conditions["sumXaggs"], ID_sumX2X, qsumX, qD2, nn)
+			sumXrest2X_ID = self.a("map_sumXrest2X_ID")
+			text = self.simplesum("E_sumX_ID", self.conditions["sumXrestaggs"], sumXrest2X_ID, qsumX, qD2, nn)
 		elif self.state == "EOP":
-			sumX2X = self.a("sumX2X")
-			text = self.simplesum("E_sumX", self.conditions["sumXaggs"], sumX2X, qsumX, qD2, nn)
+			sumXrest2X_EOP = self.a("map_sumXrest2X_EOP")
+			text = self.simplesum("E_sumX", self.conditions["sumXrestaggs"], sumXrest2X_EOP, qsumX, qD2, nn)
 		return text
 
 	def simplesum(self, name, condition, agg2ind, qagg, qD2, nn):
@@ -412,10 +463,7 @@ class simplesumX:
 		return equation(name, self.qsumX.doms(), condition, LHS, RHS)
 
 
-    #NY LIGNING SKREVET AF FRA TAVLE: 
-    #E_sumXiNE[n]$(sumXinaggs[n])..   qsumX[n] = sum(nn$sumXinE2baselineinputs[n, nn], qD[nn]) + sum(nn$suMXinE2E, sum(nnn$kno_ID_TU[nnn], [sum(nnnn$map_ID_TU[nnnn, nnn] and map_U2E[nnnn, nn], 
-    #                                            qD[nnnn]]/qD[nnn] * sum(nnnnn$sumXinE2X[n, nnnnn] and map_ID_TX[nnnnn, nnn], qD[nnnnn])
-    #)))
+	
 
 
 class minimize_object:
@@ -475,7 +523,7 @@ class emission_accounts:
 		self.state = state
 
 	def add_symbols(self, db, ns):
-		syms = ("n", "phi", "M0", "map_M2X", "M_subset", "sumXaggs", "qsumX", "pMhat", "PwT", "PwThat", "ID_inp")
+		syms = ("n", "phi", "M0", "map_M2X", "M_subset", "sumXinEaggs", "qsumX", "pMhat", "PwT", "PwThat", "ID_inp", "sumXrestaggs")
 		if self.state == "EOP":
 			syms += ("EOP_inp",)
 		[setattr(self,sym,db[ns[sym]]) for sym in syms]
@@ -505,20 +553,21 @@ class emission_accounts:
 		# PbT, PbT2 = self.a("PbT"), self.a("PbT", [(0,1)])
 		# muG, muG2 = self.a("muG"), self.a("muG", [(0,1)])
 		# sigmaG, sigmaG2 = self.a("sigmaG"), self.a("sigmaG", [(0,1)])
-		sumXaggs, qsumX = self.a("sumXaggs", [(0,1)]), self.a("qsumX", [(0,1)])
+		sumXinEaggs, sumXrestaggs = self.a("sumXinEaggs", [(0,1)]), self.a("sumXrestaggs", [(0,1)]) 
+		qsumX = self.a("qsumX", [(0,1)])
 		PwThat = self.a("PwThat")
 		PwT = self.a("PwT")
 		pMhat, pMhat2 = self.a("pMhat"), self.a("pMhat", [(0,1)])
 		if self.state == "ID":
-			text = self.preabatement_emissions(name, self.conditions["M_subset"], nn, phi, M0, sumXaggs, qsumX) + "\n\t"
+			text = self.preabatement_emissions(name, self.conditions["M_subset"], nn, phi, M0, sumXinEaggs, qsumX, sumXrestaggs) + "\n\t"
 			text += self.adjusted_inputprice(name, "ID", self.conditions["ID_PwThat"], PwThat, PwT, nn, map_M2X2, phi2, pMhat2)
 		elif self.state == "EOP":
 			text = self.adjusted_inputprice(name, "EOP", self.conditions["EOP_PwThat"], PwThat, PwT, nn, map_M2X2, phi2, pMhat2)
 		return text
 
-	def preabatement_emissions(self, name, condition, nn, phi, M0, sumXaggs, qsumX):
+	def preabatement_emissions(self, name, condition, nn, phi, M0, sumXinEaggs, qsumX, sumXrestaggs):
 		LHS = f"{M0}"
-		RHS = f"sum({nn}$({sumXaggs}), {phi}*{qsumX})"
+		RHS = f"sum({nn}$({sumXinEaggs}), {phi}*{qsumX}) + sum({nn}$({sumXrestaggs}), {phi}*{qsumX})"
 		return equation(f"E_preabatementM_{name}", self.M0.doms(), condition, LHS, RHS)
 
 	def adjusted_inputprice(self, name, state, condition, PwThat, PwT, nn, map_M2X, phi, pMhat):
@@ -531,7 +580,7 @@ class EOP:
 		pass
 
 	def add_symbols(self, db, ns):
-		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "phi", "M", "M0", "map_M2C", "map_M2X", "M_subset", "sumXaggs", \
+		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "phi", "M", "M0", "map_M2C", "map_M2X", "M_subset", \
 													"qsumX", "qS", "theta", "muG", "sigmaG", "pM", "PbT", "EOP_out", "pMhat", "PwT", "PwThat")]
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 

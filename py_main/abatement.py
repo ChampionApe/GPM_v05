@@ -35,7 +35,7 @@ class abate(gmspython):
 	# ---			1: Retrieve namespace from nesting trees		--- #
 	def namespace_global_sets(self,nt,tech_db_syms,state,kwargs):
 		""" retrieve attributes from global tree"""
-		std_sets = {**{setname: getattr(nt,setname) for setname in ('n','nn','nnn') if setname in nt.__dict__}, \
+		std_sets = {**{setname: getattr(nt,setname) for setname in ('n','nn','nnn', 'nnnn', 'nnnnn') if setname in nt.__dict__}, \
 					**{state + "_" + setname: getattr(nt, state + "_" + setname) for setname in ('inp','out','int','wT','map_all','kno_out','kno_inp') if state + "_" + setname in nt.__dict__}}
 		self.sector = True if hasattr(nt,'s') else False
 		for sym in tech_db_syms:
@@ -107,7 +107,7 @@ class abate(gmspython):
 		elif var == 'qsumU':
 			return pd.Series(10, index = self.get('ID_sumUaggs'), name = self.n(var))
 		elif var == 'qsumX':
-			return pd.Series(10, index = self.get('sumXaggs'), name = self.n(var))
+			return pd.Series(10, index = self.get("sumXinEaggs").union(self.get("sumXrestaggs")), name = self.n(var))
 		elif var == "M0":
 			return pd.Series(5, index = self.get("M_subset"), name = self.n(var))
 		elif var == "phi":
@@ -166,14 +166,15 @@ class abate(gmspython):
 			return [{"pMhat":self.g("M_subset")}]
 		#QUANTITIES
 		elif group == 'g_ID_quants_alwaysendo':
-			return [{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":self.g("ID_endovars_exoincalib_C")}]}}]
+			return [{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":{"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}}]}}]
+			# return [{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":[{"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}]}]}}]
 		elif group == 'g_EOP_quants_alwaysendo':
 			return [{'qD': {"and":[{"or":[self.g('EOP_int'), self.g("EOP_inp")]}]}, "qS":self.g("EOP_out")}] #component outputs are endogenous in the EOP world
 		elif group == 'g_ID_quants_alwaysexo':
 			return [{'qS': {"and":[self.g('ID_out')]}}]
 		elif group == 'g_ID_quants_exoincalib':
 			#sumXaggs does not distinguish between ID and EOP, it is always the same:
-			return [{"qD":self.g("ID_endovars_exoincalib_C"), "qsumU":self.g("ID_sumUaggs"), "qsumX":self.g("sumXaggs")}] 
+			return [{"qD":{"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}, "qsumU":self.g("ID_sumUaggs"), "qsumX":{"or":[self.g('sumXinEaggs'), self.g("sumXrestaggs")]}}] 
 		elif group == 'g_EOP_quants_exoincalib':
 			return [{"qsumU":self.g("EOP_sumUaggs")}]
 		#EMISSION ACCOUNTS
@@ -215,7 +216,7 @@ class abate(gmspython):
 	def endo_groups(self):
 		""" Collect endogenous groups """
 		n = self.model.settings.name+'_'
-		gs = ('g_ID_prices_alwaysendo', 'g_ID_quants_alwaysendo', 'g_emissions_alwaysendo')			
+		gs = ('g_ID_prices_alwaysendo', 'g_emissions_alwaysendo', 'g_ID_quants_alwaysendo')
 		if self.state.startswith("EOP"):
 			gs = gs + ("g_EOP_prices_alwaysendo", 'g_prices_endogenouswithEOP', "g_EOP_quants_alwaysendo", "g_emissions_endoinEOP")
 			if self.state == "EOPcalibrate":
@@ -246,7 +247,8 @@ class abate(gmspython):
 		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("ID_")}, \
 					**{f"M_{self.model.settings.name}_simplesumU_ID":self.init_simplesumU("ID"), \
 						f"M_{self.model.settings.name}_simplesumX_ID":self.init_simplesumX("ID"), \
-						f"M_ID_{self.model.settings.name}_emissionaccounts":self.init_emission_accounts("ID")}}
+						f"M_ID_{self.model.settings.name}_emissionaccounts":self.init_emission_accounts("ID"), \
+						f"M_{self.model.settings.name}_sumXinE":self.init_sumXinE()}}
 		if self.state.startswith("EOP"):
 		# if self.use_EOP:
 			blocks[f"M_EOP_{self.model.settings.name}_emissionaccounts"] = self.init_emission_accounts("EOP")
@@ -262,6 +264,8 @@ class abate(gmspython):
 	def mblocks(self):
 		blocks = [f"M_{tree}" for tree in self.ns_local if tree.startswith("ID_")] + [f"M_{self.model.settings.name}_simplesumU_ID"]
 		blocks += [f"M_ID_{self.model.settings.name}_emissionaccounts"]
+		blocks += [f"M_{self.model.settings.name}_sumXinE"]
+
 		if self.state.startswith("EOP"):
 		# if self.use_EOP:
 			blocks += [f"M_{tree}" for tree in self.ns_local if tree.startswith("EOP_")]
@@ -286,6 +290,12 @@ class abate(gmspython):
 		simplesumX.add_symbols(self.model.database, self.ns)
 		simplesumX.add_conditions()
 		return simplesumX.run()
+
+	def init_sumXinE(self):
+		sumXinE = getattr(gams_abatement, "sumXinE")()
+		sumXinE.add_symbols(self.model.database, self.ns)
+		sumXinE.add_conditions()
+		return sumXinE.run()
 
 	def init_emission_accounts(self, state):
 		emission_accounts = getattr(gams_abatement, "emission_accounts")(state=state)

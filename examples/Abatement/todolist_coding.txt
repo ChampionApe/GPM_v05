@@ -5,3 +5,14 @@ PS: Lige nu er det implementeret lidt ad-hoc i bunden af initialize_variables ve
 
 - Gør således at hver state får sin egen run-fil, og collect-fil (ligesom de allerede har med blocks, groups etc.). Det medfører at man slipper for at køre m.reset_settings() efter man har skiftet state. Lige nu er dette nødvendigt, da den eksisterende run- og collect-fil fra den anden state vil forblive brugt og ikke nulstillet.
 
+- Der opstår tilsyneladende et problem når jeg laver dette nestede condition tree (group) for qD:
+
+[{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":{"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}}]}}]
+
+Når jeg laver denne, så virker modellen, men at kalde m.endo_var("qD") smider en fejl. Fejlen ender i metoden translate_k2pd(self, l, k) med teksten "TypeError: bad operand type for unary ~: 'NoneType'".
+Det interessante er, at hvis jeg laver gruppedefinitionen om til 
+
+[{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":[{"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}]}]}}]
+
+dvs. laver value for "not" til en liste, så virker m.endo_var("qD") korrekt, men modellen kan ikke igangsættes.  Den fejler i write_groups(), rctree_gams(), mere specifikt metoden .d().
+

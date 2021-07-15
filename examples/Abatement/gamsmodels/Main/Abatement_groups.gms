@@ -3,12 +3,12 @@ PwThat[n]$((ID_int[n] or ID_inp[n])) ""
 PbT[n]$(ID_out[n]) ""
 ;
 
-$GROUP Abatement_g_ID_quants_alwaysendo
-qD[n]$(((ID_int[n] or ID_inp[n]) and not ID_endovars_exoincalib_C[n])) ""
-;
-
 $GROUP Abatement_g_emissions_alwaysendo
 M0[n]$(M_subset[n]) ""
+;
+
+$GROUP Abatement_g_ID_quants_alwaysendo
+qD[n]$(((ID_int[n] or ID_inp[n]) and not (ID_endovars_exoincalib_C[n] or ID_endovars_exoincalib_E[n]))) ""
 ;
 
 $GROUP Abatement_g_EOP_prices_alwaysendo
@@ -30,9 +30,9 @@ M[n]$(M_subset[n]) ""
 ;
 
 $GROUP Abatement_g_ID_quants_exoincalib
-qD[n]$(ID_endovars_exoincalib_C[n]) ""
+qD[n]$((ID_endovars_exoincalib_C[n] or ID_endovars_exoincalib_E[n])) ""
 qsumU[n]$(ID_sumUaggs[n]) ""
-qsumX[n]$(sumXaggs[n]) ""
+qsumX[n]$((sumXinEaggs[n] or sumXrestaggs[n])) ""
 ;
 
 $GROUP Abatement_g_EOP_quants_exoincalib
@@ -83,8 +83,8 @@ sigmaG[n]$(EOP_out[n]) ""
 ;
 
 @load_level(Abatement_g_ID_prices_alwaysendo,%qmark%%ID_0%");
-@load_level(Abatement_g_ID_quants_alwaysendo,%qmark%%ID_0%");
 @load_level(Abatement_g_emissions_alwaysendo,%qmark%%ID_0%");
+@load_level(Abatement_g_ID_quants_alwaysendo,%qmark%%ID_0%");
 @load_level(Abatement_g_EOP_prices_alwaysendo,%qmark%%ID_0%");
 @load_level(Abatement_g_prices_endogenouswithEOP,%qmark%%ID_0%");
 @load_level(Abatement_g_EOP_quants_alwaysendo,%qmark%%ID_0%");
