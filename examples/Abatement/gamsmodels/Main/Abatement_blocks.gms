@@ -22,15 +22,14 @@ $BLOCK M_ID_TX
 	E_q_nout_ID_TX[n]$(bra_no_ID_TX[n])..	qD[n] =E= sum(nn$(map_ID_TX[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
 $BLOCK M_ID_BU 
-	E_zp_ID_BU[n]$(kno_ID_BU[n])..	PwThat[n]*qD[n] =E= sum(nn$(map_ID_BU[nn,n] and ID_out[nn]), qS[nn]*PbT[nn])+sum(nn$(map_ID_BU[nn,n] and not ID_out[nn]), qD[nn]*PwThat[nn]);
-	E_q_out_ID_BU[n]$(bra_o_ID_BU[n])..	qS[n] =E= sum(nn$(map_ID_BU[n,nn]), mu[n,nn] * (PbT[n]/PwThat[nn])**(-eta[nn]) * qD[nn]/(sum(nnn$(map_ID_BU[nnn,nn] and ID_out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwThat[nn])**(-eta[nn]))+sum(nnn$(map_ID_BU[nnn,nn] and not ID_out[nnn]), mu[nnn,nn]*(PwThat[nnn]/PwThat[nn])**(-eta[nn]))));
-	E_q_nout_ID_BU[n]$(bra_no_ID_BU[n])..	qD[n] =E= sum(nn$(map_ID_BU[n,nn]), mu[n,nn] * (PwThat[n]/PwThat[nn])**(-eta[nn]) * qD[nn]/(sum(nnn$(map_ID_BU[nnn,nn] and ID_out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwThat[nn])**(-eta[nn]))+sum(nnn$(map_ID_BU[nnn,nn] and not ID_out[nnn]), mu[nnn,nn]*(PwThat[nnn]/PwThat[nn])**(-eta[nn]))));
+	E_zp_ID_BU[n]$(bra_no_ID_BU[n])..	PwThat[n] =E= sum(nn$(map_ID_BU[n,nn]), mu[n,nn]*PwThat[nn]) ;
+	E_q_nout_ID_BU[n]$(kno_ID_BU[n])..	qD[n] =E= sum(nn$(map_ID_BU[nn,n]), mu[nn,n]*qD[nn]) ;
 $ENDBLOCK
-$BLOCK M_ID_IOX 
-	E_zp_out_ID_IOX[n]$(ID_out_ID_IOX[n])..	PbT[n]*qS[n] =E= sum(nn$(map_ID_IOX[nn,n]), qD[nn]*PwThat[nn]);
-	E_zp_nout_ID_IOX[n]$(kno_no_ID_IOX[n])..	PwThat[n]*qD[n] =E= sum(nn$(map_ID_IOX[nn,n]), qD[nn]*PwThat[nn]);
-	E_q_out_ID_IOX[n]$(bra_o_ID_IOX[n])..	qD[n] =E= sum(nn$(map_ID_IOX[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
-	E_q_nout_ID_IOX[n]$(bra_no_ID_IOX[n])..	qD[n] =E= sum(nn$(map_ID_IOX[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
+$BLOCK M_ID_BX 
+	E_zp_out_ID_BX[n]$(ID_out_ID_BX[n])..	PbT[n]*qS[n] =E= sum(nn$(map_ID_BX[nn,n]), qD[nn]*PwThat[nn]);
+	E_zp_nout_ID_BX[n]$(kno_no_ID_BX[n])..	PwThat[n]*qD[n] =E= sum(nn$(map_ID_BX[nn,n]), qD[nn]*PwThat[nn]);
+	E_q_out_ID_BX[n]$(bra_o_ID_BX[n])..	qD[n] =E= sum(nn$(map_ID_BX[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
+	E_q_nout_ID_BX[n]$(bra_no_ID_BX[n])..	qD[n] =E= sum(nn$(map_ID_BX[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
 $BLOCK M_ID_Y_in 
 	E_zp_out_ID_Y_in[n]$(ID_out_ID_Y_in[n])..	PbT[n]*qS[n] =E= sum(nn$(map_ID_Y_in[nn,n]), qD[nn]*PwThat[nn]);
@@ -55,6 +54,13 @@ $BLOCK M_ID_Abatement_emissionaccounts
 $ENDBLOCK
 $BLOCK M_Abatement_sumXinE 
 	E_sumXinE[n]$(sumXinEaggs[n])..	qsumX[n] =E= sum(nn$(map_sumXinE2baselineinputs[n,nn]), qD[nn]) + sum(nn$(map_sumXinE2E[n,nn]), sum(nnn$(kno_ID_TU[nnn]), sum(nnnn$(map_ID_TU[nnnn,nnn] and map_U2E[nnnn,nn]), qD[nnnn]) / qD[nnn] * sum(nnnnn$(map_sumXinE2X[n,nnnnn] and map_ID_TX[nnnnn,nnn]), qD[nnnnn])));
+$ENDBLOCK
+$BLOCK M_Abatement_currentapplications_ID 
+	E_currentapplications_ID[n]$(currapp_ID_subset[n])..	currapp_ID[n] =E= sum([nn, nnn]$(map_currapp2sumUE[n,nn,nnn]), qsumU[nn]/qD[nnn]);
+	E_currapp_modified[n]$(currapp_ID_subset[n])..	currapp_ID_modified[n] =E=  sum(nn$(map_currapp_ID2T[n,nn]), sum(nnn$(map_currapp_ID2E[n,nnn]), sum(nnnn$(map_U2E[nnnn,nnn] and map_ID_TU[nnnn,nn]), sum(nnnnn$(map_ID_CU[nnnn,nnnnn]), (mu[nnnn,nnnnn] * 
+ exp((PwThat[nnnnn] - PwThat[nnnn])*sigma[nnnnn])) / (sum(nnnnnn$(map_ID_CU[nnnnnn,nnnnn] and not bra_no_ID_BU[nnnnnn]), mu[nnnnnn,nnnnn] * exp((PwThat[nnnnn] - PwThat[nnnnnn]) * sigma[nnnnn])) + 
+ sum(nnnnnn$(map_ID_CU[nnnnnn,nnnnn] and bra_no_ID_BU[nnnnnn]), mu[nnnnnn,nnnnn] * exp((PwThat[nnnnn] - (gamma_tau[nn,nnn] * sum(nnnnnnn$(map_ID_BU[nnnnnn,nnnnnnn]), PwThat[nnnnnnn]))) * sigma[nnnnn]))) * 
+ (qD[nnnnn]/qD[nnn])))));
 $ENDBLOCK
 $BLOCK M_EOP_Abatement_emissionaccounts 
 	E_EOP_adjusted_inputprice_emission_accounts[n]$(EOP_inp[n])..	PwThat[n] =E= PwT[n] + sum(nn$(map_M2X[nn,n]), phi[nn,n] * pMhat[nn]);
@@ -87,4 +93,10 @@ $BLOCK M_Abatement_simplesumU_EOP
 $ENDBLOCK
 $BLOCK M_Abatement_simplesumX_EOP 
 	E_sumX[n]$(sumXrestaggs[n])..	qsumX[n] =E= sum(nn$(map_sumXrest2X_EOP[n,nn]), qD[nn]);
+$ENDBLOCK
+$BLOCK M_Abatement_currentapplications_EOP 
+	E_currentapplications_EOP[n]$(currapp_EOP_subset[n])..	currapp_EOP[n] =E= sum([nn, nnn]$(map_currapp2sumUM[n,nn,nnn]), qsumU[nn]/M0[nnn]);
+$ENDBLOCK
+$BLOCK M_EOP_Abatement_minobj 
+	E_EOP_minobj..	minobj =E= sum(n$(kno_no_ID_TX[n]), sum(nn$(map_ID_TC[n,nn]), Sqr(sum(nnn$(map_ID_BUC[nnn,nn]), sum(nnnn$(map_ID_BU[nnn,nnnn]), mu[nnn,nnnn])) - sum(nnnnn$(map_ID_EC[nn,nnnnn]), gamma_tau[n,nnnnn])) ) ) + weight_mu * sum([n,nn]$(map_ID_nonBUC[n,nn]), Sqr(mu[n,nn] - mubar[n,nn])) + weight_sigmaG * sum(n$(EOP_out[n]), Sqr(sigmaG[n] - minobj_sigmaG[n])) + weight_muG * sum(n$(EOP_out[n]), Sqr(muG[n] - minobj_muG[n]));
 $ENDBLOCK

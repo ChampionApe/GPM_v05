@@ -339,6 +339,63 @@ class MNL_out:
 		RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
 		return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
 
+
+class linear_out:
+	""" collection of price indices / demand systems for CET nests """
+	def __init__(self,version='std',state="ID",**kwargs):
+		""" Add version of the model """
+		self.version = version
+		self.state = state
+
+	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
+		for sym in ['map_']:
+			setattr(self,sym,db[ns_local[sym]])
+		for sym in ('PbT','PwThat','qD','qS','mu','n'):
+			setattr(self,sym,db[df(sym,ns_global)])
+		for sym in ['out']:
+			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
+
+	def add_conditions(self,db,ns_tree):
+		self.conditions = {'q_nout': db[ns_tree['knots']].write(), 'q_out': db[ns_tree['bra_o']].write(),'zp': db[ns_tree['bra_no']].write()}
+
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+
+	def run(self,name,conditions=None):
+		conditions = self.conditions if conditions is None else conditions
+		nn,nnn = self.a('n',[(0,1)]), self.a('n',[(0,2)])
+		mu,mu2,mu3 = self.a('mu'), self.a('mu',[(0,1), (1,0)]), self.a('mu',[(0,2)])
+		out2,out3 = self.a(self.state + "_" + 'out',[(0,1)]),self.a(self.state + "_" + 'out',[(0,2)])
+		map_,map_2,map_3 = self.a('map_'),self.a('map_',[(0,1),(1,0)]), self.a('map_',[(0,2)])
+		PwThat,PwThat2,PwThat3 = self.a('PwThat'), self.a('PwThat',[(0,1)]), self.a('PwThat',[(0,2)])
+		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
+		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
+		qS,qS2 = self.a('qS'),self.a('qS',[(0,1)])
+		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_,mu,PwThat2,PwThat)+'\n\t'
+		# text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=True)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,map_2,mu2,qD,qD2,output=False)
+		return text
+
+	def demand(self,name,condition,nn,map_2,mu2,qD,qD2,output=False):
+		if output is False:
+			RHS = f"""sum({nn}$({map_2}), {mu2}*{qD2}) """
+			# RHS = f"""sum({nn}$({map_}), {mu} * exp(({PwThat}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}-{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
+			return equation(name,self.qD.doms(),condition,qD,RHS)
+		# else:
+		# 	RHS =  f"""sum({nn}$({map_}), 1/{mu}*{qD2}) """
+		# 	# RHS = f"""sum({nn}$({map_}), {mu} * exp(({PbT}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}/{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
+		# 	return equation(name,self.qS.doms(),conditions,qS,RHS)
+
+	def zero_profit(self,name,conditions,nn,map_,mu,PwThat2,PwThat):
+		RHS = f"""sum({nn}$({map_}), {mu}*{PwThat2}) """
+		
+		# RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
+		return equation(name,self.PwThat.doms(),conditions,f"{PwThat}",RHS)
+
+	#
+
 class simplesumU:
 	""" Collection of equations that define a variable as the simple sum of others """
 	def __init__(self, state="ID"):
@@ -370,6 +427,82 @@ class simplesumU:
 		LHS = f"{qagg}"
 		RHS = f"sum({nn}$({agg2ind}), {qD2})"
 		return equation(name, getattr(self, agg).doms(), conditions, LHS, RHS)
+
+class currentapplications:
+
+	def __init__(self, state="ID"):
+		self.state = state
+
+	def add_symbols(self, db, ns):
+		syms_in_ns = ['n', 'qsumU', 'qD', "currapp_ID", "currapp_ID_subset", "map_currapp2sumUE", "currapp_EOP", "currapp_EOP_subset", "map_currapp2sumUM", "M0"]
+		syms_in_ns += ["mu", "currapp_ID_modified", "currapp_ID_subset", "map_currapp_ID2T", "map_currapp_ID2E", "map_U2E",  "PwThat", "sigma", "gamma_tau", "qD"]
+		syms = ["map_ID_BU", "map_ID_CU", "map_ID_TU", "bra_no_ID_BU"]
+		[setattr(self,sym,db[ns[sym]]) for sym in syms_in_ns]
+		[setattr(self, sym, db[sym]) for sym in syms]
+		# [setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns)]) for sym in ['currapp_ID_subset', ]]
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
+
+	def add_conditions(self):
+		self.conditions = {'currapp_ID': getattr(self, "currapp_ID_subset").write(), 'currapp_EOP': getattr(self, "currapp_EOP_subset").write()}
+
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+
+	def run(self, type_f_UC=None):
+		nn, nnn, nnnn = self.a("n", [(0,1)]), self.a("n", [(0,2)]), self.a("n", [(0,3)])
+		nnnnn, nnnnnn, nnnnnnn =  self.a("n", [(0,4)]), self.a("n", [(0,5)]), self.a("n", [(0,6)])
+		currapp = self.a("currapp_" + self.state)
+		if self.state == "ID":
+			currapp2sumU_upper = self.a("map_currapp2sumUE")
+		elif self.state == "EOP":
+			currapp2sumU_upper = self.a("map_currapp2sumUM")
+		qsumU2 = self.a("qsumU", [(0, 1)])
+		if self.state == "ID":
+			quant3 = self.a("qD", [(0, 2)])
+		elif self.state == "EOP":
+			quant3 = self.a("M0", [(0, 2)])
+		#currapp modified
+
+		currapp_ID_modified = self.a("currapp_ID_modified")
+		map_currapp_ID2T = self.a("map_currapp_ID2T")
+		map_currapp_ID2E = self.a("map_currapp_ID2E", [(0,0), (1,2)])
+		map_U2E = self.a("map_U2E", [(0, 3), (1,2)])
+		map_ID_TU = self.a("map_ID_TU", [(0, 3), (1,1)])
+		map_ID_CU45, map_ID_CU65 = self.a("map_ID_CU", [(0,3), (1,4)]), self.a("map_ID_CU", [(0,5), (1,4)])
+		PwThat4, PwThat5, PwThat6, PwThat7 = self.a("PwThat", [(0,3)]), self.a("PwThat", [(0,4)]), self.a("PwThat", [(0,5)]), self.a("PwThat", [(0,6)])
+		sigma5 = self.a("sigma", [(0, 4)])
+		bra_no_ID_BU6 = self.a("bra_no_ID_BU", [(0, 5)])
+		gamma_tau23 = self.a("gamma_tau", [(0,1), (1,2)])
+		map_ID_BU67 = self.a("map_ID_BU", [(0, 5), (1,6)])
+		qD3, qD5 = self.a("qD", [(0, 2)]), self.a("qD", [(0, 4)])
+		mu45, mu65 = self.a("mu", [(0,3), (1,4)]), self.a("mu", [(0,5), (1,4)])
+		
+		name = "E_currentapplications_" + self.state
+		doms = getattr(self, "currapp_" + self.state).doms()
+		text = self.currentapplication(name, self.conditions["currapp_" + self.state], doms, currapp, nn, nnn, currapp2sumU_upper, qsumU2, quant3)
+		if self.state == "ID":
+			text += "\n\t" + self.eq_currapp_modified(type_f_UC, currapp_ID_modified, nn, nnn, map_currapp_ID2T, map_currapp_ID2E, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu45, PwThat5, PwThat4, sigma5, \
+										nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau23, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3)
+		return text
+
+	def currentapplication(self, name, condition, doms, currapp, nn, nnn, currapp2sumU_upper, qsumU2, quant3):
+		LHS = f"{currapp}"
+		RHS = f"sum([{nn}, {nnn}]$({currapp2sumU_upper}), {qsumU2}/{quant3})"
+		return equation(name, doms, condition, LHS, RHS)
+
+	def eq_currapp_modified(self, type_f_UC, currapp_ID_modified, nn, nnn, map_currapp_ID2T, map_currapp_ID2E, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu4, PwThat5, PwThat4, sigma5, \
+							nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau23, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3):
+		LHS = f"""{currapp_ID_modified}"""
+		if type_f_UC == "MNL":
+			RHS = f" sum({nn}$({map_currapp_ID2T}), sum({nnn}$({map_currapp_ID2E}), sum({nnnn}$({map_U2E} and {map_ID_TU}), sum({nnnnn}$({map_ID_CU45}), ({mu4} * \n" + \
+				  f" exp(({PwThat5} - {PwThat4})*{sigma5})) / (sum({nnnnnn}$({map_ID_CU65} and not {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - {PwThat6}) * {sigma5})) + \n"  + \
+				  f" sum({nnnnnn}$({map_ID_CU65} and {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - ({gamma_tau23} * sum({nnnnnnn}$({map_ID_BU67}), {PwThat7}))) * {sigma5}))) * \n" + \
+				  f" ({qD5}/{qD3})))))"
+		else:
+			RHS = f""" NOOOOOO """
+			#f"""sum({nn}$({map_}), {mu} * exp(({PbT2}-{PwThat})*{sigma2}) * {qS2}/ sum({nnn}$({map_3}), {mu3}*exp(({PbT2}-{PwThat3})*{sigma2})))"""
+		return equation("E_currapp_modified", self.currapp_ID_modified.doms(), self.conditions["currapp_ID"], LHS, RHS)
 
 class sumXinE:
 	def __init__(self):
@@ -417,10 +550,8 @@ class sumXinE:
 		RHS += f" + sum({nn}$({map_sumXinE2E}), sum({nnn}$({kno_ID_TU}), sum({nnnn}$({map_ID_TU} and {map_U2E}), {qD4}) / {qD3} * sum({nnnnn}$({map_sumXinE2X} and {map_ID_TX}), {qD5})))"
 		return equation(name, self.qsumX.doms(), condition, LHS, RHS)
 
-#NY LIGNING SKREVET AF FRA TAVLE: 
 	#E_sumXiNE[n]$(sumXinEaggs[n])..   qsumX[n] = sum(nn$sumXinE2baselineinputs[n, nn], qD[nn]) + sum(nn$suMXinE2E[n, nn], sum(nnn$kno_ID_TU[nnn], [sum(nnnn$map_ID_TU[nnnn, nnn] and map_U2E[nnnn, nn], 
 	#                                            qD[nnnn]]/qD[nnn] * sum(nnnnn$sumXinE2X[n, nnnnn] and map_ID_TX[nnnnn, nnn], qD[nnnnn])
-	#)))
 
 class simplesumX:
 	""" Collection of equations that define a variable as the simple sum of others """
@@ -462,59 +593,96 @@ class simplesumX:
 		RHS = f"sum({nn}$({agg2ind}), {qD2})"
 		return equation(name, self.qsumX.doms(), condition, LHS, RHS)
 
-
-	
-
-
 class minimize_object:
 	def __init__(self, state="IDcalibrate"):
 		self.state = state
 
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "minobj", "mu", "minobj_mu", "sigma", "minobj_sigma", "minobj_sigma_subset", "minobj_mu_subset", \
-													"muG", "sigmaG", "minobj_muG", "minobj_sigmaG", "weight_sigma", "weight_mu", "EOP_out", "weight_sigmaG", "weight_muG")]
+		[setattr(self,sym,db[ns[sym]]) for sym in ("n", "minobj", "mu", "mubar", "map_ID_nonBUC", "map_ID_TC", "map_ID_BUC", \
+													"currapp_ID_modified", "currapp_ID_subset", "map_U2E", "PwThat", \
+													"sigma", "gamma_tau", "qD", \
+													"muG", "sigmaG", "minobj_muG", "minobj_sigmaG", "weight_mu", "EOP_out", "weight_sigmaG", "weight_muG")]
+		[setattr(self, sym, db[sym]) for sym in ['kno_no_ID_TX', "map_ID_BU", "map_ID_CU", "map_ID_TU", "bra_no_ID_BU", "map_ID_EC"]] #lavet dårligt, bruger ikke namespace lige pt.
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 
-	# def add_conditions(self):
-	# 	self.conditions = {'sumUaggs': self.sumUaggs.write(), 'sumXaggs': self.sumXaggs.write()}
+	def add_conditions(self):
+		self.conditions = {'currapp_ID': getattr(self, "currapp_ID_subset").write()}
 
 	def run(self):
-		n, nn = self.a("n"), self.a("n", [(0,1)])
+		n, nn, nnn, nnnn = self.a("n"), self.a("n", [(0,1)]), self.a("n", [(0,2)]), self.a("n", [(0,3)])
+		nnnnn, nnnnnn, nnnnnnn =  self.a("n", [(0,4)]), self.a("n", [(0,5)]), self.a("n", [(0,6)])
 		minobj = self.a("minobj")
-		mu, sigma = self.a("mu"), self.a("sigma")
+		mu, mu34 = self.a("mu"), self.a("mu", [(0,2), (1,3)])
+		# mu4, mu65 = self.a("mu", [(0,3), (1,4)]), self.a("mu", [(0,5), (1,4)])
 		#ID
-		minobj_mu, minobj_sigma = self.a("minobj_mu"), self.a("minobj_sigma")
-		minobj_mu_subset = self.a("minobj_mu_subset")
-		minobj_sigma_subset = self.a("minobj_sigma_subset")
+		map_ID_nonBUC = self.a("map_ID_nonBUC")
+		kno_no_ID_TX = self.a("kno_no_ID_TX")
+		map_ID_TC = self.a("map_ID_TC")
+		map_ID_BUC3 = self.a("map_ID_BUC", [(0,2), (1,1)])
+		map_ID_BU4 = self.a("map_ID_BU", [(0, 2), (1,3)])
+		gamma_tau15 = self.a("gamma_tau", [(0,0), (1,4)])
+		mubar = self.a("mubar")
+		map_ID_EC25 = self.a("map_ID_EC", [(0, 1), (1,4)])
+		#gamma_tau is implicitly defined
+		# currapp_ID_modified = self.a("currapp_ID_modified")
+		# map_currapp2TE = self.a("map_currapp2TE")
+		# map_U2E = self.a("map_U2E", [(0, 3), (1,2)])
+		# map_ID_TU = self.a("map_ID_TU", [(0, 3), (1,1)])
+		# map_ID_CU45, map_ID_CU65 = self.a("map_ID_CU", [(0,3), (1,4)]), self.a("map_ID_CU", [(0,5), (1,4)])
+		# PwThat4, PwThat5, PwThat6, PwThat7 = self.a("PwThat", [(0,3)]), self.a("PwThat", [(0,4)]), self.a("PwThat", [(0,5)]), self.a("PwThat", [(0,6)])
+		# sigma5 = self.a("sigma", [(0, 4)])
+		# bra_no_ID_BU6 = self.a("bra_no_ID_BU", [(0, 5)])
+		# gamma_tau2 = self.a("gamma_tau", [(0,1)])
+		# map_ID_BU67 = self.a("map_ID_BU", [(0, 5), (1,6)])
+		# qD3, qD5 = self.a("qD", [(0, 2)]), self.a("qD", [(0, 4)])
+
+		# minobj_mu, minobj_sigma = self.a("minobj_mu"), self.a("minobj_sigma")
+		# minobj_mu_subset = self.a("minobj_mu_subset")
+		# minobj_sigma_subset = self.a("minobj_sigma_subset")
 		#EOP
 		muG, sigmaG = self.a("muG"), self.a("sigmaG")
 		minobj_muG, minobj_sigmaG = self.a("minobj_muG"), self.a("minobj_sigmaG")
 		EOP_out = self.a("EOP_out")
 		#Weights
-		weight_mu, weight_sigma = self.a("weight_mu"), self.a("weight_sigma")
+		weight_mu = self.a("weight_mu")
 		weight_muG, weight_sigmaG = self.a("weight_muG"), self.a("weight_sigmaG")
-		if self.state == "IDcalibrate":
-			text = self.ID_minimize_object(n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma)
-		elif self.state == "EOPcalibrate":
-			text = self.EOP_minimize_object(n, nn, minobj, mu, sigma, minobj_mu, muG, minobj_sigma, sigmaG, minobj_mu_subset, \
-											EOP_out, minobj_sigma_subset, weight_mu, weight_sigma, weight_muG, weight_sigmaG, minobj_sigmaG, minobj_muG)
+		# if self.state == "IDcalibrate":
+		# 	text = self.ID_minimize_object(n, nn, minobj, mu, weight_mu, weight_sigma)
+		if self.state == "EOPcalibrate":
+			text = self.EOP_minimize_object(n, nn, minobj, mu, kno_no_ID_TX, map_ID_TC, nnn, map_ID_BUC3, nnnn, map_ID_BU4, mu34, nnnnn, map_ID_EC25, map_ID_nonBUC, mubar, gamma_tau15, \
+											muG, sigmaG, EOP_out, weight_mu, weight_muG, weight_sigmaG, minobj_sigmaG, minobj_muG)
+			# text += self.eq_currapp_modified(type_f_UC, currapp_ID_modified, nn, nnn, map_currapp2TE, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu4, PwThat5, PwThat4, sigma5, \
+			# 								 nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau2, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3)
 		return text
 
-	def ID_minimize_object(self, n, nn, minobj, mu, sigma, minobj_mu, minobj_sigma, minobj_mu_subset, minobj_sigma_subset, weight_mu, weight_sigma):
-		LHS = f"{minobj}"
-		RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), Sqr({sigma} - {minobj_sigma})) + {weight_mu} * sum([{n},{nn}]$({minobj_mu_subset}), Sqr({mu} - {minobj_mu}))" 
-		return equation("E_ID_minobj", "", "", LHS, RHS)
+	# def ID_minimize_object(self, n, nn, minobj, mu, weight_mu, weight_sigma):
+	# 	LHS = f"{minobj}"
+	# 	RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), Sqr({sigma} - {minobj_sigma})) + {weight_mu} * sum([{n},{nn}]$({minobj_mu_subset}), Sqr({mu} - {minobj_mu}))" 
+	# 	return equation("E_ID_minobj", "", "", LHS, RHS)
 
-	def EOP_minimize_object(self, n, nn, minobj, mu, sigma, minobj_mu, muG, minobj_sigma, sigmaG, minobj_mu_subset, \
-							EOP_out, minobj_sigma_subset, weight_mu, weight_sigma, weight_muG, weight_sigmaG, minobj_sigmaG, minobj_muG):
+	# def eq_currapp_modified(self, type_f_UC, currapp_ID_modified, nn, nnn, map_currapp2TE, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu4, PwThat5, PwThat4, sigma5, \
+	# 						nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau2, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3):
+	# 	LHS = f"""{currapp_ID_modified}"""
+	# 	if type_f_UC == "MNL":
+	# 		RHS = f" sum([{nn}, {nnn}]$({map_currapp2TE}), sum({nnnn}$({map_U2E} and {map_ID_TU}), sum({nnnnn}$({map_ID_CU45}), ({mu4} * \n" + \
+	# 			  f" exp(({PwThat5} - {PwThat4})*{sigma5})) / (sum({nnnnnn}$({map_ID_CU65} and not {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - {PwThat6}) * {sigma5})) + \n"  + \
+	# 			  f" sum({nnnnnn}$({map_ID_CU65} and {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - ({gamma_tau2} * sum({nnnnnnn}$({map_ID_BU67}), {PwThat7}))) * {sigma5}))) * \n" + \
+	# 			  f" ({qD5}/{qD3}))))"
+	# 	else:
+	# 		RHS = f""" NOOOOOO """
+	# 		#f"""sum({nn}$({map_}), {mu} * exp(({PbT2}-{PwThat})*{sigma2}) * {qS2}/ sum({nnn}$({map_3}), {mu3}*exp(({PbT2}-{PwThat3})*{sigma2})))"""
+	# 	return equation("E_currapp_modified", self.currapp_ID_modified.doms(), self.conditions["currapp_ID"], LHS, RHS)
+
+	def EOP_minimize_object(self, n, nn, minobj, mu, kno_no_ID_TX, map_ID_TC, nnn, map_ID_BUC3, nnnn, map_ID_BU4, mu34, nnnnn, map_ID_EC25, map_ID_nonBUC, mubar, gamma_tau15, \
+							muG, sigmaG, EOP_out, weight_mu, weight_muG, weight_sigmaG, minobj_sigmaG, minobj_muG):
 		LHS = f"{minobj}"
-		RHS = f"{weight_sigma} * sum({n}$({minobj_sigma_subset}), Sqr({sigma} - {minobj_sigma})) +\n" + \
-				f"{weight_mu} * sum([{n},{nn}]$({minobj_mu_subset}), Sqr({mu} - {minobj_mu})) +\n" +\
-				f"{weight_sigmaG} * sum({n}$({EOP_out}), Sqr({sigmaG} - {minobj_sigmaG})) +\n" + \
+		RHS = f"sum({n}$({kno_no_ID_TX}), sum({nn}$({map_ID_TC}), Sqr(sum({nnn}$({map_ID_BUC3}), sum({nnnn}$({map_ID_BU4}), {mu34})) - sum({nnnnn}$({map_ID_EC25}), {gamma_tau15})) ) ) + " + \
+				f"{weight_mu} * sum([{n},{nn}]$({map_ID_nonBUC}), Sqr({mu} - {mubar})) + " +\
+				f"{weight_sigmaG} * sum({n}$({EOP_out}), Sqr({sigmaG} - {minobj_sigmaG})) + " + \
 				f"{weight_muG} * sum({n}$({EOP_out}), Sqr({muG} - {minobj_muG}))"
 		return equation("E_EOP_minobj", "", "", LHS, RHS)
 

@@ -50,6 +50,7 @@ class nesting_tree:
 	def aggregate_sector(self,**kwargs):
 		""" Aggregate sector from combination of trees. """
 		self.n,self.nn, self.nnn, self.nnnn, self.nnnnn = list(self.trees.values())[0].n, list(self.trees.values())[0].nn, list(self.trees.values())[0].nnn, list(self.trees.values())[0].nnnn, list(self.trees.values())[0].nnnnn
+		self.nnnnnn, self.nnnnnnn = list(self.trees.values())[0].nnnnnn, list(self.trees.values())[0].nnnnnnn
 		self.inp = df('inp',kwargs) # inputs in sector,
 		self.out = df('out',kwargs) # outputs from sector, 
 		self.int = df('int',kwargs) # intermediate goods used in nesting,
@@ -65,7 +66,7 @@ class nesting_tree:
 			self.adjust_for_Q2P(**kwargs)
 
 	def aggregate_sector_sets(self,**kwargs):
-		self.database.update_alias(alias=pd.MultiIndex.from_tuples([(self.n,self.nn), (self.n,self.nnn), (self.n,self.nnnn), (self.n,self.nnnnn)]))
+		self.database.update_alias(alias=pd.MultiIndex.from_tuples([(self.n,self.nn), (self.n,self.nnn), (self.n,self.nnnn), (self.n,self.nnnnn), (self.n,self.nnnnnn), (self.n,self.nnnnnnn)]))
 		self.database[self.n] = pd.Index(set.union(*[set(tree.database.get(tree.n)) for tree in self.trees.values()]), name=self.n)
 		self.database[self.map_all] = pd.MultiIndex.from_tuples(set.union(*[set(tree.database.get(tree.map_)) for tree in self.trees.values()]), names = [self.n,self.nn])
 		# Define inputs/outputs from all trees:

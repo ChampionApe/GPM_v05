@@ -21,6 +21,8 @@ class nt:
 		self.nnn = 'nnn'
 		self.nnnn = 'nnnn'
 		self.nnnnn = 'nnnnn'
+		self.nnnnnn = 'nnnnnn'
+		self.nnnnnnn = 'nnnnnnn'
 		self.map_ = 'map_'+self.name # map branches to knots
 		self.kno = 'kno_'+self.name # knots 
 		self.bra = 'bra_'+self.name # branches

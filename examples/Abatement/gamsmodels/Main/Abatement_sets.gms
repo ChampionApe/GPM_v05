@@ -2,9 +2,10 @@ sets
 	alias_set
 	alias_map2
 	n
+	l1
 ;
 
-alias(n,nn,nnn,nnnn,nnnnn);
+alias(n,nn,nnn,nnnn,nnnnn,nnnnnn,nnnnnnn);
 
 sets
 	alias_[alias_set,alias_map2]
@@ -59,15 +60,15 @@ sets
 	ID_out_ID_BU[n]
 	bra_o_ID_BU[n]
 	bra_no_ID_BU[n]
-	map_ID_IOX[n,nn]
-	kno_ID_IOX[n]
-	bra_ID_IOX[n]
-	inp_ID_IOX[n]
-	out_ID_IOX[n]
-	ID_out_ID_IOX[n]
-	kno_no_ID_IOX[n]
-	bra_o_ID_IOX[n]
-	bra_no_ID_IOX[n]
+	map_ID_BX[n,nn]
+	kno_ID_BX[n]
+	bra_ID_BX[n]
+	inp_ID_BX[n]
+	out_ID_BX[n]
+	ID_out_ID_BX[n]
+	kno_no_ID_BX[n]
+	bra_o_ID_BX[n]
+	bra_no_ID_BX[n]
 	map_ID_Y_in[n,nn]
 	kno_ID_Y_in[n]
 	bra_ID_Y_in[n]
@@ -89,9 +90,14 @@ sets
 	ID_endovars_exoincalib_E[n]
 	ID_endovars_exoincalib_C[n]
 	ID_tech_endoincalib_mu[n,nn]
-	ID_tech_endoincalib_sigma[n]
-	minobj_mu_subset[n,nn]
-	minobj_sigma_subset[n]
+	map_ID_TC[n,nn]
+	map_ID_BUC[n,nn]
+	map_ID_nonBUC[n,nn]
+	map_T2E[n,nn]
+	currapp_ID_subset[n]
+	map_currapp_ID2T[n,nn]
+	map_currapp_ID2E[n,nn]
+	map_currapp2sumUE[n,nn,nnn]
 	ID_sumUaggs[n]
 	ID_sumU2U[n,nn]
 	sumXinEaggs[n]
@@ -137,10 +143,14 @@ sets
 	bra_o_EOP_TX[n]
 	bra_no_EOP_TX[n]
 	EOP_params_alwaysexo_mu[n,nn]
+	currapp_EOP_subset[n]
+	map_currapp2sumUM[n,nn,nnn]
 	EOP_sumUaggs[n]
 	EOP_sumU2U[n,nn]
 	map_sumXrest2X_EOP[n,nn]
 	map_M2C[n,nn]
+	eta_l1_subset[n]
+	sigma_l1_subset[n]
 ;
 
 $GDXIN %ID_0%
@@ -148,6 +158,7 @@ $onMulti
 $load alias_set
 $load alias_map2
 $load n
+$load l1
 $load ID_inp
 $load ID_out
 $load ID_int
@@ -193,14 +204,14 @@ $load out_ID_BU
 $load ID_out_ID_BU
 $load bra_o_ID_BU
 $load bra_no_ID_BU
-$load kno_ID_IOX
-$load bra_ID_IOX
-$load inp_ID_IOX
-$load out_ID_IOX
-$load ID_out_ID_IOX
-$load kno_no_ID_IOX
-$load bra_o_ID_IOX
-$load bra_no_ID_IOX
+$load kno_ID_BX
+$load bra_ID_BX
+$load inp_ID_BX
+$load out_ID_BX
+$load ID_out_ID_BX
+$load kno_no_ID_BX
+$load bra_o_ID_BX
+$load bra_no_ID_BX
 $load kno_ID_Y_in
 $load bra_ID_Y_in
 $load inp_ID_Y_in
@@ -218,8 +229,7 @@ $load bra_o_ID_Y_out
 $load bra_no_ID_Y_out
 $load ID_endovars_exoincalib_E
 $load ID_endovars_exoincalib_C
-$load ID_tech_endoincalib_sigma
-$load minobj_sigma_subset
+$load currapp_ID_subset
 $load ID_sumUaggs
 $load sumXinEaggs
 $load sumXrestaggs
@@ -253,7 +263,10 @@ $load EOP_out_EOP_TX
 $load kno_no_EOP_TX
 $load bra_o_EOP_TX
 $load bra_no_EOP_TX
+$load currapp_EOP_subset
 $load EOP_sumUaggs
+$load eta_l1_subset
+$load sigma_l1_subset
 $load alias_
 $load ID_map_all
 $load map_ID_EC
@@ -261,12 +274,18 @@ $load map_ID_CU
 $load map_ID_TU
 $load map_ID_TX
 $load map_ID_BU
-$load map_ID_IOX
+$load map_ID_BX
 $load map_ID_Y_in
 $load map_ID_Y_out
 $load ID_params_alwaysexo_mu
 $load ID_tech_endoincalib_mu
-$load minobj_mu_subset
+$load map_ID_TC
+$load map_ID_BUC
+$load map_ID_nonBUC
+$load map_T2E
+$load map_currapp_ID2T
+$load map_currapp_ID2E
+$load map_currapp2sumUE
 $load ID_sumU2U
 $load map_sumXrest2X_ID
 $load map_sumXinE2X
@@ -279,6 +298,7 @@ $load map_EOP_CU
 $load map_EOP_TU
 $load map_EOP_TX
 $load EOP_params_alwaysexo_mu
+$load map_currapp2sumUM
 $load EOP_sumU2U
 $load map_sumXrest2X_EOP
 $load map_M2C

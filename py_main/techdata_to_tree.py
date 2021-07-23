@@ -14,9 +14,9 @@ from pandas.core.indexes import base
 
 
 #%% Load catalog
-testing = False
+testing = True
 if testing:
-    sheets = pd.read_excel(os.getcwd() + "/../examples/Abatement/Data/techdata_new2.xlsx", sheet_name=["inputdisp", "inputprices"])
+    sheets = pd.read_excel(os.getcwd() + "/../examples/Abatement/Data/techdata_new2ID_only_simple_2Twith2overlap_simple.xlsx", sheet_name=["inputdisp", "inputprices"])
     dict_with_techcats = sheets
     #inputdisp = sheets["inputdisp"]
     #inputprices = sheets["inputprices"]
@@ -130,6 +130,7 @@ def load_techcats(dict_with_techcats):
         coverage_potentials = multiindex_series(idx_level_names=["n", "nn"], series_name="coverage_potentials")
         #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
         current_coverages = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages")
+        current_coverages_split = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages_split")
 
 
         #Technologies
@@ -150,7 +151,7 @@ def load_techcats(dict_with_techcats):
 
         #Energy services / emission types
         upper_categories = {col[0:len(col)-len("_coverage_pot")]:[] for col in df.columns if "_coverage_pot" in col}
-        
+
         #Number of potential overlaps (simply deduces it from xlsx structure)
         n_overlaps = len([col for col in df.columns if "_overlap_" in col])/ (len(upper_categories) * 2)
 
@@ -210,6 +211,7 @@ def load_techcats(dict_with_techcats):
                 potential = df.loc[i, E + "_coverage_pot"]
                 if potential > 0:
 
+
                     shares = df[[E + "_overlap_" + str(n_overlap) + "_potshare" for n_overlap in list(range(1, int(n_overlaps) + 1))]].iloc[i, :]
                     
                     if (all(shares.isna()) or shares.sum() < 1):
@@ -231,21 +233,23 @@ def load_techcats(dict_with_techcats):
 
                         #Add current coverage to mu, as the share parameter in the output nest from T to U (technologies to their technology goods)
                         curr_coverage = df.loc[i, E + "_coverage_curr"]
+                        current_coverages[(tech, E)] = curr_coverage
                         total_curr_coverage = (df.loc[i, [e + "_coverage_curr" for e in upper_categories]]).sum()
                         
                         solo_curr_coverage = curr_coverage * (1-shares.sum())
-                        current_coverages[(U, E)] = solo_curr_coverage
+                        current_coverages_split[(U, E)] = solo_curr_coverage
                         #add to mu (we divide by total curr_coverage to make sure that the mus from T to U sum to 1 (scale-preservance))
                         mu[(U, tech)] = solo_curr_coverage / total_curr_coverage
 
                         if testing:
-                            j = "EL_overlap_1_potshare"
-                            share = 0.25
+                            j = E + "_overlap_1_potshare"
+                            share = shares[j]
 
                         for j, share in shares.items():
                             if share > 0:
                                 #identify the technologies that this potential is shared with:
                                 othertechs = [prefix + "_" + othertech for othertech in str(df[E + "_overlap" + re.search("_[0-9]+_", j)[0] + "othertechs"][i]).split(",")]
+                                # print(othertechs)
                                 #Check if this component has been dealt with earlier and so should not be constructed again
                                 if i > np.min([tech_series[tech_series == othertech].index[0] for othertech in othertechs]):
                                     continue
@@ -257,7 +261,7 @@ def load_techcats(dict_with_techcats):
                                     overlap_curr_coverage = share * curr_coverage
 
                                     #Current coverage tells us the value of U/E, which we store later calibration
-                                    current_coverages[(U, E)] = overlap_curr_coverage
+                                    current_coverages_split[(U, E)] = overlap_curr_coverage
 
                                     #Add to mu (again, we divide by total curr_coverage to ensure the mus sum to 1)
                                     mu[(U, tech)] = overlap_curr_coverage / total_curr_coverage
@@ -278,7 +282,7 @@ def load_techcats(dict_with_techcats):
                                     components[C] = [U]
 
                                     if testing:
-                                        othertech = "ID_2"
+                                        othertech = othertechs[0]
 
                                     for othertech in othertechs:
                                         U = next_U(techs[othertech], othertech)
@@ -292,8 +296,11 @@ def load_techcats(dict_with_techcats):
                                         row = df[df.loc[:, "tech"].astype(str) == othertech.split("_", 1)[1]]
                                         #Find the exact field where this data is stored, and retrieve the corresponding overlap share:
                                         #Calculate the current coverage (of this overlapping part) as a share of the technology's total current coverage.
-                                        othertech_curr_potential = row[E + "_coverage_curr"].values[0] * row.loc[:, list(row.columns[(row.astype(str) == overlapping_techs).all()])[0].replace("othertechs", "potshare")].values[0]
-                                        current_coverages[(U, E)] = othertech_curr_potential
+                                        overlap_cols = [col for col in list(row.columns[(row.astype(str) == overlapping_techs).all()]) if col.startswith(E)]
+                                        if len(overlap_cols) != 1:
+                                            raise Exception("Must only find one column with these technologies overlapping, in this E")
+                                        othertech_curr_potential = row[E + "_coverage_curr"].values[0] * row.loc[:, overlap_cols[0].replace("othertechs", "potshare")].values[0]
+                                        current_coverages_split[(U, E)] = othertech_curr_potential
 
                                         mu[(U, othertech)] = (othertech_curr_potential / row[[e + "_coverage_curr" for e in upper_categories]].sum(axis=1)).values[0]
 
@@ -342,72 +349,13 @@ def load_techcats(dict_with_techcats):
                 basetech_inputs[basetech] = [basetech + "_" + inp for inp in list(inputs) + ["K"]]
                 [Q2P.append((basetech + "_" + inp, inp)) for inp in list(inputs) + ["K"]]
 
-            # for c in components:
-                
-                
-                # base_U = "U_" + prefix + "_" + c + "_base"
-
-
-                #Check whether the underlying technologies have specified the fuels that they replace.
-                # c_techs = [find_key_from_value(techs, U) for U in components[c]]
-                # if testing:
-                #     c_t = c_techs[0]
-                
-                # replace_vectors_weight = 0
-                # replace_vectors = pd.Series(index=replace_cols, dtype=float)
-                # for c_t in c_techs:
-                #     if not techs_replace[c_t].isna().all():
-                #         replace_vectors_weight += 1
-                # if replace_vectors_weight == 0:
-                    #Add the baseline_Us without replacement vectors to the output of the overall IO baseline tech
-                    # IO_tech["IO_tech"].append(base_U)
-                # else:
-                #     replace_vectors_weight = 1/replace_vectors_weight 
-                #     for c_t in c_techs:
-                #         if techs_replace[c_t].isna().all():
-                #             continue
-                #         else:
-                #             replace_vectors = pd.concat([replace_vectors, replace_vectors_weight*techs_replace[c_t]], axis=1).sum(axis=1)
-                #     assert replace_vectors.sum() == 1
-                #     replace_vectors = replace_vectors[replace_vectors > 0]
-                #     baseline_U_inputs[base_U] = []
-                #     if testing:
-                #         inp = replace_vectors.index[0]
-                #     for inp in replace_vectors.index:
-                #         baseline_U_inputs[base_U] += [base_U + "_" + inp.split("replace_share_")[1]]
-                #         mu[(base_U + "_" + inp.split("replace_share_")[1], base_U)] = replace_vectors[inp]
-                            
-                # components[c].append(base_U)
-
-
-                #Add the latter to Q2P as well:
-                # [Q2P.append(("U_" + prefix + "_" + c + "_base_" + inp, inp)) for inp in inputs]
-                # Q2P.append(("U_" + prefix + "_" + c + "_base_K", "K"))
-
-        
-
-
-            #Calculate mu-parameters for baseline components to be used below (they sum to 1 under E by construction):
-            # mu2 = mu.reset_index()
-            # mu2 = 1 - mu2.loc[mu2["nn"].isin(upper_categories.keys()), :].groupby("nn").sum()
-                
-            # for E in upper_categories:
-                # upper_categories[E].append("C_" + E + "_base")
-                # mu[("C_" + E + "_base", E)] = mu2.loc[E, "mu"]
-                # baseline_C_inputs["C_" + E + "_base"] = ["C_" + E + "_base_" + inp for inp in inputs] + ["C_" + E + "_base_K"]
-                # IO_tech["IO_tech"].append("C_" + E + "_base")
-                
-                #Add to Q2P
-                # [Q2P.append(("C_" + E + "_base_" + inp, inp)) for inp in inputs]
-                # Q2P.append(("C_" + E + "_base_K", "K"))
-
-
 
         Q2P = pd.MultiIndex.from_tuples(Q2P, names=["n", "nn"])
 
 
         output[prefix] = {"techs_inputs":techs_inputs, "techs":techs, "components":components, "upper_categories":upper_categories, 
-                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_coverages":current_coverages, "coverage_potentials":coverage_potentials}
+                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_coverages":current_coverages, 
+                            "current_coverages_split":current_coverages_split, "coverage_potentials":coverage_potentials}
 
         output["inputprices"] = inputprices.set_index("input")["price"]
 
@@ -422,6 +370,8 @@ def load_techcats(dict_with_techcats):
 
 
 
+
+# %%
 
 # %%
 
