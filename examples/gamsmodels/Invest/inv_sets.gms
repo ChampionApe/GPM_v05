@@ -39,7 +39,7 @@ sets
 	I_exo_mu[s,n,nn]
 ;
 
-$GDXIN %inv_2%
+$GDXIN %inv_1%
 $onMulti
 $load alias_set
 $load alias_map2

@@ -420,10 +420,10 @@ class GPM_database:
 		"""
 		return np.unique([self.alias(name) for name in self[x].index.names]).tolist()
 
-	def vardom(self,set_):
+	def vardom(self,set_,types=['variable','parameter']):
 		""" Return a dictionary with keys = aliases of the set 'x', and values = list of variables defined over the set/alias"""
-		return {set_i: [x for x in self.variables['variables']+self.parameters['parameters'] if set_i in self[x].domains] for set_i in self.alias_all(set_)}
-		
+		return {set_i: [x for x in set([k for k,v in self.types.items() if v in types])-set(['alias_set','alias_map2']) if set_i in self[x].domains] for set_i in self.alias_all(set_)}
+	
 	###################################################################################################
 	###								3: Add/merge symbols from databases. 							###
 	###################################################################################################
@@ -507,30 +507,27 @@ class GPM_database:
 	###								4.1: UPDATE DOMAINS FROM OTHER SYMBOLS	 						###
 	###################################################################################################
 
-	def update_all_sets(self,clean_up=True,include_mappings=False,ign_alias=False):
-		self.update_sets_from_vars(clean_up=clean_up,include_mappings=include_mappings,ign_alias=ign_alias)
-		self.update_subsets_from_sets()
-		self.update_maps_from_sets(ign_alias=ign_alias)
-
-	def update_sets_from_vars(self,clean_up=True,include_mappings=False,ign_alias=False):
-		if clean_up:
-			for set_ in self.sets['sets']:
-				self.series[set_].vals = pd.Index([],name=set_)
-		if include_mappings:
-			[self.update_sets_from_index(self[symbol].index,ign_alias=ign_alias) for symbol in self.variables['variables']+self.parameters['parameters']+self.sets['mappings']];
-		else:
-			[self.update_sets_from_index(self[symbol].index,ign_alias=ign_alias) for symbol in self.variables['variables']+self.parameters['parameters']];
+	def update_all_sets(self,clean_up=True,types=['variable','parameter'],ign_alias=False,clean_alias=False):
+		self.update_sets_from_types(clean_up=clean_up,types=types,ign_alias=ign_alias)
+		if clean_alias:
+			self.clean_aliases(types)
 		self.update_aliased_sets(ign_alias=False)
+		if clean_up:
+			self.update_subsets_from_sets()
+			self.update_maps_from_sets()
+
+	def update_sets_from_types(self,clean_up=True,types=['variable','parameter'],ign_alias=False):
+		if clean_up:
+			[self.__setitem__(set_,pd.Index([],name=set_)) for set_ in set(self.sets['sets'])-set(['alias_set','alias_map2'])];
+		[self.update_sets_from_index(self[symbol].index,ign_alias=ign_alias) for symbol in set([k for k,v in self.types.items() if v in types])-set(['alias_set','alias_map2'])];
 
 	def update_aliased_sets(self,ign_alias=False):
 		for set_i in self.alias_dict:
-			all_elements = set.union(*[set(self.get(set_ij)) for set_ij in self.alias_dict0[set_i] if set_ij in self.sets['sets']])
-			for set_ij in self.alias_dict0[set_i]:
-				if ign_alias is False:
-					if set_ij in self.sets['sets']:
-						self[set_ij].vals = pd.Index(all_elements,name=set_ij)
-				else:
-					self[set_ij] = pd.Index(all_elements,name=set_ij)
+			all_elements = sunion_empty([set(self.get(set_ij)) for set_ij in self.alias_dict0[set_i] if set_ij in self.sets['sets']])
+			if ign_alias is False:
+				[self.__setitem__(set_ij,pd.Index(all_elements,name=set_ij)) for set_ij in self.alias_dict0[set_i] if set_ij in self.sets['sets']];
+			else:
+				[self.__setitem__(set_ij,pd.Index(all_elements,name=set_ij)) for set_ij in self.alias_dict0[set_i]];
 
 	def update_sets_from_index(self,index_,ign_alias=False):
 		""" The ign_alias=True ignores the indices defined over aliased sets that are not defined in the db"""
@@ -540,13 +537,29 @@ class GPM_database:
 			[GPM_database.add_or_merge(self.series,index_.get_level_values(set_).unique(),'first') for set_ in index_.names];
 
 	def update_subsets_from_sets(self):
-		for x in self.sets['subsets']:
-			self[x].vals = self[x].vals[self[x].vals.isin(self.get(self.alias(self[x].vals.name)))]
+		[self.update_subset(ss) for ss in self.sets['subsets']];
 
-	def update_maps_from_sets(self,ign_alias=False):
-		if ign_alias:
-			for x in self.sets['mappings']:
-				[self.__setitem__(x,self[x].vals[self[x].vals.get_level_values(y).isin(self.get(self.alias(y)))]) for y in set(self[x].domains)-self.alias_notin_db];
+	def update_subset(self,ss):
+		if self.alias(self.get(ss).name) not in self.symbols:
+			self.__setitem__(ss,pd.Index([],name=self.get(ss).name))
 		else:
-			for x in self.sets['mappings']:
-				[self.__setitem__(x,self[x].vals[self[x].vals.get_level_values(y).isin(self.get(self.alias(y)))]) for y in self[x].domains];				
+			self.__setitem__(ss,self[ss].rctree_pd(self[self.alias(self.get(ss).name)]))
+
+	def update_maps_from_sets(self):
+		[self.update_map(m) for m in self.sets['mappings']];
+
+	def update_map(self,m):
+		if sum([bool(set(self.symbols.keys()).intersection(self.alias_all(s))) for s in self[m].domains])<len(self[m].domains):
+			self.__setitem__(m,pd.MultiIndex.from_tuples([],names=self[m].domains))
+		else:
+			self.__setitem__(m,self[m].rctree_pd({'and': [self[s] for s in self[m].domains]}))
+
+	def clean_aliases(self,types):
+		""" Remove aliases that are not used. """
+		self['alias_'] = pd.MultiIndex.from_tuples(self.active_aliases(types), names=['alias_set','alias_map2'])
+		self['alias_set'] = self.get('alias_').get_level_values('alias_set').unique()
+		self['alias_map2'] = self.get('alias_').get_level_values('alias_map2').unique()
+
+	def active_aliases(self,types):
+		""" Return list of tuples with alias_ that are used in the model variables / mappings"""
+		return [(k,v) for k in self.get('alias_set') for v in [x for x in self.alias_dict[k] if len(self.vardom(k,types=types)[x])>0]]
