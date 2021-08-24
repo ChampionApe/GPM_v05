@@ -43,11 +43,11 @@ $GROUP inv_g_vars_exo
 inv_gvars_exo
 ;
 
-@load_level(inv_g_vars_endo,%qmark%%inv_2%");
-@load_fixed(inv_g_tech_endo,%qmark%%inv_2%");
-@load_fixed(inv_gvars_endo,%qmark%%inv_2%");
-@load_fixed(inv_g_tech_exo,%qmark%%inv_2%");
-@load_fixed(inv_gvars_exo,%qmark%%inv_2%");
-@load_fixed(inv_g_calib_exo,%qmark%%inv_2%");
-@load_fixed(inv_g_tech,%qmark%%inv_2%");
-@load_fixed(inv_g_vars_exo,%qmark%%inv_2%");
+@load_level(inv_g_vars_endo,%qmark%%inv_1%");
+@load_fixed(inv_g_tech_endo,%qmark%%inv_1%");
+@load_fixed(inv_gvars_endo,%qmark%%inv_1%");
+@load_fixed(inv_g_tech_exo,%qmark%%inv_1%");
+@load_fixed(inv_gvars_exo,%qmark%%inv_1%");
+@load_fixed(inv_g_calib_exo,%qmark%%inv_1%");
+@load_fixed(inv_g_tech,%qmark%%inv_1%");
+@load_fixed(inv_g_vars_exo,%qmark%%inv_1%");

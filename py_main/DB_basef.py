@@ -240,3 +240,10 @@ def series_from_variable(symbol, attr="level"):
 def series_from_parameter(symbol):
 	"""Get a parameter symbol from the GAMS database and return an equivalent Pandas series."""
 	return pd.Series([rec.value for rec in symbol], index_from_symbol(symbol), name=symbol.name)
+
+def sunion_empty(ls):
+	""" return empty set if the list of sets (ls) is empty"""
+	try:
+		return set.union(*ls)
+	except TypeError:
+		return set()

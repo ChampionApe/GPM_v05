@@ -65,7 +65,7 @@ class OrdSet:
 		return OrdSet(self.__add__([x for l in args for x in l]))
 
 	def intersection(self,*args):
-		return OrdSet(self.__sub__([x for l in args for x in l]))
+		return OrdSet([x for l in self.union(args) for x in l if x in self.v])
 
 	def update(self,*args):
 		self.v = self.union(*args).v

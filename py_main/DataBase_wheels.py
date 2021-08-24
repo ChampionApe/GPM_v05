@@ -22,11 +22,58 @@ def repeat_variable_windex(var,index):
 	else:
 		return var
 
+def map_from_mi(mi,lfrom,lto):
+	""" create mapping from one level of the multiindex to the other."""
+	return {k:v for k,v in zip(*([mi.get_level_values(lfrom),mi.get_level_values(lto)]))}
+
+def apply_map(index_,map_):
+	return [map_[x] for x in index_]
+
+def appmap(map_,mapping,level=None):
+	if isinstance(map_,pd.MultiIndex):
+		return pd.MultiIndex.from_arrays([map_.get_level_values(l) for l in map_.droplevel(level).names]+[map_.get_level_values(level).map(mapping)]).reorder_levels(map_.names)
+	elif isinstance(map_,pd.Index):
+		return map_.map(mapping)
+
+def update_lname_index(ind,oldname,newname):
+	if isinstance(ind, pd.MultiIndex):
+		return ind.rename(list(map(lambda x: x if x != oldname else newname, ind.names)))
+	elif isinstance(ind,pd.Index):
+		return ind.rename(newname)
+
+def appmap_s(s,mapping,level=None):
+	return pd.Series(s.values, index = appmap(s.index,mapping,level=level), name = s.name)
+
+def appmap_df(df,mapping,level=None):
+	return df.set_index(appmap(df.index,mapping,level=level))
+
 class mi:
-	""" small collection of multiindex operations """
+	""" small collection of multiindex/index operations """
+	@staticmethod
+	def map_v3(ind,mi,level=None,add_new_name = True):
+		""" Swap level in index by mapping from second multiindex  The name of the index is updated if add_new_name is True"""
+		if type(level) is str:
+			lfrom,lto = level, [x for x in mi.names if x!=level][0]
+		elif type(level) is int:
+			lfrom = ind.names[level]
+			lto = [x for x in mi.names if x !=lfrom][0]
+		elif level is None:
+			lfrom = [x for x in ind.names if x in mi.names][0]
+			lto = [x for x in mi.names if x !=lfrom][0]
+		else:
+			raise TypeError('Specify level as an integer, string of None')
+		mi_map = map_from_mi(mi,lfrom,lto)
+		ind_new = appmap(ind,mi_map,level=lfrom)
+		return ind_new if add_new_name is False else update_lname_index(ind_new,lfrom,lto)
+
+	@staticmethod 
+	def v3_series(s,mi_map,level=None,**kwargs):
+		""" map_v1 applied on a pandas series """
+		return pd.Series(s.values,index = mi.map_v3(s.index,mi_map,**kwargs),name=s.name)
+
 	@staticmethod
 	def map_v1(mi1,mi2,level=None,verify_integrity=False):
-		""" swap level of multiindex by mapping from second multiindex. the name"""
+		""" swap level of multiindex by mapping from second multiindex. The name of the index level is updated as well"""
 		if type(level) is str:
 			mi_map = {k:v for k,v in mi2}
 			return mi1.set_levels([x if x not in mi_map else mi_map[x] for x in mi1.levels[mi1.names.index(level)]],level=level,verify_integrity=verify_integrity)
@@ -38,8 +85,9 @@ class mi:
 			mi_map = {k:v for k,v in mi2.swaplevel(i=level,j=0)}
 			return mi1.set_levels([x if x not in mi_map else mi_map[x] for x in mi1.levels[mi1.names.index(level)]],level=level,verify_integrity=verify_integrity)
 
-	@staticmethod 
+	@staticmethod
 	def v1_series(s,mi_map,level=None,**kwargs):
+		""" map_v1 applied on a pandas series """
 		return pd.Series(s.values,index = mi.map_v1(s.index,mi_map),name=s.name)
 
 	@staticmethod
@@ -56,6 +104,18 @@ class mi:
 			name = [name] if name is not None else [n for n in mi2.names if n!=level]
 			mi_map = {k:v for k,v in mi2.swaplevel(i=level,j=0)}
 		return pd.MultiIndex.from_tuples(zip(*([mi1.get_level_values(x) for x in mi1.droplevel(level).names]+[a])),names=mi1.droplevel(level).names+name)
+
+	@staticmethod
+	def add_ndmi(mi1,mi2,level=None):
+		""" Merge a 2d multiindex (mi2) onto multiindex mi1; merge on level."""
+		if level is None:
+			level = [x for x in mi1.names if x in mi2.names][0]
+		lto = [x for x in mi2.names if x not in mi1.names]
+		return pd.MultiIndex.from_tuples(zip(*([mi1.get_level_values(x) for x in mi1.names]+[apply_map(mi1.get_level_values(level),map_from_mi(mi2,level,y)) for y in lto])),names=mi1.names+lto)
+
+	@staticmethod
+	def add_mi_series(s,mi_map,level=None):
+		return pd.Series(s.values,index = mi.add_ndmi(s.index,mi_map,level=level),name=s.name)
 
 class small_updates:
 	"""
@@ -100,11 +160,14 @@ class small_updates:
 	@staticmethod
 	def subset_db(db,index_,exceptions=[],add_to_specific=None):
 		""" Only keep values from index_ """
-		db[index_.name].vals = db.get(index_.name)[db.get(index_.name).isin(index_)] # subset the set itself
-		for sym in slice_in_and_out(db.sets['subsets']+db.sets['mappings'],exceptions=exceptions,add_to_specific=add_to_specific):
-			if index_.name in db[sym].domains:
-				db[sym].vals = db.get(sym)[db.get(sym).get_level_values(index_.name).isin(index_)].unique()
-		for sym in slice_in_and_out(db.parameters['parameters']+db.variables['variables'],exceptions=exceptions,add_to_specific=add_to_specific):
-			if index_.name in db[sym].domains:
-				db[sym].vals = db.get(sym)[db.get(sym).index.get_level_values(index_.name).isin(index_)]
+		for set_ in db.alias_all(index_.name):
+			index_i = pd.Index(index_,name=set_)
+			if set_ in db.symbols:
+				db[set_].vals = db.get(set_)[db.get(set_).isin(index_i)] # subset the set itself
+			for sym in slice_in_and_out(db.sets['subsets']+db.sets['mappings'],exceptions=exceptions,add_to_specific=add_to_specific):
+				if set_ in db[sym].domains:
+					db[sym].vals = db.get(sym)[db.get(sym).get_level_values(set_).isin(index_i)].unique()
+			for sym in slice_in_and_out(db.parameters['parameters']+db.variables['variables'],exceptions=exceptions,add_to_specific=add_to_specific):
+				if index_i.name in db[sym].domains:
+					db[sym].vals = db.get(sym)[db.get(sym).index.get_level_values(index_i.name).isin(index_i)]
 		return db

@@ -121,8 +121,8 @@ class gams_model:
 
 	def solve_sneakily(self,db_star=None,from_cp=False,cp_init=None,run_from_job=False,shock_db=None,options_run={},kwargs_shock={},kwargs_db={},model_name=None):
 		if from_cp is False:
-			cp = self.ws.add_checkpoint() if cp_init is None else cp_init
-			self.run(run_from_job=run_from_job,**{'checkpoint': cp})
+			cp_init = self.ws.add_checkpoint() if cp_init is None else cp_init
+			self.run(run_from_job=run_from_job,**{'checkpoint': cp_init})
 		if shock_db is None:
 			(shock_db, kwargs_shock) = ShockFunction.sneaky_db(self.out_db,db_star,**kwargs_shock)
 		shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**kwargs_shock)

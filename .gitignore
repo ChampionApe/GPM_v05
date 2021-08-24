@@ -1,0 +1,5 @@
+*.pyc
+work_folder/
+py_main/__pycache__/
+*.pyc~main
+**/.ipynb_checkpoints/

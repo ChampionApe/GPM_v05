@@ -60,7 +60,7 @@ class read_data:
 	def read_sheet_standard(data,sheet):
 		db = DataBase.GPM_database(alias=pd.MultiIndex.from_tuples([('n','nn')]))
 		db.merge_dbs(db,excel2py.xl2PM.pm_from_workbook(data,{sheet: 'vars'}),'second')
-		db.update_sets_from_vars()
+		db.update_sets_from_types()
 		return db
 
 	@staticmethod
@@ -68,7 +68,7 @@ class read_data:
 		""" Input/output table, domestic sectors/goods"""
 		db_dom = DataBase.GPM_database()
 		db_dom.merge_dbs(db_dom,excel2py.xl2PM.pm_from_workbook(data,{'sec_domestic': 'vars'}),'second')
-		db_dom.update_sets_from_vars()
+		db_dom.update_sets_from_types()
 		db_dom['s_prod'] = db_dom['s']
 		db_dom['n_prod'] = db_dom['n']
 		db_dom['n_fg'] = db_dom['n']
@@ -86,7 +86,7 @@ class read_data:
 		""" read in some household aggregates"""
 		db_HH = DataBase.GPM_database()
 		db_HH.merge_dbs(db_HH,excel2py.xl2PM.pm_from_workbook(data,{'sec_HH':'vars'}), 'second')
-		db_HH.update_sets_from_vars()
+		db_HH.update_sets_from_types()
 		db_HH['s_HH'] = db_HH['s']
 		db_HH['inp_HH'] = db_HH.get('vD').index
 		db_HH['out_HH'] = db_HH.get('vS').index
@@ -97,7 +97,7 @@ class read_data:
 		""" taxes """
 		db_tax = DataBase.GPM_database()
 		db_tax.merge_dbs(db_tax,excel2py.xl2PM.pm_from_workbook(data,{'sec_tax': 'vars'}),'second')
-		db_tax.update_sets_from_vars()
+		db_tax.update_sets_from_types()
 		db_tax['n_tax'] = db_tax['n']
 		db_tax['s_tax'] = db_tax['s']
 		return db_tax

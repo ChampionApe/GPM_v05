@@ -4,7 +4,7 @@ parameters
 	infl_LR
 ;
 
-$GDXIN %inv_2%
+$GDXIN %inv_1%
 $onMulti
 $load R_LR
 $load g_LR
