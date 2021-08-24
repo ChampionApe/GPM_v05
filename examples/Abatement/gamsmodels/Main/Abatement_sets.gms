@@ -2,7 +2,6 @@ sets
 	alias_set
 	alias_map2
 	n
-	l1
 ;
 
 alias(n,nn,nnn,nnnn,nnnnn,nnnnnn,nnnnnnn);
@@ -149,8 +148,6 @@ sets
 	EOP_sumU2U[n,nn]
 	map_sumXrest2X_EOP[n,nn]
 	map_M2C[n,nn]
-	eta_l1_subset[n]
-	sigma_l1_subset[n]
 ;
 
 $GDXIN %ID_0%
@@ -158,7 +155,6 @@ $onMulti
 $load alias_set
 $load alias_map2
 $load n
-$load l1
 $load ID_inp
 $load ID_out
 $load ID_int
@@ -265,8 +261,6 @@ $load bra_o_EOP_TX
 $load bra_no_EOP_TX
 $load currapp_EOP_subset
 $load EOP_sumUaggs
-$load eta_l1_subset
-$load sigma_l1_subset
 $load alias_
 $load ID_map_all
 $load map_ID_EC

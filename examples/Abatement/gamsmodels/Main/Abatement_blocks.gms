@@ -97,6 +97,3 @@ $ENDBLOCK
 $BLOCK M_Abatement_currentapplications_EOP 
 	E_currentapplications_EOP[n]$(currapp_EOP_subset[n])..	currapp_EOP[n] =E= sum([nn, nnn]$(map_currapp2sumUM[n,nn,nnn]), qsumU[nn]/M0[nnn]);
 $ENDBLOCK
-$BLOCK M_EOP_Abatement_minobj 
-	E_EOP_minobj..	minobj =E= sum(n$(kno_no_ID_TX[n]), sum(nn$(map_ID_TC[n,nn]), Sqr(sum(nnn$(map_ID_BUC[nnn,nn]), sum(nnnn$(map_ID_BU[nnn,nnnn]), mu[nnn,nnnn])) - sum(nnnnn$(map_ID_EC[nn,nnnnn]), gamma_tau[n,nnnnn])) ) ) + weight_mu * sum([n,nn]$(map_ID_nonBUC[n,nn]), Sqr(mu[n,nn] - mubar[n,nn])) + weight_sigmaG * sum(n$(EOP_out[n]), Sqr(sigmaG[n] - minobj_sigmaG[n])) + weight_muG * sum(n$(EOP_out[n]), Sqr(muG[n] - minobj_muG[n]));
-$ENDBLOCK

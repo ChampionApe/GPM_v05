@@ -91,22 +91,6 @@ $GROUP Abatement_g_minobj_endoincalib_exoinbaseline
 gamma_tau[n,nn]$(map_T2E[n,nn]) ""
 ;
 
-$GROUP Abatement_g_minobj_endoincalib
-minobj ""
-;
-
-$GROUP Abatement_g_ID_minobj_exoincalib
-weight_mu ""
-mubar[n,nn]$(map_ID_nonBUC[n,nn]) ""
-;
-
-$GROUP Abatement_g_EOP_minobj_exoincalib
-weight_muG ""
-weight_sigmaG ""
-minobj_sigmaG[n]$(EOP_out[n]) ""
-minobj_muG[n]$(EOP_out[n]) ""
-;
-
 @load_level(Abatement_g_ID_prices_alwaysendo,%qmark%%ID_0%");
 @load_level(Abatement_g_emissions_alwaysendo,%qmark%%ID_0%");
 @load_level(Abatement_g_ID_quants_alwaysendo,%qmark%%ID_0%");
@@ -114,12 +98,9 @@ minobj_muG[n]$(EOP_out[n]) ""
 @load_level(Abatement_g_prices_endogenouswithEOP,%qmark%%ID_0%");
 @load_level(Abatement_g_EOP_quants_alwaysendo,%qmark%%ID_0%");
 @load_level(Abatement_g_emissions_endoinEOP,%qmark%%ID_0%");
-@load_level(Abatement_g_EOP_params_endoincalib,%qmark%%ID_0%");
-@load_level(Abatement_g_minobj_endoincalib,%qmark%%ID_0%");
-@load_level(Abatement_g_minobj_endoincalib_exoinbaseline,%qmark%%ID_0%");
-@load_fixed(Abatement_g_ID_quants_exoincalib,%qmark%%ID_0%");
-@load_fixed(Abatement_g_EOP_quants_exoincalib,%qmark%%ID_0%");
-@load_fixed(Abatement_g_ID_minobj_exoincalib_endoinbaseline,%qmark%%ID_0%");
+@load_level(Abatement_g_ID_quants_exoincalib,%qmark%%ID_0%");
+@load_level(Abatement_g_EOP_quants_exoincalib,%qmark%%ID_0%");
+@load_level(Abatement_g_ID_minobj_exoincalib_endoinbaseline,%qmark%%ID_0%");
 @load_fixed(Abatement_g_ID_params_alwaysexo,%qmark%%ID_0%");
 @load_fixed(Abatement_g_ID_prices_alwaysexo,%qmark%%ID_0%");
 @load_fixed(Abatement_g_prices_alwaysexo,%qmark%%ID_0%");
@@ -128,5 +109,5 @@ minobj_muG[n]$(EOP_out[n]) ""
 @load_fixed(Abatement_g_EOP_params_alwaysexo,%qmark%%ID_0%");
 @load_fixed(Abatement_g_EOP_prices_alwaysexo,%qmark%%ID_0%");
 @load_fixed(Abatement_g_ID_params_endoincalib,%qmark%%ID_0%");
-@load_fixed(Abatement_g_ID_minobj_exoincalib,%qmark%%ID_0%");
-@load_fixed(Abatement_g_EOP_minobj_exoincalib,%qmark%%ID_0%");
+@load_fixed(Abatement_g_EOP_params_endoincalib,%qmark%%ID_0%");
+@load_fixed(Abatement_g_minobj_endoincalib_exoinbaseline,%qmark%%ID_0%");
