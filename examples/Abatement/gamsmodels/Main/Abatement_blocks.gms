@@ -86,7 +86,7 @@ $BLOCK M_Abatement_EOP
 	E_postabatementM_EOP[n]$(M_subset[n])..	M[n] =E= M0[n] - sum(nn$map_M2C[n,nn], qS[nn]);
 	E_endogenous_abatementC_EOP[n]$(EOP_out[n])..	qS[n] =E= sum(nn$map_M2C[nn,n], M0[nn] * theta[n] * errorf((pM[nn] - PbT[n] + muG[n])/(sigmaG[n])));
 	E_adjusted_emission_price_EOP[n]$(M_subset[n])..	pMhat[n] =E= pM[n]*(1 - sum(nn$map_M2C[n,nn], theta[nn] * errorf( (pM[n] - PbT[nn] + muG[nn]) / (sigmaG[nn])))) + 
- sum(nn$map_M2C[n,nn], theta[nn] * errorf( (pM[n] - PbT[nn] + muG[nn]) / (sigmaG[nn])) * (PbT[nn] + muG[nn] - Sqr(sigmaG[nn]) * (@std_pdf((pM[n] - PbT[nn] - muG[nn])/sigmaG[nn]) / errorf((pM[n] - PbT[nn] - muG[nn])/sigmaG[nn]))));
+ sum(nn$map_M2C[n,nn], theta[nn] * errorf( (pM[n] - PbT[nn] + muG[nn]) / (sigmaG[nn])) * (PbT[nn] + muG[nn] - Sqr(sigmaG[nn]) * (@std_pdf((pM[n] - PbT[nn] - muG[nn])/sigmaG[nn]) / (0.000 + errorf((pM[n] - PbT[nn] - muG[nn])/sigmaG[nn])))));
 $ENDBLOCK
 $BLOCK M_Abatement_simplesumU_EOP 
 	E_sumU_EOP[n]$(EOP_sumUaggs[n])..	qsumU[n] =E= sum(nn$(EOP_sumU2U[n,nn]), qD[nn]);

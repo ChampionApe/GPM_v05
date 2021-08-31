@@ -92,14 +92,14 @@ class abate(gmspython):
 		elif var == 'mu':
 			return pd.Series(1, index = self.get('ID_map_all'), name=self.n(var))
 		elif var == 'sigma':
-			ser = pd.Series(0.0001, index = self.get("ID_kno_inp"), name = self.n(var))
+			ser = pd.Series(0.001, index = self.get("ID_kno_inp"), name = self.n(var))
 			if self.state == "EOP":
 			# if self.use_EOP:
-				ser = pd.concat([ser, pd.Series(0.0001, index = self.get("knots", tree="EOP_TX"), name = self.n(var))])
+				ser = pd.concat([ser, pd.Series(0.001, index = self.get("knots", tree="EOP_TX"), name = self.n(var))])
 				ser = pd.concat([ser, pd.Series(2, index = self.get("knots", tree="EOP_CU"), name = self.n(var))])
 			return ser
 		elif var == 'eta':
-			ser = pd.Series(-0.0001, index = self.get("ID_kno_out"), name = self.n(var))
+			ser = pd.Series(-0.001, index = self.get("ID_kno_out"), name = self.n(var))
 			if self.state == "EOP":
 			# if self.use_EOP:
 				ser = pd.concat([ser, pd.Series(-2, index = self.get("EOP_kno_out"), name = self.n(var))])
