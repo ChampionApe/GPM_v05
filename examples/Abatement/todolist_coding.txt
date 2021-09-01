@@ -7,7 +7,7 @@ PS: Lige nu er det implementeret lidt ad-hoc i bunden af initialize_variables ve
 
 - Der opstår tilsyneladende et problem når jeg laver dette nestede condition tree (group) for qD:
 
-[{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not":{"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}}]}}]
+[{'qD': {"and":[{"or":[self.g('ID_int'), self.g("ID_inp")]}, {"not": {"or":[self.g("ID_endovars_exoincalib_C"), self.g("ID_endovars_exoincalib_E")]}}]}}]
 
 Når jeg laver denne, så virker modellen, men at kalde m.endo_var("qD") smider en fejl. Fejlen ender i metoden translate_k2pd(self, l, k) med teksten "TypeError: bad operand type for unary ~: 'NoneType'".
 Det interessante er, at hvis jeg laver gruppedefinitionen om til 
