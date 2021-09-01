@@ -106,12 +106,28 @@ class abate(gmspython):
 		if 'calibrate' in self.state:
 			self.model.settings.set_conf('solve',self.add_solve + "\n")
 
+	def initialize_variables_leontief(self):
+		db = DataBase.GPM_database()
+		qD = (self.get("mu")[self.g("map_ID_Y").rctree_pd(self.g("bra_o_ID_Y"))] * self.get("qS")[self.get("out_ID_Y")].values).droplevel(1) #E and Y quantity
+		qD = qD.append((self.g("mu").rctree_pd(self.g("bra_no_ID_Y")) * qD[self.get("kno_no_ID_Y")].values).droplevel(1)) #X under Y quantity
+		qD = qD.append((self.get("mu")[self.get("map_ID_EC")] * qD[self.get("kno_ID_EC")].rename_axis("nn")).droplevel(1)) #C quantity
+		qD = qD.append((self.get("current_coverages_split") * qD[self.get("kno_ID_EC")].rename_axis("nn")).droplevel(1)) #non-baseline U quantity
+		mu = DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_TU")], self.g("map_ID_CU").rctree_pd(self.g("bra_ID_TU"))) / \
+				qD[self.g("map_ID_CU").rctree_pd(self.g("bra_ID_TU")).droplevel(0).drop_duplicates()] #non baseline U share of C (mu)
+		mu = mu.append(pd.Series(1, index=self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU"))).subtract(mu[self.g("map_ID_CU").rctree_pd(self.g("bra_ID_TU"))].groupby(level=1).sum(), fill_value=0)) #baseline U share of C (mu)
+		assert (mu > 0).all()
+		qD = qD.append((mu[self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU"))] * qD[self.get("kno_ID_CU")].rename_axis("nn")).droplevel(1)) #baseline U quantity
+		qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_ID_CU")], DataBase_wheels.map_from_mi(self.get("ID_u2t"), "n", "nn")).groupby(by="n").sum()) #tech and baseline tech quantities
+		qD = qD.append((self.get("mu")[self.get("map_ID_TX")] * qD[self.get("kno_ID_TX")].rename_axis("nn")).droplevel(1)) #X under techs
+		mu = mu.append(DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_BU")], self.g("map_ID_BU").rctree_pd(self.g("bra_ID_BU"))) / qD[self.get("kno_ID_BU")].rename_axis("nn")) #baseline tech to U shares (mu)
+		#PRICES NOW
+
 	def add_subsets(self, m="ID"):
-		self.model.database[self.n(m + "_params_endoincalib_mu")] = (
+		self.model.database[self.n("ID_mu_endoincalib")] = (
 			self.get("map_ID_EC").append(self.g("map_ID_CU").rctree_pd(self.g("bra_no_ID_BU"))).append(self.get("map_ID_BX"))
 			.append(self.get("map_ID_Y_in")).append(self.get("map_ID_Y_out")).append(self.get("map_ID_BU"))
 		)
-		self.model.database[self.n(m + '_params_alwaysexo_mu')] = self.get("map_ID_TX").append(self.get("map_ID_TU")).append(self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU")))
+		self.model.database[self.n("ID_mu_exo")] = self.get("map_ID_TX").append(self.get("map_ID_TU")).append(self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU")))
 
 
 	# ------------------ 2: Groups  ------------------ #

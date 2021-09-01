@@ -14,7 +14,7 @@ from pandas.core.indexes import base
 
 
 #%% Load catalog
-testing = True
+testing = False
 if testing:
     sheets = pd.read_excel(os.getcwd() + "/../examples/Abatement/Data/techdata_new2ID_only_simple_2Twith2overlap_simple.xlsx", sheet_name=["inputdisp", "inputprices"])
     dict_with_techcats = sheets
