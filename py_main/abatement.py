@@ -53,6 +53,7 @@ class abate(gmspython):
 		self.model.database[self.n(m+'_i2t')] = self.get(m+'_map_all')[(self.get(m+'_map_all').get_level_values(self.n('n')).isin(self.get(m+'_inp'))) & (self.get(m+'_map_all').get_level_values(self.n('nn')).isin(self.get(m+'_t_all')))]
 		self.model.database[self.n(m+'_u2t')] = self.get(m+'_map_all')[(self.get(m+'_map_all').get_level_values(self.n('n')).isin(self.get(m+'_u_all'))) & (self.get(m+'_map_all').get_level_values(self.n('nn')).isin(self.get(m+'_t_all')))]
 		self.model.database[self.n(m+'_u2c')] = self.get(m+'_map_all')[(self.get(m+'_map_all').get_level_values(self.n('n')).isin(self.get(m+'_u_all'))) & (self.get(m+'_map_all').get_level_values(self.n('nn')).isin(self.get(m+'_c')))]
+		#self.model.database[self.n(m+'_nonB_u2c')] = self.get(m+'_map_all')[(self.get(m+'_map_all').get_level_values(self.n('n')).isin(self.get(m+'_u'))) & (self.get(m+'_map_all').get_level_values(self.n('nn')).isin(self.get(m+'_c')))]
 		self.model.database[self.n(m+'_c2e')] = self.get(m+'_map_all')[(self.get(m+'_map_all').get_level_values(self.n('n')).isin(self.get(m+'_c'))) & (self.get(m+'_map_all').get_level_values(self.n('nn')).isin(self.get(m+'_e')))]
 		self.model.database[self.n(m+'_e2u')] = DataBase_wheels.appmap(self.get(m+'_u2c'),DataBase_wheels.map_from_mi(self.get(m+'_c2e'),self.n('n'),self.n('nn')),self.n('nn')).swaplevel(0,1).set_names([self.n('n'),self.n('nn')])
 		self.model.database[self.n(m+'_e2t')] = DataBase_wheels.appmap(self.get(m+'_e2u'),DataBase_wheels.map_from_mi(self.get(m+'_u2t'),self.n('n'),self.n('nn')),self.n('nn')).unique()
@@ -113,6 +114,14 @@ class abate(gmspython):
 					self.model.database[self.ns[var]] = self.default_var_series(var)
 		if 'calibrate' in self.state:
 			self.model.settings.set_conf('solve',self.add_solve + "\n")
+
+	def add_subsets(self, m="ID"):
+		self.model.database[self.n(m + "_params_endoincalib_mu")] = (
+			self.get("map_ID_EC").append(self.g("map_ID_CU").rctree_pd(self.g("bra_no_ID_BU"))).append(self.get("map_ID_BX"))
+			.append(self.get("map_ID_Y_in")).append(self.get("map_ID_Y_out")).append(self.get("map_ID_BU"))
+		)
+		self.model.database[self.n(m + '_params_alwaysexo_mu')] = self.get("map_ID_TX").append(self.get("map_ID_TU")).append(self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU")))
+
 
 	# ------------------ 2: Groups  ------------------ #
 	def group_conditions(self,group):
