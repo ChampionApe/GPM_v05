@@ -53,6 +53,8 @@ class abate(gmspython):
 		self.model.database[self.n('ID_e2ai2i')] = DataBase_wheels.appmap(t2i2ai,DataBase_wheels.map_from_mi(self.get('ID_e2t'),self.n('nn'),self.n('n')),self.n('n')).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
 		self.model.database[self.n('ID_e2ai')] = self.get('ID_e2ai2i').droplevel(self.n('nnn')).unique()
 
+
+
 	# ---------------- 1.2: Variables  ------------- #
 	def default_var_series(self,var):
 		if var=='PbT':
@@ -118,9 +120,20 @@ class abate(gmspython):
 		assert (mu > 0).all()
 		qD = qD.append((mu[self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU"))] * qD[self.get("kno_ID_CU")].rename_axis("nn")).droplevel(1)) #baseline U quantity
 		qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_ID_CU")], DataBase_wheels.map_from_mi(self.get("ID_u2t"), "n", "nn")).groupby(by="n").sum()) #tech and baseline tech quantities
-		qD = qD.append((self.get("mu")[self.get("map_ID_TX")] * qD[self.get("kno_ID_TX")].rename_axis("nn")).droplevel(1)) #X under techs
-		mu = mu.append(DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_BU")], self.g("map_ID_BU").rctree_pd(self.g("bra_ID_BU"))) / qD[self.get("kno_ID_BU")].rename_axis("nn")) #baseline tech to U shares (mu)
-		#PRICES NOW
+		qD = qD.append((self.get("mu")[self.get("map_ID_TX")] * qD[self.get("kno_ID_TX")].rename_axis("nn")).droplevel(1)) #X under non baseline techs
+		mu = mu.append(DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_BU")], self.g("map_ID_BU").rctree_pd(self.g("bra_ID_BU"))) / qD[self.get("kno_ID_BU")].rename_axis("nn")) #baseline tech to U shares (gamma)
+		mu = mu.append(pd.Series(1, index=self.get("map_ID_BX")) / pd.Series(1, index=self.get("map_ID_BX")).groupby("nn").sum()) #baseline tech to X shares (set equal to 1/N)
+		PwThat = (pd.Series(0, index=self.get("Q2P")) + (self.get("phi") * self.get("pM")).droplevel(0).rename_axis("nn").groupby("nn").sum() + self.get("inputprices").rename_axis("nn")).droplevel(1) #prices of all X
+		qD = qD.append((mu[self.get("map_ID_BX")] * qD[self.get("kno_ID_BX")].rename_axis("nn")).droplevel(1)) #X under baseline tech quantity
+		PwThat = PwThat.append((pd.Series(0, index=self.get("ID_i2t").union(self.g("map_ID_Y").rctree_pd(self.g("bra_no_ID_Y")))) + qD[self.get("ID_i2t").droplevel(1).union(self.get("bra_no_ID_Y"))] * \
+			PwThat[self.get("ID_i2t").droplevel(1).union(self.get("bra_no_ID_Y"))]).groupby("nn").sum() / qD[self.get("kno_ID_BX").union(self.get("kno_ID_TX")).union(self.get("kno_no_ID_Y"))]) #Price of techs, baseline techs and Y aggregate
+		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_BU").union(self.get("map_ID_TU"))) + PwThat[self.get("ID_t_all")].rename_axis("nn")).droplevel(1)) #Prices of technology goods
+		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_CU")) + qD[self.get("bra_ID_CU")] * PwThat[self.get("bra_ID_CU")]).groupby("nn").sum() / qD[self.get("kno_ID_CU")]) #Prices of C
+		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_EC")) + qD[self.get("bra_ID_EC")] * PwThat[self.get("bra_ID_EC")]).groupby("nn").sum() / qD[self.get("kno_ID_EC")]) #Prices of E
+		PbT = ((pd.Series(0, index=self.g("map_ID_Y").rctree_pd(self.g("bra_o_ID_Y"))) + (qD[self.get("bra_o_ID_Y")] * PwThat[self.get("bra_o_ID_Y")])).groupby("nn").sum()).rename_axis("n") / self.get("qS") #Price of final good
+		db["qD"], db["mu"], db["PwThat"], db["PbT"] = qD, mu, PwThat, PbT
+		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
+
 
 	def add_subsets(self, m="ID"):
 		self.model.database[self.n("ID_mu_endoincalib")] = (
