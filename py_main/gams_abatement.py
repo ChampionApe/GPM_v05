@@ -8,14 +8,19 @@ def df(x,kwargs):
 	"""
 	return x if x not in kwargs else kwargs[x]
 
-def create_alias_dict(aliases,list_of_tuples_indices=[]):
-	return {aliases[i[0]]: aliases[i[1]] for i in list_of_tuples_indices}
+def create_alias_dict(aliases,lot_indices=[]):
+	return {aliases[i[0]]: aliases[i[1]] for i in lot_indices}
 
 def ign_KeyError(dict_,key):
 	try:
 		return dict_[key]
 	except KeyError:
 		return None
+def rK_if_KE(dict_,key):
+	try:
+		return dict_[key]
+	except KeyError:
+		return key
 
 class CES:
 	""" collection of price indices / demand systems for ces nests """
@@ -381,20 +386,91 @@ class linear_out:
 	def demand(self,name,condition,nn,map_2,mu2,qD,qD2,output=False):
 		if output is False:
 			RHS = f"""sum({nn}$({map_2}), {mu2}*{qD2}) """
-			# RHS = f"""sum({nn}$({map_}), {mu} * exp(({PwThat}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}-{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
 			return equation(name,self.qD.doms(),condition,qD,RHS)
-		# else:
-		# 	RHS =  f"""sum({nn}$({map_}), 1/{mu}*{qD2}) """
-		# 	# RHS = f"""sum({nn}$({map_}), {mu} * exp(({PbT}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}/{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
-		# 	return equation(name,self.qS.doms(),conditions,qS,RHS)
 
 	def zero_profit(self,name,conditions,nn,map_,mu,PwThat2,PwThat):
 		RHS = f"""sum({nn}$({map_}), {mu}*{PwThat2}) """
-		
-		# RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
 		return equation(name,self.PwThat.doms(),conditions,f"{PwThat}",RHS)
 
-	#
+class ID_sum:
+	""" Defines qsumU, os and qsumX"""
+	def __init__(self):
+		pass
+	def add_symbols(self,db,ns):
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','ID_e2t','ID_e2u','ID_u2t','ID_e2ai','ID_e2ai2i','ID_i2t','qsumU','qsumX','os','qD')];
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
+	def add_conditions(self):
+		self.conditions = {'qsumU': self.ID_e2t.write(), 'os': self.ID_e2t.write(),'qsumX': self.ID_e2ai.write()}
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+	def run(self,name):
+		nnn,nnnn = self.a('n',[(0,2)]), self.a('n',[(0,3)])
+		e2t,e2t_2 = self.a('ID_e2t'), self.a('ID_e2t',[(1,3)])
+		e2u_2 = self.a('ID_e2u',[(1,2)])
+		qD_2,qD_3 = self.a('qD',[(0,1)]),self.a('qD',[(0,2)])
+		u2t_2 = self.a('ID_u2t',[(0,2)])
+		e2ai2i = self.a('ID_e2ai2i')
+		i2t_2 = self.a('ID_i2t',[(0,2),(1,3)])
+		os_2 = self.a('os',[(1,3)])
+		text = self.e_qsumU(f"E_ID_qsumU_{name}", self.conditions['qsumU'],nnn,e2t,e2u_2,qD_3)+'\n\t'
+		text += self.e_os(f"E_ID_os_{name}", self.conditions['os'],nnn,e2u_2,u2t_2,qD_2,qD_3)+'\n\t'
+		text += self.e_qsumX(f"E_ID_qsumX_{name}", self.conditions['qsumX'],nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2)
+		return text
+	def e_qsumU(self,name,conditions,nnn,e2t,e2u_2,qD_3):
+		RHS = "1"
+		# RHS = f"""sum({nnn}$({e2t} and {e2u_2}), {qD_3})"""
+		return equation(name,self.qsumU.doms(),conditions,self.qsumU.write(), RHS)
+	def e_os(self,name,conditions,nnn,e2u_2,u2t_2,qD_2,qD_3):
+		RHS = "1"
+		# RHS = f"""sum({nnn}$({e2u_2} and {u2t_2}), {qD_3})/{qD_2}"""
+		return equation(name,self.os.doms(),conditions,self.os.write(),RHS)
+	def e_qsumX(self,name,conditions,nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2):
+		RHS = "1"
+		# RHS = f""" sum([{nnn},{nnnn}]$({e2ai2i} and {e2t_2} and {i2t_2}), {qD_3}*{os_2})"""
+		return equation(name,self.qsumX.doms(),conditions,self.qsumX.write(),RHS)
+
+class ID_emissions:
+	def __init__(self):
+		pass
+	def add_symbols(self,db,ns):
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_inp','phi','qD','M0','PwT','PwThat','pMhat')];
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
+	def add_conditions(self):
+		self.conditions = {'M0': '', 'PwThat': self.ID_inp.write()}
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+	def run(self,name):
+		text = self.e_M0(f"E_M0_{name}", self.conditions['M0'],self.a('n'),self.a('z'),self.a('ai'),self.a('phi'),self.a('qD'))+'\n\t'
+		text += self.e_PwThat(f"E_ID_PwThat_{name}", self.conditions['PwThat'],self.a('n'),self.a('z'),self.a('phi'),self.a('PwT'),self.a('pMhat'))
+		return text
+	def e_M0(self,name,conditions,n,z,ai,phi,qD):
+		return equation(name,self.M0.doms(),conditions,self.M0.write(),f"""1""")
+		# return equation(name,self.M0.doms(),conditions,self.M0.write(),f"""sum({n}$({ai}), {phi}*{qD})""")
+	def e_PwThat(self,name,conditions,n,z,phi,PwT,pMhat):
+		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),f"""1""")
+		# return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),f"""{PwT}+sum({z},{phi}*{pMhat})""")
+
+class aggregates:
+	def __init__(self,state='ID'):
+		self.state = state
+	def add_symbols(self,db,ns):
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_i2ai','qD','pM','pMhat')];
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
+	def add_conditions(self):
+		self.conditions = {'qD': self.ai.write(), 'pMhat': ''}
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+	def run(self,name):
+		if self.state == 'ID':
+			text = self.e_qD(f"E_aggqD_ID_{name}", self.conditions['qD'], self.a('n',[(0,1)]), self.a('ID_i2ai',[(0,1),(1,0)]), self.a('qD',[(0,1)]))+'\n\t'
+			text += self.e_pMhat_ID(f"E_pMhat_ID_{name}", self.conditions['pMhat'])
+		return text
+	def e_qD(self,name,conditions,nn,i2ai_2,qD_2):
+		return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""1""")
+		# return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""sum({nn}$({i2ai_2}), {qD_2})""")
+	def e_pMhat_ID(self,name,conditions):
+		return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),"1")
+		# return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),self.pM.write())
 
 class simplesumU:
 	""" Collection of equations that define a variable as the simple sum of others """
