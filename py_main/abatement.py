@@ -12,7 +12,7 @@ class abate(gmspython):
 			self.ns_local = {**self.ns_local, **self.namespace_local_sets(nt)}
 			for tree in nt.trees.values():
 				DataBase.GPM_database.merge_dbs(self.model.database,tree.database,'first')
-			self.add_globals(tech,kwargs_ns)
+			self.add_sets(tech,kwargs_ns)
 			self.setstate('ID',init=False)
 
 	# ------------------ 1: Initialization  ------------------ #
@@ -25,6 +25,10 @@ class abate(gmspython):
 			std_sets['s_prod'] = df('s_prod',kwargs)
 		return std_sets
 
+	def add_aliases(self,list_of_tuples,ns={}):
+		self.model.database.update_alias(pd.MultiIndex.from_tuples(list_of_tuples))
+		self.ns.update({k[1]:df(k[1],ns) for k in list_of_tuples}) # add to namespace
+
 	def namespace_local_sets(self,nt):
 		"""create namespace for each tree by copying attributes."""
 		return {tree: {attr: nt.trees[tree].__dict__[attr] for attr in nt.trees[tree].__dict__ if attr not in set(['tree','database']).union(nt.prune_trees)} for tree in nt.trees}
@@ -35,14 +39,15 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','mu','sigma','eta','gamma_tau','currapp_ID')
+		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','os','mu','sigma','eta','gamma_tau','currapp_ID')
 
-	def add_globals(self,tech,kwargs):
+	def add_sets(self,tech,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
-		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2t']]})
+		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
+		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
 		self.model.database[self.n('ai')] = tech['ID']['Q2P'].levels[1].rename(self.n('n'))
 		# Mappings:
 		self.model.database[self.n('ID_i2t')] = self.get('ID_map_all')[(self.get('ID_map_all').get_level_values(self.n('n')).isin(self.get('ID_inp'))) & (self.get('ID_map_all').get_level_values(self.n('nn')).isin(self.get('ID_t_all')))]
@@ -52,6 +57,8 @@ class abate(gmspython):
 		t2i2ai = DataBase_wheels.mi.add_ndmi(self.get('ID_i2t').swaplevel(0,1).set_names([self.n('n'),self.n('nn')]),tech['ID']['Q2P'].set_names([self.n('nn'),self.n('nnn')]))
 		self.model.database[self.n('ID_e2ai2i')] = DataBase_wheels.appmap(t2i2ai,DataBase_wheels.map_from_mi(self.get('ID_e2t'),self.n('nn'),self.n('n')),self.n('n')).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
 		self.model.database[self.n('ID_e2ai')] = self.get('ID_e2ai2i').droplevel(self.n('nnn')).unique()
+		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_BU')), self.get('map_ID_BX'), self.get('map_ID_Y'), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
+		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')))]), names = [self.n('n'),self.n('nn')])
 
 
 
@@ -76,6 +83,8 @@ class abate(gmspython):
 			return pd.Series(1, index = self.get('ID_e2t'), name = self.n(var))
 		elif var == 'qsumX':
 			return pd.Series(1, index = self.get('ID_e2ai'), name = self.n(var))
+		elif var == 'os':
+			return pd.Series(0.5, index = self.get('ID_e2t'), name = self.n(var))
 		elif var == 'M0':
 			return pd.Series(1, index = self.get('z'), name = self.n(var))
 		elif var == 'M':
@@ -150,7 +159,7 @@ class abate(gmspython):
 			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out')}]
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
-					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'qsumU': self.g('ID_e2t'),
+					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'qsumU': self.g('ID_e2t'), 'os': self.g('ID_e2t'),
 					 'M0': None}]
 		elif group == 'g_ID_endoincalib':
 			return [{'mu': self.g('ID_mu_endoincalib')}]
@@ -184,6 +193,7 @@ class abate(gmspython):
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_endoincalib_exoinbaseline','g_minobj_endoincalib'])
 														   -OS(['g_ID_exoincalib']))}
 
+	# ------------------ 3: Special solve statements  ------------------ #
 	@property
 	def add_solve(self):
 		if self.state == 'EOPcalibrate':
@@ -191,90 +201,35 @@ class abate(gmspython):
 		else:
 			return None
 
-	# --- 		4: Define blocks 		--- #
+	# ------------------------ 4: Blocks  ----------------------- #
 	@property
 	def blocktext(self):
-		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("ID_")}, \
-					**{f"M_{self.model.settings.name}_simplesumU_ID":self.init_simplesumU("ID"), \
-						f"M_{self.model.settings.name}_simplesumX_ID":self.init_simplesumX("ID"), \
-						f"M_ID_{self.model.settings.name}_emissionaccounts":self.init_emission_accounts("ID"), \
-						f"M_{self.model.settings.name}_sumXinE":self.init_sumXinE(), \
-						f"M_{self.model.settings.name}_currentapplications_ID":self.init_currentapplications("ID")}}
-		if self.state.startswith("EOP"):
-		# if self.use_EOP:
-			blocks[f"M_EOP_{self.model.settings.name}_emissionaccounts"] = self.init_emission_accounts("EOP")
-			blocks = {**blocks, **{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("EOP_")}}
-			blocks[f"M_{self.model.settings.name}_EOP"] = self.init_EOP_eqs()
-			blocks[f"M_{self.model.settings.name}_simplesumU_EOP"] = self.init_simplesumU("EOP")
-			blocks[f"M_{self.model.settings.name}_simplesumX_EOP"] = self.init_simplesumX("EOP")
-			blocks[f"M_{self.model.settings.name}_currentapplications_EOP"] = self.init_currentapplications("EOP")
-		if self.state == "EOPcalibrate":
-			blocks[f"M_EOP_{self.model.settings.name}_minobj"] = self.init_minimize_object(self.state)
+		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},
+				  **{f"M_{self.model.settings.name}_ID_sum": self.init_ID_sum(),
+				     f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
+				     f"M_{self.model.settings.name}_ID_agg": self.init_agg()}}
 		return blocks
 
 	@property
 	def mblocks(self):
-		blocks = [f"M_{tree}" for tree in self.ns_local if tree.startswith("ID_")] + [f"M_{self.model.settings.name}_simplesumU_ID"]
-		blocks += [f"M_ID_{self.model.settings.name}_emissionaccounts"]
-		blocks += [f"M_{self.model.settings.name}_sumXinE"]
-		blocks += [f"M_{self.model.settings.name}_currentapplications_ID"]
+		return set([f"M_{tree}" for tree in self.ns_local]+
+				   [f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg')])
 
-		if self.state.startswith("EOP"):
-		# if self.use_EOP:
-			blocks += [f"M_{tree}" for tree in self.ns_local if tree.startswith("EOP_")]
-			blocks += [f"M_{self.model.settings.name}_EOP"] + [f"M_{self.model.settings.name}_simplesumU_EOP"]
-			blocks += [f"M_{self.model.settings.name}_simplesumX_EOP"]
-			blocks += [f"M_EOP_{self.model.settings.name}_emissionaccounts"]
-			blocks += [f"M_{self.model.settings.name}_currentapplications_EOP"]
-		else:
-			blocks += [f"M_{self.model.settings.name}_simplesumX_ID"]
-		
-		if self.state == "EOPcalibrate":
-			blocks += [f"M_EOP_{self.model.settings.name}_minobj"]
-		return set(blocks)
-
-	def init_simplesumU(self,state):
-		simplesumU = getattr(gams_abatement, "simplesumU")(state=state)
-		simplesumU.add_symbols(self.model.database, self.ns)
-		simplesumU.add_conditions()
-		return simplesumU.run()
-	
-	def init_simplesumX(self, state):
-		simplesumX = getattr(gams_abatement, "simplesumX")(state=state)
-		simplesumX.add_symbols(self.model.database, self.ns)
-		simplesumX.add_conditions()
-		return simplesumX.run()
-
-	def init_sumXinE(self):
-		sumXinE = getattr(gams_abatement, "sumXinE")()
-		sumXinE.add_symbols(self.model.database, self.ns)
-		sumXinE.add_conditions()
-		return sumXinE.run()
-
-	def init_emission_accounts(self, state):
-		emission_accounts = getattr(gams_abatement, "emission_accounts")(state=state)
-		emission_accounts.add_symbols(self.model.database, self.ns)
-		emission_accounts.add_conditions()
-		return emission_accounts.run("emission_accounts")
-
-	def init_currentapplications(self, state):
-		currentapplications = getattr(gams_abatement, "currentapplications")(state=state)
-		currentapplications.add_symbols(self.model.database, self.ns)
-		currentapplications.add_conditions()
-		return currentapplications.run(self.ns_local["ID_CU"]["type_f"])
-
-	def init_minimize_object(self, state):
-		minimize_object = getattr(gams_abatement, "minimize_object")(state=state)
-		minimize_object.add_symbols(self.model.database, self.ns)
-		minimize_object.add_conditions()
-		return minimize_object.run()
-
-	def init_EOP_eqs(self):
-		EOP = getattr(gams_abatement, "EOP")()
-		EOP.add_symbols(self.model.database, self.ns)
-		EOP.add_conditions()
-		return EOP.run("EOP")
-
+	def init_ID_sum(self):
+		s = getattr(gams_abatement,'ID_sum')()
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
+	def init_ID_emissions(self):
+		s = getattr(gams_abatement,'ID_emissions')()
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
+	def init_agg(self):
+		s = getattr(gams_abatement,'aggregates')(state=self.state)
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
 	def eqtext(self,tree_name):
 		tree = self.ns_local[tree_name]
 		if "ID" in tree_name:

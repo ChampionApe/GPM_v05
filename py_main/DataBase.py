@@ -127,6 +127,8 @@ class gpy_symbol:
 			return self.d(d2t(vi))
 		elif isinstance(vi,dict):
 			return self.one_c(d2t(vi))
+		elif isinstance(vi,list) and len(vi)==1:
+			return self.d(d2t(vi[0]))
 
 	def rctree_pd(self,c):
 		""" returns the pandas representation of the variable subsetted according to sets in the conditions tree."""
