@@ -457,7 +457,7 @@ class aggregates:
 		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_i2ai','qD','pM','pMhat')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
-		self.conditions = {'qD': self.ai.write(), 'pMhat': ''}
+		self.conditions = {'qsumU': self.ID_e2t.write()}
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
@@ -472,113 +472,99 @@ class aggregates:
 		#return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),"1")
 		return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),self.pM.write())
 
-class simplesumU:
-	""" Collection of equations that define a variable as the simple sum of others """
-	def __init__(self, state="ID"):
-		self.state = state
-
-	def add_symbols(self, db, ns):
-		[setattr(self,sym,db[ns[sym]]) for sym in ('n', 'qsumU', 'qD')]
-		[setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns)]) for sym in ['sumUaggs', 'sumU2U']]
-		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
-
-	def add_conditions(self):
-		self.conditions = {'sumUaggs': getattr(self, self.state + "_" + "sumUaggs").write()}
-
-	def a(self,attr,lot_indices=[],l='',lag={}):
-		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
-		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
-
-	def run(self):
-		nn = self.a("n", [(0, 1)])
-		sumUaggs = self.state + "_" + "sumUaggs"
-		sumU2U= self.a(self.state + "_" + "sumU2U")
-		qsumU= self.a("qsumU")
-		qD2 = self.a("qD", [(0, 1)])
-		name_sumU = "E_sumU" + "_" + self.state
-		text = self.simplesum(name_sumU, self.conditions["sumUaggs"], sumUaggs, sumU2U, qsumU, qD2, nn)
-		return text
-
-	def simplesum(self, name, conditions, agg, agg2ind, qagg, qD2, nn):
-		LHS = f"{qagg}"
-		RHS = f"sum({nn}$({agg2ind}), {qD2})"
-		return equation(name, getattr(self, agg).doms(), conditions, LHS, RHS)
-
 class currentapplications:
-
-	def __init__(self, state="ID"):
-		self.state = state
-
-	def add_symbols(self, db, ns):
-		syms_in_ns = ['n', 'qsumU', 'qD', "currapp_ID", "currapp_ID_subset", "map_currapp2sumUE", "currapp_EOP", "currapp_EOP_subset", "map_currapp2sumUM", "M0"]
-		syms_in_ns += ["mu", "currapp_ID_modified", "currapp_ID_subset", "map_currapp_ID2T", "map_currapp_ID2E", "map_U2E",  "PwThat", "sigma", "gamma_tau", "qD"]
-		syms = ["map_ID_BU", "map_ID_CU", "map_ID_TU", "bra_no_ID_BU"]
-		[setattr(self,sym,db[ns[sym]]) for sym in syms_in_ns]
-		[setattr(self, sym, db[sym]) for sym in syms]
-		# [setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns)]) for sym in ['currapp_ID_subset', ]]
-		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
-
+	def __init__(self,state='ID'):
+		self.state=state
+	def add_symbols(self,db,ns):
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','e2t','e2u','qD','currapp_ID')];
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
-		self.conditions = {'currapp_ID': getattr(self, "currapp_ID_subset").write(), 'currapp_EOP': getattr(self, "currapp_EOP_subset").write()}
-
+		self.conditions = {'currapp_ID': self.ID_e2t.write()}
 	def a(self,attr,lot_indices=[],l='',lag={}):
-		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
-
-	def run(self, type_f_UC=None):
-		nn, nnn, nnnn = self.a("n", [(0,1)]), self.a("n", [(0,2)]), self.a("n", [(0,3)])
-		nnnnn, nnnnnn, nnnnnnn =  self.a("n", [(0,4)]), self.a("n", [(0,5)]), self.a("n", [(0,6)])
-		currapp = self.a("currapp_" + self.state)
-		if self.state == "ID":
-			currapp2sumU_upper = self.a("map_currapp2sumUE")
-		elif self.state == "EOP":
-			currapp2sumU_upper = self.a("map_currapp2sumUM")
-		qsumU2 = self.a("qsumU", [(0, 1)])
-		if self.state == "ID":
-			quant3 = self.a("qD", [(0, 2)])
-		elif self.state == "EOP":
-			quant3 = self.a("M0", [(0, 2)])
-		#currapp modified
-
-		currapp_ID_modified = self.a("currapp_ID_modified")
-		map_currapp_ID2T = self.a("map_currapp_ID2T")
-		map_currapp_ID2E = self.a("map_currapp_ID2E", [(0,0), (1,2)])
-		map_U2E = self.a("map_U2E", [(0, 3), (1,2)])
-		map_ID_TU = self.a("map_ID_TU", [(0, 3), (1,1)])
-		map_ID_CU45, map_ID_CU65 = self.a("map_ID_CU", [(0,3), (1,4)]), self.a("map_ID_CU", [(0,5), (1,4)])
-		PwThat4, PwThat5, PwThat6, PwThat7 = self.a("PwThat", [(0,3)]), self.a("PwThat", [(0,4)]), self.a("PwThat", [(0,5)]), self.a("PwThat", [(0,6)])
-		sigma5 = self.a("sigma", [(0, 4)])
-		bra_no_ID_BU6 = self.a("bra_no_ID_BU", [(0, 5)])
-		gamma_tau23 = self.a("gamma_tau", [(0,1), (1,2)])
-		map_ID_BU67 = self.a("map_ID_BU", [(0, 5), (1,6)])
-		qD3, qD5 = self.a("qD", [(0, 2)]), self.a("qD", [(0, 4)])
-		mu45, mu65 = self.a("mu", [(0,3), (1,4)]), self.a("mu", [(0,5), (1,4)])
-		
-		name = "E_currentapplications_" + self.state
-		doms = getattr(self, "currapp_" + self.state).doms()
-		text = self.currentapplication(name, self.conditions["currapp_" + self.state], doms, currapp, nn, nnn, currapp2sumU_upper, qsumU2, quant3)
-		if self.state == "ID":
-			text += "\n\t" + self.eq_currapp_modified(type_f_UC, currapp_ID_modified, nn, nnn, map_currapp_ID2T, map_currapp_ID2E, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu45, PwThat5, PwThat4, sigma5, \
-										nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau23, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3)
+	def run(self,name):
+		if self.state == 'ID':
+			text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], self.a('n',[(0,2)]), self.a('e2t'), self.a('e2u_2',[(1,2)]), self.a('qD'),self.a('qD',[(0,2)]),self.currapp_ID)
 		return text
+	def e_currapp(self,name,conditions,nnn,e2t,e2u_2,qD,qD_3,currapp):
+		RHS = f"""sum({nnn}$({e2t} and {e2u_u}), {qD_3})/{qD}"""
+		return equation(name,currapp.doms(),conditions,currapp.write(),RHS)
 
-	def currentapplication(self, name, condition, doms, currapp, nn, nnn, currapp2sumU_upper, qsumU2, quant3):
-		LHS = f"{currapp}"
-		RHS = f"sum([{nn}, {nnn}]$({currapp2sumU_upper}), {qsumU2}/{quant3})"
-		return equation(name, doms, condition, LHS, RHS)
+# class currentapplications:
 
-	def eq_currapp_modified(self, type_f_UC, currapp_ID_modified, nn, nnn, map_currapp_ID2T, map_currapp_ID2E, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu4, PwThat5, PwThat4, sigma5, \
-							nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau23, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3):
-		LHS = f"""{currapp_ID_modified}"""
-		if type_f_UC == "MNL":
-			RHS = f" sum({nn}$({map_currapp_ID2T}), sum({nnn}$({map_currapp_ID2E}), sum({nnnn}$({map_U2E} and {map_ID_TU}), sum({nnnnn}$({map_ID_CU45}), ({mu4} * \n" + \
-				  f" exp(({PwThat5} - {PwThat4})*{sigma5})) / (sum({nnnnnn}$({map_ID_CU65} and not {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - {PwThat6}) * {sigma5})) + \n"  + \
-				  f" sum({nnnnnn}$({map_ID_CU65} and {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - ({gamma_tau23} * sum({nnnnnnn}$({map_ID_BU67}), {PwThat7}))) * {sigma5}))) * \n" + \
-				  f" ({qD5}/{qD3})))))"
-		else:
-			RHS = f""" NOOOOOO """
-			#f"""sum({nn}$({map_}), {mu} * exp(({PbT2}-{PwThat})*{sigma2}) * {qS2}/ sum({nnn}$({map_3}), {mu3}*exp(({PbT2}-{PwThat3})*{sigma2})))"""
-		return equation("E_currapp_modified", self.currapp_ID_modified.doms(), self.conditions["currapp_ID"], LHS, RHS)
+# 	def __init__(self, state="ID"):
+# 		self.state = state
+
+# 	def add_symbols(self, db, ns):
+# 		syms_in_ns = ['n', 'qsumU', 'qD', "currapp_ID", "currapp_ID_subset", "map_currapp2sumUE", "currapp_EOP", "currapp_EOP_subset", "map_currapp2sumUM", "M0"]
+# 		syms_in_ns += ["mu", "currapp_ID_modified", "currapp_ID_subset", "map_currapp_ID2T", "map_currapp_ID2E", "map_U2E",  "PwThat", "sigma", "gamma_tau", "qD"]
+# 		syms = ["map_ID_BU", "map_ID_CU", "map_ID_TU", "bra_no_ID_BU"]
+# 		[setattr(self,sym,db[ns[sym]]) for sym in syms_in_ns]
+# 		[setattr(self, sym, db[sym]) for sym in syms]
+# 		# [setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns)]) for sym in ['currapp_ID_subset', ]]
+# 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}	
+
+# 	def add_conditions(self):
+# 		self.conditions = {'currapp_ID': getattr(self, "currapp_ID_subset").write(), 'currapp_EOP': getattr(self, "currapp_EOP_subset").write()}
+
+# 	def a(self,attr,lot_indices=[],l='',lag={}):
+# 		""" get the version of the symbol self.attr with alias from list of tuples with indices (lot_indices) and potentially .l added."""
+# 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+
+# 	def run(self, type_f_UC=None):
+# 		nn, nnn, nnnn = self.a("n", [(0,1)]), self.a("n", [(0,2)]), self.a("n", [(0,3)])
+# 		nnnnn, nnnnnn, nnnnnnn =  self.a("n", [(0,4)]), self.a("n", [(0,5)]), self.a("n", [(0,6)])
+# 		currapp = self.a("currapp_" + self.state)
+# 		if self.state == "ID":
+# 			currapp2sumU_upper = self.a("map_currapp2sumUE")
+# 		elif self.state == "EOP":
+# 			currapp2sumU_upper = self.a("map_currapp2sumUM")
+# 		qsumU2 = self.a("qsumU", [(0, 1)])
+# 		if self.state == "ID":
+# 			quant3 = self.a("qD", [(0, 2)])
+# 		elif self.state == "EOP":
+# 			quant3 = self.a("M0", [(0, 2)])
+# 		#currapp modified
+
+# 		currapp_ID_modified = self.a("currapp_ID_modified")
+# 		map_currapp_ID2T = self.a("map_currapp_ID2T")
+# 		map_currapp_ID2E = self.a("map_currapp_ID2E", [(0,0), (1,2)])
+# 		map_U2E = self.a("map_U2E", [(0, 3), (1,2)])
+# 		map_ID_TU = self.a("map_ID_TU", [(0, 3), (1,1)])
+# 		map_ID_CU45, map_ID_CU65 = self.a("map_ID_CU", [(0,3), (1,4)]), self.a("map_ID_CU", [(0,5), (1,4)])
+# 		PwThat4, PwThat5, PwThat6, PwThat7 = self.a("PwThat", [(0,3)]), self.a("PwThat", [(0,4)]), self.a("PwThat", [(0,5)]), self.a("PwThat", [(0,6)])
+# 		sigma5 = self.a("sigma", [(0, 4)])
+# 		bra_no_ID_BU6 = self.a("bra_no_ID_BU", [(0, 5)])
+# 		gamma_tau23 = self.a("gamma_tau", [(0,1), (1,2)])
+# 		map_ID_BU67 = self.a("map_ID_BU", [(0, 5), (1,6)])
+# 		qD3, qD5 = self.a("qD", [(0, 2)]), self.a("qD", [(0, 4)])
+# 		mu45, mu65 = self.a("mu", [(0,3), (1,4)]), self.a("mu", [(0,5), (1,4)])
+		
+# 		name = "E_currentapplications_" + self.state
+# 		doms = getattr(self, "currapp_" + self.state).doms()
+# 		text = self.currentapplication(name, self.conditions["currapp_" + self.state], doms, currapp, nn, nnn, currapp2sumU_upper, qsumU2, quant3)
+# 		if self.state == "ID":
+# 			text += "\n\t" + self.eq_currapp_modified(type_f_UC, currapp_ID_modified, nn, nnn, map_currapp_ID2T, map_currapp_ID2E, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu45, PwThat5, PwThat4, sigma5, \
+# 										nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau23, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3)
+# 		return text
+
+# 	def currentapplication(self, name, condition, doms, currapp, nn, nnn, currapp2sumU_upper, qsumU2, quant3):
+# 		LHS = f"{currapp}"
+# 		RHS = f"sum([{nn}, {nnn}]$({currapp2sumU_upper}), {qsumU2}/{quant3})"
+# 		return equation(name, doms, condition, LHS, RHS)
+
+# 	def eq_currapp_modified(self, type_f_UC, currapp_ID_modified, nn, nnn, map_currapp_ID2T, map_currapp_ID2E, nnnn, map_U2E, map_ID_TU, nnnnn, map_ID_CU45, mu4, PwThat5, PwThat4, sigma5, \
+# 							nnnnnn, map_ID_CU65, bra_no_ID_BU6, mu65, PwThat6, gamma_tau23, nnnnnnn, map_ID_BU67, PwThat7, qD5, qD3):
+# 		LHS = f"""{currapp_ID_modified}"""
+# 		if type_f_UC == "MNL":
+# 			RHS = f" sum({nn}$({map_currapp_ID2T}), sum({nnn}$({map_currapp_ID2E}), sum({nnnn}$({map_U2E} and {map_ID_TU}), sum({nnnnn}$({map_ID_CU45}), ({mu4} * \n" + \
+# 				  f" exp(({PwThat5} - {PwThat4})*{sigma5})) / (sum({nnnnnn}$({map_ID_CU65} and not {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - {PwThat6}) * {sigma5})) + \n"  + \
+# 				  f" sum({nnnnnn}$({map_ID_CU65} and {bra_no_ID_BU6}), {mu65} * exp(({PwThat5} - ({gamma_tau23} * sum({nnnnnnn}$({map_ID_BU67}), {PwThat7}))) * {sigma5}))) * \n" + \
+# 				  f" ({qD5}/{qD3})))))"
+# 		else:
+# 			RHS = f""" NOOOOOO """
+# 			#f"""sum({nn}$({map_}), {mu} * exp(({PbT2}-{PwThat})*{sigma2}) * {qS2}/ sum({nnn}$({map_3}), {mu3}*exp(({PbT2}-{PwThat3})*{sigma2})))"""
+# 		return equation("E_currapp_modified", self.currapp_ID_modified.doms(), self.conditions["currapp_ID"], LHS, RHS)
 
 class sumXinE:
 	def __init__(self):
