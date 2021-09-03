@@ -385,7 +385,7 @@ class linear_out:
 
 	def demand(self,name,condition,nn,map_2,mu2,qD,qD2,output=False):
 		if output is False:
-			RHS = f"""sum({nn}$({map_2}), {mu2}*{qD2}) """
+			RHS = f"""sum({nn}$({map_2}), {qD2}/{mu2}) """
 			return equation(name,self.qD.doms(),condition,qD,RHS)
 
 	def zero_profit(self,name,conditions,nn,map_,mu,PwThat2,PwThat):
