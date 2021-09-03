@@ -57,7 +57,7 @@ class abate(gmspython):
 		t2i2ai = DataBase_wheels.mi.add_ndmi(self.get('ID_i2t').swaplevel(0,1).set_names([self.n('n'),self.n('nn')]),tech['ID']['Q2P'].set_names([self.n('nn'),self.n('nnn')]))
 		self.model.database[self.n('ID_e2ai2i')] = DataBase_wheels.appmap(t2i2ai,DataBase_wheels.map_from_mi(self.get('ID_e2t'),self.n('nn'),self.n('n')),self.n('n')).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
 		self.model.database[self.n('ID_e2ai')] = self.get('ID_e2ai2i').droplevel(self.n('nnn')).unique()
-		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_BU')), self.get('map_ID_BX'), self.get('map_ID_Y'), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
+		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.get('map_ID_Y'), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
 		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')))]), names = [self.n('n'),self.n('nn')])
 
 
@@ -138,18 +138,10 @@ class abate(gmspython):
 			PwThat[self.get("ID_i2t").droplevel(1).union(self.get("bra_no_ID_Y"))]).groupby("nn").sum() / qD[self.get("kno_ID_BX").union(self.get("kno_ID_TX")).union(self.get("kno_no_ID_Y"))]) #Price of techs, baseline techs and Y aggregate
 		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_BU").union(self.get("map_ID_TU"))) + PwThat[self.get("ID_t_all")].rename_axis("nn")).droplevel(1)) #Prices of technology goods
 		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_CU")) + qD[self.get("bra_ID_CU")] * PwThat[self.get("bra_ID_CU")]).groupby("nn").sum() / qD[self.get("kno_ID_CU")]) #Prices of C
-		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_EC")) + qD[self.get("bra_ID_EC")] * PwThat[self.get("bra_ID_EC")]).groupby("nn").sum() / qD[self.get("kno_ID_EC")]) #Prices of E
+		PwThat = (PwThat.append((pd.Series(0, index=self.get("map_ID_EC")) + qD[self.get("bra_ID_EC")] * PwThat[self.get("bra_ID_EC")]).groupby("nn").sum() / qD[self.get("kno_ID_EC")])).rename_axis("n") #Prices of E
 		PbT = ((pd.Series(0, index=self.g("map_ID_Y").rctree_pd(self.g("bra_o_ID_Y"))) + (qD[self.get("bra_o_ID_Y")] * PwThat[self.get("bra_o_ID_Y")])).groupby("nn").sum()).rename_axis("n") / self.get("qS") #Price of final good
 		db["qD"], db["mu"], db["PwThat"], db["PbT"] = qD, mu, PwThat, PbT
 		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
-
-
-	def add_subsets(self, m="ID"):
-		self.model.database[self.n("ID_mu_endoincalib")] = (
-			self.get("map_ID_EC").append(self.g("map_ID_CU").rctree_pd(self.g("bra_no_ID_BU"))).append(self.get("map_ID_BX"))
-			.append(self.get("map_ID_Y_in")).append(self.get("map_ID_Y_out")).append(self.get("map_ID_BU"))
-		)
-		self.model.database[self.n("ID_mu_exo")] = self.get("map_ID_TX").append(self.get("map_ID_TU")).append(self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU")))
 
 
 	# ------------------ 2: Groups  ------------------ #
