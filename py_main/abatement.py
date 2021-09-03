@@ -52,13 +52,8 @@ class abate(gmspython):
 		t2i2ai = DataBase_wheels.mi.add_ndmi(self.get('ID_i2t').swaplevel(0,1).set_names([self.n('n'),self.n('nn')]),tech['ID']['Q2P'].set_names([self.n('nn'),self.n('nnn')]))
 		self.model.database[self.n('ID_e2ai2i')] = DataBase_wheels.appmap(t2i2ai,DataBase_wheels.map_from_mi(self.get('ID_e2t'),self.n('nn'),self.n('n')),self.n('n')).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
 		self.model.database[self.n('ID_e2ai')] = self.get('ID_e2ai2i').droplevel(self.n('nnn')).unique()
-<<<<<<< Updated upstream
-
-
-=======
 		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.get('map_ID_Y'), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
 		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')))]), names = [self.n('n'),self.n('nn')])
->>>>>>> Stashed changes
 
 	# ---------------- 1.2: Variables  ------------- #
 	def default_var_series(self,var):
@@ -111,7 +106,8 @@ class abate(gmspython):
 			for var in self.default_variables:
 				if self.ns[var] not in self.model.database.symbols:
 					self.model.database[self.ns[var]] = self.default_var_series(var)
-		self.model.settings.set_conf('solve',self.add_solve + "\n")
+		if 'calibrate' in self.state:
+			self.model.settings.set_conf('solve',self.add_solve + "\n")
 
 	def initialize_variables_leontief(self):
 		db = DataBase.GPM_database()
@@ -140,33 +136,15 @@ class abate(gmspython):
 		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
 
-	def add_subsets(self, m="ID"):
-		self.model.database[self.n("ID_mu_endoincalib")] = (
-			self.get("map_ID_EC").append(self.g("map_ID_CU").rctree_pd(self.g("bra_no_ID_BU"))).append(self.get("map_ID_BX"))
-			.append(self.get("map_ID_Y")).append(self.get("map_ID_BU"))
-		)
-		self.model.database[self.n("ID_mu_exo")] = self.get("map_ID_TX").append(self.get("map_ID_TU")).append(self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU")))
-
-
 	# ------------------ 2: Groups  ------------------ #
 	def group_conditions(self,group):
 		if group == 'g_ID_alwaysexo':
-			return [{'sigma': self.g('ID_kno_inp'), 'mu': self.g('ID_mu_exo'), 'eta': self.g('ID_kno_out'),
-			 			'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'), 'PwThat': self.g('ID_inp')}]
-			# return [{'sigma': self.g('ID_kno_inp'), 'mu': self.g('ID_mu_exo'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'),
-			#   		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out')}]
+			return [{'sigma': self.g('ID_kno_inp'), 'mu': self.g('ID_mu_exo'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'),
+			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out')}]
 		elif group == 'g_ID_alwaysendo':
-<<<<<<< Updated upstream
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
-					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'qsumU': self.g('ID_e2t'),
+					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'qsumU': self.g('ID_e2t'), 'os': self.g('ID_e2t'),
 					 'M0': None}]
-=======
-			return [{'PwThat': self.g('ID_int'), 'PbT': self.g('ID_out'),
-					 'qD': {'or': [self.g('ID_int'), self.g('ID_inp')]}}]
-			# return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
-			# 		'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'qsumU': self.g('ID_e2t'), 'os': self.g('ID_e2t'),
-			# 		 'M0': None}]
->>>>>>> Stashed changes
 		elif group == 'g_ID_endoincalib':
 			return [{'mu': self.g('ID_mu_endoincalib')}]
 		elif group == 'g_ID_exoincalib':
@@ -194,121 +172,32 @@ class abate(gmspython):
 	@property 
 	def endo_groups(self):
 		n = self.model.settings.name+'_'
-		gs = OS(['g_ID_alwaysendo','TEST'])
-		return {n+g: self.add_group(g,n=n) for g in gs}
-		# gs = OS(['g_ID_alwaysendo','g_ID_exoincalib'])
-		# if self.state == 'ID':
-		# 	return {n+g: self.add_group(g,n=n) for g in gs}
-		# elif self.state == 'ID_calibrate':
-		# 	return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_endoincalib_exoinbaseline','g_minobj_endoincalib'])
-		# 												   -OS(['g_ID_exoincalib']))}
+		gs = OS(['g_ID_alwaysendo','g_ID_exoincalib'])
+		if self.state == 'ID':
+			return {n+g: self.add_group(g,n=n) for g in gs}
+		elif self.state == 'ID_calibrate':
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_endoincalib_exoinbaseline','g_minobj_endoincalib'])
+														   -OS(['g_ID_exoincalib']))}
 
 	@property
 	def add_solve(self):
 		if self.state == 'EOPcalibrate':
 			return f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
 		else:
-			return f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
+			return None
 
 	# --- 		4: Define blocks 		--- #
 	@property
 	def blocktext(self):
-<<<<<<< Updated upstream
-		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("ID_")}, \
-					**{f"M_{self.model.settings.name}_simplesumU_ID":self.init_simplesumU("ID"), \
-						f"M_{self.model.settings.name}_simplesumX_ID":self.init_simplesumX("ID"), \
-						f"M_ID_{self.model.settings.name}_emissionaccounts":self.init_emission_accounts("ID"), \
-						f"M_{self.model.settings.name}_sumXinE":self.init_sumXinE(), \
-						f"M_{self.model.settings.name}_currentapplications_ID":self.init_currentapplications("ID")}}
-		if self.state.startswith("EOP"):
-		# if self.use_EOP:
-			blocks[f"M_EOP_{self.model.settings.name}_emissionaccounts"] = self.init_emission_accounts("EOP")
-			blocks = {**blocks, **{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith("EOP_")}}
-			blocks[f"M_{self.model.settings.name}_EOP"] = self.init_EOP_eqs()
-			blocks[f"M_{self.model.settings.name}_simplesumU_EOP"] = self.init_simplesumU("EOP")
-			blocks[f"M_{self.model.settings.name}_simplesumX_EOP"] = self.init_simplesumX("EOP")
-			blocks[f"M_{self.model.settings.name}_currentapplications_EOP"] = self.init_currentapplications("EOP")
-		if self.state == "EOPcalibrate":
-			blocks[f"M_EOP_{self.model.settings.name}_minobj"] = self.init_minimize_object(self.state)
-=======
 		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},
-				  **{"M_TEST": f"""E_TEST..	{self.g('minobj').write()} =E= 0;"""}}
-		# blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},
-		# 		  **{f"M_{self.model.settings.name}_ID_sum": self.init_ID_sum(),
-		# 		     f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
-		# 		     f"M_{self.model.settings.name}_ID_agg": self.init_agg()}}
->>>>>>> Stashed changes
+				  **{f"M_{self.model.settings.name}_ID_sum": self.init_ID_sum(),
+				     f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
+				     f"M_{self.model.settings.name}_ID_agg": self.init_agg()}}
 		return blocks
-
 	@property
 	def mblocks(self):
-<<<<<<< Updated upstream
-		blocks = [f"M_{tree}" for tree in self.ns_local if tree.startswith("ID_")] + [f"M_{self.model.settings.name}_simplesumU_ID"]
-		blocks += [f"M_ID_{self.model.settings.name}_emissionaccounts"]
-		blocks += [f"M_{self.model.settings.name}_sumXinE"]
-		blocks += [f"M_{self.model.settings.name}_currentapplications_ID"]
-
-		if self.state.startswith("EOP"):
-		# if self.use_EOP:
-			blocks += [f"M_{tree}" for tree in self.ns_local if tree.startswith("EOP_")]
-			blocks += [f"M_{self.model.settings.name}_EOP"] + [f"M_{self.model.settings.name}_simplesumU_EOP"]
-			blocks += [f"M_{self.model.settings.name}_simplesumX_EOP"]
-			blocks += [f"M_EOP_{self.model.settings.name}_emissionaccounts"]
-			blocks += [f"M_{self.model.settings.name}_currentapplications_EOP"]
-		else:
-			blocks += [f"M_{self.model.settings.name}_simplesumX_ID"]
-		
-		if self.state == "EOPcalibrate":
-			blocks += [f"M_EOP_{self.model.settings.name}_minobj"]
-		return set(blocks)
-
-	def init_simplesumU(self,state):
-		simplesumU = getattr(gams_abatement, "simplesumU")(state=state)
-		simplesumU.add_symbols(self.model.database, self.ns)
-		simplesumU.add_conditions()
-		return simplesumU.run()
-	
-	def init_simplesumX(self, state):
-		simplesumX = getattr(gams_abatement, "simplesumX")(state=state)
-		simplesumX.add_symbols(self.model.database, self.ns)
-		simplesumX.add_conditions()
-		return simplesumX.run()
-
-	def init_sumXinE(self):
-		sumXinE = getattr(gams_abatement, "sumXinE")()
-		sumXinE.add_symbols(self.model.database, self.ns)
-		sumXinE.add_conditions()
-		return sumXinE.run()
-
-	def init_emission_accounts(self, state):
-		emission_accounts = getattr(gams_abatement, "emission_accounts")(state=state)
-		emission_accounts.add_symbols(self.model.database, self.ns)
-		emission_accounts.add_conditions()
-		return emission_accounts.run("emission_accounts")
-
-	def init_currentapplications(self, state):
-		currentapplications = getattr(gams_abatement, "currentapplications")(state=state)
-		currentapplications.add_symbols(self.model.database, self.ns)
-		currentapplications.add_conditions()
-		return currentapplications.run(self.ns_local["ID_CU"]["type_f"])
-
-	def init_minimize_object(self, state):
-		minimize_object = getattr(gams_abatement, "minimize_object")(state=state)
-		minimize_object.add_symbols(self.model.database, self.ns)
-		minimize_object.add_conditions()
-		return minimize_object.run()
-
-	def init_EOP_eqs(self):
-		EOP = getattr(gams_abatement, "EOP")()
-		EOP.add_symbols(self.model.database, self.ns)
-		EOP.add_conditions()
-		return EOP.run("EOP")
-
-=======
-		return set([f"M_{tree}" for tree in self.ns_local]+['M_TEST'])
-		# return set([f"M_{tree}" for tree in self.ns_local]+
-		# 		   [f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg')])
-
+		return set([f"M_{tree}" for tree in self.ns_local]+
+				   [f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg')])
 	def init_ID_sum(self):
 		s = getattr(gams_abatement,'ID_sum')()
 		s.add_symbols(self.model.database,self.ns)
@@ -324,7 +213,6 @@ class abate(gmspython):
 		s.add_symbols(self.model.database,self.ns)
 		s.add_conditions()
 		return s.run(self.model.settings.name)
->>>>>>> Stashed changes
 	def eqtext(self,tree_name):
 		tree = self.ns_local[tree_name]
 		if "ID" in tree_name:
