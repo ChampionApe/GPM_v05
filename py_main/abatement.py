@@ -45,11 +45,7 @@ class abate(gmspython):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
-		
-		#Variables
-		db = DataBase.GPM_database()
-		db["mu"], db["current_coverages_split"], db["PwT"] = tech["ID"]["mu"], tech["ID"]["current_coverages_split"], tech["PwT"]
-		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
+		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT']]]; 
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']

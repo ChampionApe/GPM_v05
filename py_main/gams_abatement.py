@@ -457,7 +457,7 @@ class aggregates:
 		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_i2ai','qD','pM','pMhat')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
-		self.conditions = {'qsumU': self.ID_e2t.write()}
+		self.conditions = {'qD': self.ai.write(), 'pMhat': ''}
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
@@ -466,10 +466,8 @@ class aggregates:
 			text += self.e_pMhat_ID(f"E_pMhat_ID_{name}", self.conditions['pMhat'])
 		return text
 	def e_qD(self,name,conditions,nn,i2ai_2,qD_2):
-		#return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""1""")
 		return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""sum({nn}$({i2ai_2}), {qD_2})""")
 	def e_pMhat_ID(self,name,conditions):
-		#return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),"1")
 		return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),self.pM.write())
 
 class currentapplications:

@@ -3,7 +3,6 @@ sets
 	alias_map2
 	n
 	z
-	input
 ;
 
 alias(n,nn,nnn,nnnn,nnnnn);
@@ -18,7 +17,6 @@ sets
 	ID_wT[n]
 	ID_kno_out[n]
 	ID_kno_inp[n]
-	Q2P[n,nn]
 	map_ID_EC[n,nn]
 	kno_ID_EC[n]
 	bra_ID_EC[n]
@@ -99,7 +97,6 @@ $load alias_set
 $load alias_map2
 $load n
 $load z
-$load input
 $load ID_inp
 $load ID_out
 $load ID_int
@@ -165,7 +162,6 @@ $load ID_t_all
 $load ai
 $load alias_
 $load ID_map_all
-$load Q2P
 $load map_ID_EC
 $load map_ID_CU
 $load map_ID_TU
