@@ -45,6 +45,11 @@ class abate(gmspython):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
+		
+		#Variables
+		db = DataBase.GPM_database()
+		db["mu"], db["current_coverages_split"], db["PwT"] = tech["ID"]["mu"], tech["ID"]["current_coverages_split"], tech["PwT"]
+		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
@@ -130,8 +135,8 @@ class abate(gmspython):
 		qD = qD.append((self.get("mu")[self.get("map_ID_TX")] * qD[self.get("kno_ID_TX")].rename_axis("nn")).droplevel(1)) #X under non baseline techs
 		mu = mu.append(DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_BU")], self.g("map_ID_BU").rctree_pd(self.g("bra_ID_BU"))) / qD[self.get("kno_ID_BU")].rename_axis("nn")) #baseline tech to U shares (gamma)
 		mu = mu.append(pd.Series(1, index=self.get("map_ID_BX")) / pd.Series(1, index=self.get("map_ID_BX")).groupby("nn").sum()) #baseline tech to X shares (set equal to 1/N)
-		PwThat = (pd.Series(0, index=self.get("Q2P")) + (self.get("phi") * self.get("pM")).droplevel(0).rename_axis("nn").groupby("nn").sum() + self.get("inputprices").rename_axis("nn")).droplevel(1) #prices of all X
-		qD = qD.append((mu[self.get("map_ID_BX")] * qD[self.get("kno_ID_BX")].rename_axis("nn")).droplevel(1)) #X under baseline tech quantity
+		PwThat = (pd.Series(0, index=self.get("ID_i2ai")) + (self.get("phi") * self.get("pM")).droplevel(0).rename_axis("nn").groupby("nn").sum() + self.g("PwT").rctree_pd(self.g("ai")).rename_axis("nn")).droplevel(1) #prices of all X
+		qD = qD.append((mu[self.get("map_ID_BX")] * qD[self.get("kno_ID_BX")].rename_axis("nn")).droplevel(1)) #X under baseline tech quantity  
 		PwThat = PwThat.append((pd.Series(0, index=self.get("ID_i2t").union(self.g("map_ID_Y").rctree_pd(self.g("bra_no_ID_Y")))) + qD[self.get("ID_i2t").droplevel(1).union(self.get("bra_no_ID_Y"))] * \
 			PwThat[self.get("ID_i2t").droplevel(1).union(self.get("bra_no_ID_Y"))]).groupby("nn").sum() / qD[self.get("kno_ID_BX").union(self.get("kno_ID_TX")).union(self.get("kno_no_ID_Y"))]) #Price of techs, baseline techs and Y aggregate
 		PwThat = PwThat.append((pd.Series(0, index=self.get("map_ID_BU").union(self.get("map_ID_TU"))) + PwThat[self.get("ID_t_all")].rename_axis("nn")).droplevel(1)) #Prices of technology goods
@@ -197,8 +202,8 @@ class abate(gmspython):
 	def blocktext(self):
 		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},
 				  **{f"M_{self.model.settings.name}_ID_sum": self.init_ID_sum(),
-				     f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
-				     f"M_{self.model.settings.name}_ID_agg": self.init_agg()}}
+					 f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
+					 f"M_{self.model.settings.name}_ID_agg": self.init_agg()}}
 		return blocks
 	@property
 	def mblocks(self):

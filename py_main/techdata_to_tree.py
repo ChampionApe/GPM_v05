@@ -357,7 +357,9 @@ def load_techcats(dict_with_techcats):
                             "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_coverages":current_coverages, 
                             "current_coverages_split":current_coverages_split, "coverage_potentials":coverage_potentials}
 
-        output["inputprices"] = inputprices.set_index("input")["price"]
+        output["PwT"] = inputprices.set_index("input")["price"]
+        output["PwT"].name = "PwT"
+        output["PwT"].index.name = "n"
 
         #Add baseline components if this is input-displacing technologies
         if techcat_type == "inputdisp":
