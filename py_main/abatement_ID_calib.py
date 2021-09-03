@@ -39,13 +39,13 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','os','mu','sigma','eta','gamma_tau','currapp_ID')
+		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','os','mu','sigma','eta','gamma_tau','currapp')
 
 	def add_sets(self,tech,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
-		[DataBase.GPM_database.add_or_merge(self.model.database,tech['ID'][s],'second') for s in ('mu','current_coverages_split','PwT')];
+		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT']]]; 
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
@@ -98,7 +98,7 @@ class abate(gmspython):
 			return pd.Series(-0.01, index = self.get('ID_kno_out'), name = self.n(var))
 		elif var == 'gamma_tau':
 			return pd.Series(1, index = self.get('ID_e2t'), name = self.n(var))
-		elif var == 'currapp_ID':
+		elif var == 'currapp':
 			return pd.Series(0.05, index = self.get('ID_e2t'), name = self.n(var))
 
 	def initialize_variables(self,**kwargs):
@@ -163,7 +163,7 @@ class abate(gmspython):
 		elif group == 'g_minobj_endoincalib_exoinbaseline':
 			return [{'gamma_tau': self.g('ID_e2t')}]
 		elif group == 'g_minobj_endoincalib': 
-			return [{'minobj': None,'currapp_ID': self.g('ID_e2t')}]
+			return [{'minobj': None,'currapp': self.g('ID_e2t')}]
 		elif group =='TEST':
 			return [{'minobj': None}]
 

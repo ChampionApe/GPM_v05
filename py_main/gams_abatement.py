@@ -474,7 +474,7 @@ class currentapplications:
 	def __init__(self,state='ID'):
 		self.state=state
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','e2t','e2u','qD','currapp_ID')];
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','e2t','e2u','qD','currapp')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'currapp_ID': self.ID_e2t.write()}
@@ -482,7 +482,7 @@ class currentapplications:
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
 		if self.state == 'ID':
-			text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], self.a('n',[(0,2)]), self.a('e2t'), self.a('e2u_2',[(1,2)]), self.a('qD'),self.a('qD',[(0,2)]),self.currapp_ID)
+			text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], self.a('n',[(0,2)]), self.a('e2t'), self.a('e2u_2',[(1,2)]), self.a('qD'),self.a('qD',[(0,2)]),self.currapp)
 		return text
 	def e_currapp(self,name,conditions,nnn,e2t,e2u_2,qD,qD_3,currapp):
 		RHS = f"""sum({nnn}$({e2t} and {e2u_u}), {qD_3})/{qD}"""
