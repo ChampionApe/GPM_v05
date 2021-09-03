@@ -1,6 +1,7 @@
 from gmspython import *
 import gams_abatement,global_settings
 from DB2Gams import OrdSet as OS
+import excel2py
 
 class abate(gmspython):
 	def __init__(self,nt=None,tech=None,pickle_path=None,work_folder=None,kwargs_ns={},use_EOP=False,**kwargs_gs):
@@ -45,7 +46,7 @@ class abate(gmspython):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
-		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT']]]; 
+		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT'], tech["ID"]["current_applications"], tech["ID"]["coverage_potentials"]]]; 
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
@@ -58,8 +59,8 @@ class abate(gmspython):
 		t2i2ai = DataBase_wheels.mi.add_ndmi(self.get('ID_i2t').swaplevel(0,1).set_names([self.n('n'),self.n('nn')]),tech['ID']['Q2P'].set_names([self.n('nn'),self.n('nnn')]))
 		self.model.database[self.n('ID_e2ai2i')] = DataBase_wheels.appmap(t2i2ai,DataBase_wheels.map_from_mi(self.get('ID_e2t'),self.n('nn'),self.n('n')),self.n('n')).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
 		self.model.database[self.n('ID_e2ai')] = self.get('ID_e2ai2i').droplevel(self.n('nnn')).unique()
-		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.get('map_ID_Y'), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
-		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')))]), names = [self.n('n'),self.n('nn')])
+		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g("map_ID_Y").rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
+		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")))]), names = [self.n('n'),self.n('nn')])
 
 	# ---------------- 1.2: Variables  ------------- #
 	def default_var_series(self,var):
@@ -142,6 +143,11 @@ class abate(gmspython):
 		db["qD"], db["mu"], db["PwThat"], db["PbT"] = qD, mu, PwThat, PbT
 		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
+	def add_calib_data(self, inputIO):
+		db = excel2py.xl2PM.pm_from_workbook(inputIO,{'IO': 'vars'})
+		db["currapp"] = self.get("current_applications").rename("currapp")
+		db["qD"] = db["qD"].vals.append((self.get("coverage_potentials") * db.database.get("qD").vals.rename_axis("nn")).droplevel(1))
+		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
 	# ------------------ 2: Groups  ------------------ #
 	def group_conditions(self,group):
