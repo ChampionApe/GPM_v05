@@ -417,23 +417,23 @@ class ID_sum:
 		text += self.e_qsumX(f"E_ID_qsumX_{name}", self.conditions['qsumX'],nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2)
 		return text
 	def e_qsumU(self,name,conditions,nnn,e2t,e2u_2,qD_3):
-		RHS = "1"
-		# RHS = f"""sum({nnn}$({e2t} and {e2u_2}), {qD_3})"""
+		#RHS = "1"
+		RHS = f"""sum({nnn}$({e2t} and {e2u_2}), {qD_3})"""
 		return equation(name,self.qsumU.doms(),conditions,self.qsumU.write(), RHS)
 	def e_os(self,name,conditions,nnn,e2u_2,u2t_2,qD_2,qD_3):
-		RHS = "1"
-		# RHS = f"""sum({nnn}$({e2u_2} and {u2t_2}), {qD_3})/{qD_2}"""
+		#RHS = "1"
+		RHS = f"""sum({nnn}$({e2u_2} and {u2t_2}), {qD_3})/{qD_2}"""
 		return equation(name,self.os.doms(),conditions,self.os.write(),RHS)
 	def e_qsumX(self,name,conditions,nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2):
-		RHS = "1"
-		# RHS = f""" sum([{nnn},{nnnn}]$({e2ai2i} and {e2t_2} and {i2t_2}), {qD_3}*{os_2})"""
+		#RHS = "1"
+		RHS = f""" sum([{nnn},{nnnn}]$({e2ai2i} and {e2t_2} and {i2t_2}), {qD_3}*{os_2})"""
 		return equation(name,self.qsumX.doms(),conditions,self.qsumX.write(),RHS)
 
 class ID_emissions:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_inp','phi','qD','M0','PwT','PwThat','pMhat')];
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_inp','phi','qD','M0','PwT','PwThat','pMhat', "ID_i2ai")];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'M0': '', 'PwThat': self.ID_inp.write()}
@@ -441,14 +441,14 @@ class ID_emissions:
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
 		text = self.e_M0(f"E_M0_{name}", self.conditions['M0'],self.a('n'),self.a('z'),self.a('ai'),self.a('phi'),self.a('qD'))+'\n\t'
-		text += self.e_PwThat(f"E_ID_PwThat_{name}", self.conditions['PwThat'],self.a('n'),self.a('z'),self.a('phi'),self.a('PwT'),self.a('pMhat'))
+		text += self.e_PwThat(f"E_ID_PwThat_{name}", self.conditions['PwThat'],self.a('n'),self.a('z'),self.a('phi', [(0,0), (0,1)]),self.a('PwT'),self.a('pMhat'), self.a("ID_i2ai"), self.a("n",[(0,1)]))
 		return text
 	def e_M0(self,name,conditions,n,z,ai,phi,qD):
-		return equation(name,self.M0.doms(),conditions,self.M0.write(),f"""1""")
-		# return equation(name,self.M0.doms(),conditions,self.M0.write(),f"""sum({n}$({ai}), {phi}*{qD})""")
-	def e_PwThat(self,name,conditions,n,z,phi,PwT,pMhat):
-		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),f"""1""")
-		# return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),f"""{PwT}+sum({z},{phi}*{pMhat})""")
+		#return equation(name,self.M0.doms(),conditions,self.M0.write(),f"""1""")
+		return equation(name,self.M0.doms(),conditions,self.M0.write(),f"""sum({n}$({ai}), {phi}*{qD})""")
+	def e_PwThat(self,name,conditions,n,z,phi,PwT,pMhat, i2ai, nn):
+		#return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),f"""1""")
+		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),f"""{PwT}+sum({z}, sum({nn}$({i2ai}), {phi}*{pMhat}))""")
 
 class aggregates:
 	def __init__(self,state='ID'):
@@ -466,11 +466,11 @@ class aggregates:
 			text += self.e_pMhat_ID(f"E_pMhat_ID_{name}", self.conditions['pMhat'])
 		return text
 	def e_qD(self,name,conditions,nn,i2ai_2,qD_2):
-		return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""1""")
-		# return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""sum({nn}$({i2ai_2}), {qD_2})""")
+		#return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""1""")
+		return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""sum({nn}$({i2ai_2}), {qD_2})""")
 	def e_pMhat_ID(self,name,conditions):
-		return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),"1")
-		# return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),self.pM.write())
+		#return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),"1")
+		return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),self.pM.write())
 
 class simplesumU:
 	""" Collection of equations that define a variable as the simple sum of others """

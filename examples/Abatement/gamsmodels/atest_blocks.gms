@@ -38,15 +38,15 @@ $BLOCK M_ID_Y
 	E_q_nout_ID_Y[n]$(bra_no_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
 $BLOCK M_atest_ID_sum 
-	E_ID_qsumU_atest[n,nn]$(ID_e2t[n,nn])..	qsumU[n,nn] =E= 1;
-	E_ID_os_atest[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= 1;
-	E_ID_qsumX_atest[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E= 1;
+	E_ID_qsumU_atest[n,nn]$(ID_e2t[n,nn])..	qsumU[n,nn] =E= sum(nnn$(ID_e2t[n,nn] and ID_e2u[n,nnn]), qD[nnn]);
+	E_ID_os_atest[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
+	E_ID_qsumX_atest[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E=  sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn]), qD[nnn]*os[n,nnnn]);
 $ENDBLOCK
 $BLOCK M_atest_ID_Em 
-	E_M0_atest[z]..	M0[z] =E= 1;
-	E_ID_PwThat_atest[n]$(ID_inp[n])..	PwThat[n] =E= 1;
+	E_M0_atest[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
+	E_ID_PwThat_atest[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
 $ENDBLOCK
 $BLOCK M_atest_ID_agg 
-	E_aggqD_ID_atest[n]$(ai[n])..	qD[n] =E= 1;
-	E_pMhat_ID_atest[z]..	pMhat[z] =E= 1;
+	E_aggqD_ID_atest[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n]), qD[nn]);
+	E_pMhat_ID_atest[z]..	pMhat[z] =E= pM[z];
 $ENDBLOCK
