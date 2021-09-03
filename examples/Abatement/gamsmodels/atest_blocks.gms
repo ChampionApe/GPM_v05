@@ -37,6 +37,16 @@ $BLOCK M_ID_Y
 	E_q_out_ID_Y[n]$(bra_o_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
 	E_q_nout_ID_Y[n]$(bra_no_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
-$BLOCK M_TEST 
-	E_TEST..	minobj =E= 0;
+$BLOCK M_atest_ID_sum 
+	E_ID_qsumU_atest[n,nn]$(ID_e2t[n,nn])..	qsumU[n,nn] =E= 1;
+	E_ID_os_atest[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= 1;
+	E_ID_qsumX_atest[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E= 1;
+$ENDBLOCK
+$BLOCK M_atest_ID_Em 
+	E_M0_atest[z]..	M0[z] =E= 1;
+	E_ID_PwThat_atest[n]$(ID_inp[n])..	PwThat[n] =E= 1;
+$ENDBLOCK
+$BLOCK M_atest_ID_agg 
+	E_aggqD_ID_atest[n]$(ai[n])..	qD[n] =E= 1;
+	E_pMhat_ID_atest[z]..	pMhat[z] =E= 1;
 $ENDBLOCK

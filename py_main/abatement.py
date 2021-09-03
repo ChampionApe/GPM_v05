@@ -12,7 +12,7 @@ class abate(gmspython):
 			self.ns_local = {**self.ns_local, **self.namespace_local_sets(nt)}
 			for tree in nt.trees.values():
 				DataBase.GPM_database.merge_dbs(self.model.database,tree.database,'first')
-			self.add_globals(tech,kwargs_ns)
+			self.add_sets(tech,kwargs_ns)
 			self.setstate('ID',init=False)
 
 	# ------------------ 1: Initialization  ------------------ #
@@ -25,6 +25,10 @@ class abate(gmspython):
 			std_sets['s_prod'] = df('s_prod',kwargs)
 		return std_sets
 
+	def add_aliases(self,list_of_tuples,ns={}):
+		self.model.database.update_alias(pd.MultiIndex.from_tuples(list_of_tuples))
+		self.ns.update({k[1]:df(k[1],ns) for k in list_of_tuples}) # add to namespace
+
 	def namespace_local_sets(self,nt):
 		"""create namespace for each tree by copying attributes."""
 		return {tree: {attr: nt.trees[tree].__dict__[attr] for attr in nt.trees[tree].__dict__ if attr not in set(['tree','database']).union(nt.prune_trees)} for tree in nt.trees}
@@ -35,14 +39,15 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','mu','sigma','eta','gamma_tau','currapp_ID')
+		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','os','mu','sigma','eta','gamma_tau','currapp_ID')
 
-	def add_globals(self,tech,kwargs):
+	def add_sets(self,tech,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
-		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2t']]})
+		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
+		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
 		self.model.database[self.n('ai')] = tech['ID']['Q2P'].levels[1].rename(self.n('n'))
 		# Mappings:
 		self.model.database[self.n('ID_i2t')] = self.get('ID_map_all')[(self.get('ID_map_all').get_level_values(self.n('n')).isin(self.get('ID_inp'))) & (self.get('ID_map_all').get_level_values(self.n('nn')).isin(self.get('ID_t_all')))]
@@ -69,8 +74,7 @@ class abate(gmspython):
 			return pd.Series(1, index = self.get('z'), name = self.n(var))
 		elif var == 'qD':
 			s = pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
-			return s
-			# return s.combine_first(pd.Series(1, index = self.get('ai'), name = self.n(var)))
+			return s.combine_first(pd.Series(1, index = self.get('ai'), name = self.n(var)))
 		elif var == 'qS':
 			return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
 		elif var == 'qsumU':
@@ -83,6 +87,8 @@ class abate(gmspython):
 			return pd.Series(1, index = self.get('z'), name = self.n(var))
 		elif var == 'phi':
 			return pd.Series(0, index = pd.MultiIndex.from_product([self.get('z'),self.get('ai')]))
+		elif var == 'os':
+			return pd.Series(0.5, index = self.get('ID_e2t'), name = self.n(var))
 		elif var == 'mu':
 			return pd.Series(1, index = self.get('ID_map_all'), name=self.n(var))
 		elif var == 'sigma':
