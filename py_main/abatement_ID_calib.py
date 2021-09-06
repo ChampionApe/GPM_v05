@@ -130,7 +130,7 @@ class abate(gmspython):
 		qD = qD.append((mu[self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU"))] * qD[self.get("kno_ID_CU")].rename_axis("nn")).droplevel(1)) #baseline U quantity
 		qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_ID_CU")], DataBase_wheels.map_from_mi(self.get("ID_u2t"), "n", "nn")).groupby(by="n").sum()) #tech and baseline tech quantities
 		qD = qD.append((self.get("mu")[self.get("map_ID_TX")] * qD[self.get("kno_ID_TX")].rename_axis("nn")).droplevel(1)) #X under non baseline techs
-		mu = mu.append(DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_BU")], self.g("map_ID_BU").rctree_pd(self.g("bra_ID_BU"))) / qD[self.get("kno_ID_BU")].rename_axis("nn")) #baseline tech to U shares (gamma)
+		mu = mu.append(pd.Series(1, index=self.get("map_ID_BU"))) #baseline tech to U shares (gamma)
 		mu = mu.append(pd.Series(1, index=self.get("map_ID_BX")) / pd.Series(1, index=self.get("map_ID_BX")).groupby("nn").sum()) #baseline tech to X shares (set equal to 1/N)
 		PwThat = (pd.Series(0, index=self.get("ID_i2ai")) + (self.get("phi") * self.get("pM")).droplevel(0).rename_axis("nn").groupby("nn").sum() + self.g("PwT").rctree_pd(self.g("ai")).rename_axis("nn")).droplevel(1) #prices of all X
 		qD = qD.append((mu[self.get("map_ID_BX")] * qD[self.get("kno_ID_BX")].rename_axis("nn")).droplevel(1)) #X under baseline tech quantity  
