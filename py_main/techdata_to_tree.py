@@ -129,7 +129,7 @@ def load_techcats(dict_with_techcats):
         #Empty potential coverages container (shares that components make up of their upper categories (energy services or emission types))
         coverage_potentials = multiindex_series(idx_level_names=["n", "nn"], series_name="coverage_potentials")
         #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
-        current_coverages = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages")
+        current_applications = multiindex_series(idx_level_names=["n", "nn"], series_name="current_applications")
         current_coverages_split = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages_split")
 
 
@@ -233,7 +233,7 @@ def load_techcats(dict_with_techcats):
 
                         #Add current coverage to mu, as the share parameter in the output nest from T to U (technologies to their technology goods)
                         curr_coverage = df.loc[i, E + "_coverage_curr"]
-                        current_coverages[(tech, E)] = curr_coverage
+                        current_applications[(E, tech)] = curr_coverage
                         total_curr_coverage = (df.loc[i, [e + "_coverage_curr" for e in upper_categories]]).sum()
                         
                         solo_curr_coverage = curr_coverage * (1-shares.sum())
@@ -336,6 +336,7 @@ def load_techcats(dict_with_techcats):
                 upper_categories[E].append("C0_" + E)
                 components["C0_" + E] = ["U0_" + prefix + "_" + "C0_" + E]
                 mu[("C0_" + E, E)] = mu2.loc[E, "mu"]
+                coverage_potentials[("C0_" + E, E)] = mu2.loc[E, "mu"] 
                 basetechs["basetech_" + E].append("U0_" + prefix + "_" + "C0_" + E)
 
             # if testing:
@@ -352,9 +353,9 @@ def load_techcats(dict_with_techcats):
 
         Q2P = pd.MultiIndex.from_tuples(Q2P, names=["n", "nn"])
 
-
+        
         output[prefix] = {"techs_inputs":techs_inputs, "techs":techs, "components":components, "upper_categories":upper_categories, 
-                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_coverages":current_coverages, 
+                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_applications":current_applications, 
                             "current_coverages_split":current_coverages_split, "coverage_potentials":coverage_potentials}
 
         output["PwT"] = inputprices.set_index("input")["price"]

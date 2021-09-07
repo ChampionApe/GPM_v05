@@ -1,6 +1,7 @@
 from gmspython import *
 import gams_abatement,global_settings
 from DB2Gams import OrdSet as OS
+import excel2py
 
 class abate(gmspython):
 	def __init__(self,nt=None,tech=None,pickle_path=None,work_folder=None,kwargs_ns={},use_EOP=False,**kwargs_gs):
@@ -52,7 +53,7 @@ class abate(gmspython):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo','map_gamma']]})
-		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT']]]; 
+		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT'], tech["ID"]["current_applications"], tech["ID"]["coverage_potentials"]]]; 
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 		self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
@@ -152,7 +153,7 @@ class abate(gmspython):
 		qD = qD.append((mu[self.g("map_ID_CU").rctree_pd(self.g("bra_ID_BU"))] * qD[self.get("kno_ID_CU")].rename_axis("nn")).droplevel(1)) #baseline U quantity
 		qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_ID_CU")], DataBase_wheels.map_from_mi(self.get("ID_u2t"), "n", "nn")).groupby(by="n").sum()) #tech and baseline tech quantities
 		qD = qD.append((self.get("mu")[self.get("map_ID_TX")] * qD[self.get("kno_ID_TX")].rename_axis("nn")).droplevel(1)) #X under non baseline techs
-		mu = mu.append(DataBase_wheels.mi.add_mi_series(qD[self.get("bra_ID_BU")], self.g("map_ID_BU").rctree_pd(self.g("bra_ID_BU"))) / qD[self.get("kno_ID_BU")].rename_axis("nn")) #baseline tech to U shares (gamma)
+		mu = mu.append(pd.Series(1, index=self.get("map_ID_BU"))) #baseline tech to U shares (gamma)
 		mu = mu.append(pd.Series(1, index=self.get("map_ID_BX")) / pd.Series(1, index=self.get("map_ID_BX")).groupby("nn").sum()) #baseline tech to X shares (set equal to 1/N)
 		PwThat = (pd.Series(0, index=self.get("ID_i2ai")) + (self.get("phi") * self.get("pM")).droplevel(0).rename_axis("nn").groupby("nn").sum() + self.g("PwT").rctree_pd(self.g("ai")).rename_axis("nn")).droplevel(1) #prices of all X
 		qD = qD.append((mu[self.get("map_ID_BX")] * qD[self.get("kno_ID_BX")].rename_axis("nn")).droplevel(1)) #X under baseline tech quantity  
@@ -163,6 +164,12 @@ class abate(gmspython):
 		PwThat = (PwThat.append((pd.Series(0, index=self.get("map_ID_EC")) + qD[self.get("bra_ID_EC")] * PwThat[self.get("bra_ID_EC")]).groupby("nn").sum() / qD[self.get("kno_ID_EC")])).rename_axis("n") #Prices of E
 		PbT = ((pd.Series(0, index=self.g("map_ID_Y").rctree_pd(self.g("bra_o_ID_Y"))) + (qD[self.get("bra_o_ID_Y")] * PwThat[self.get("bra_o_ID_Y")])).groupby("nn").sum()).rename_axis("n") / self.get("qS") #Price of final good
 		db["qD"], db["mu"], db["PwThat"], db["PbT"] = qD, mu, PwThat, PbT
+		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
+
+	def add_calib_data(self, inputIO):
+		db = excel2py.xl2PM.pm_from_workbook(inputIO,{'IO': 'vars'})
+		db["currapp"] = self.get("current_applications").rename("currapp")
+		db["qD"] = db["qD"].vals.append((self.get("coverage_potentials") * db.database.get("qD").vals.rename_axis("nn")).droplevel(1))
 		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
 	# ------------------ 2: Groups  ------------------ #
