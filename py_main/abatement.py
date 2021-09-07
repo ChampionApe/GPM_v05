@@ -164,8 +164,6 @@ class abate(gmspython):
 			return [{'gamma_tau': self.g('ID_e2t')}]
 		elif group == 'g_minobj_endoincalib': 
 			return [{'minobj': None,'currapp': self.g('ID_e2t')}]
-		elif group =='TEST':
-			return [{'minobj': None}]
 
 	@property
 	def exo_groups(self):

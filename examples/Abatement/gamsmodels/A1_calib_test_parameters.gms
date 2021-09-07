@@ -17,8 +17,8 @@ parameters
 	load_PwT[n]
 	load_qS[n]
 	load_gamma_tau[n,nn]
-	atest_ID_modelstat
-	atest_ID_solvestat
+	A1_calib_test_ID_modelstat
+	A1_calib_test_ID_solvestat
 ;
 
 $GDXIN %ID_0%
@@ -41,6 +41,6 @@ $load load_pM
 $load load_PwT
 $load load_qS
 $load load_gamma_tau
-$load atest_ID_modelstat
-$load atest_ID_solvestat
+$load A1_calib_test_ID_modelstat
+$load A1_calib_test_ID_solvestat
 $offMulti

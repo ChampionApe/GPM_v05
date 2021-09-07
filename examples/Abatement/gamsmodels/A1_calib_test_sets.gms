@@ -87,9 +87,9 @@ sets
 	ID_e2t[n,nn]
 	ID_e2ai2i[n,nn,nnn]
 	ID_e2ai[n,nn]
+	map_gamma[n,nn,nnn,nnnn]
 	ID_mu_endoincalib[n,nn]
 	ID_mu_exo[n,nn]
-	map_gamma[n,nn,nnn,nnnn]
 ;
 
 $GDXIN %ID_0%
@@ -177,8 +177,8 @@ $load ID_e2u
 $load ID_e2t
 $load ID_e2ai2i
 $load ID_e2ai
+$load map_gamma
 $load ID_mu_endoincalib
 $load ID_mu_exo
-$load map_gamma
 $GDXIN
 $offMulti

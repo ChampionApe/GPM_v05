@@ -39,12 +39,19 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		return ('PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumU','qsumX','M0','M','phi','os','mu','sigma','eta','gamma_tau','currapp')
+		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau']
+		if self.state == 'ID_calibrate':
+			syms += self.id_calibrate_vars
+		return syms
+
+	@property 
+	def id_calibrate_vars(self):
+		return ['weight_mu','mubar','minobj']
 
 	def add_sets(self,tech,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
-		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo']]})
+		self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo','map_gamma']]})
 		[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT']]]; 
 		# level sets:
 		self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
@@ -58,8 +65,16 @@ class abate(gmspython):
 		t2i2ai = DataBase_wheels.mi.add_ndmi(self.get('ID_i2t').swaplevel(0,1).set_names([self.n('n'),self.n('nn')]),tech['ID']['Q2P'].set_names([self.n('nn'),self.n('nnn')]))
 		self.model.database[self.n('ID_e2ai2i')] = DataBase_wheels.appmap(t2i2ai,DataBase_wheels.map_from_mi(self.get('ID_e2t'),self.n('nn'),self.n('n')),self.n('n')).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
 		self.model.database[self.n('ID_e2ai')] = self.get('ID_e2ai2i').droplevel(self.n('nnn')).unique()
-		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.get('map_ID_Y'), self.get('map_ID_BU'))]), names = [self.n('n'),self.n('nn')])
-		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')))]), names = [self.n('n'),self.n('nn')])
+		# Define e2t2c for non-baseline technologies:
+		u2t2c = DataBase_wheels.mi.add_ndmi(self.get('map_ID_TU'), self.get('map_ID_CU').set_names([self.n('n'),self.n('nnn')])).droplevel(0) # drop the U level
+		e2t2c = DataBase_wheels.mi.add_ndmi(u2t2c, self.get('map_ID_EC').set_names([self.n('nnn'),self.n('nnnn')])).swaplevel(0,2).swaplevel(1,2).set_names([self.n('n'),self.n('nn'),self.n('nnn')])
+		# Define u2t2c for baseline technologies:
+		u2t2c_B = DataBase_wheels.mi.add_ndmi(self.get('map_ID_BU'), self.get('map_ID_CU').set_names([self.n('n'),self.n('nnn')])).set_names([self.n('nnnn'),self.n('nnnnn'),self.n('nnn')])
+		# Merge the two on the level of components, drop the component level and rename sets:
+		self.model.database[self.n('map_gamma')] = DataBase_wheels.mi.add_ndmi(e2t2c,u2t2c_B).droplevel(2).set_names([self.n('n'),self.n('nn'),self.n('nnn'),self.n('nnnn')])
+		u2t_BaseC = self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(self.get('map_gamma').droplevel(0).droplevel(0).set_names([self.n('n'),self.n('nn')]))})
+		self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.get('map_ID_Y'), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
+		self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 
 	# ---------------- 1.2: Variables  ------------- #
 	def default_var_series(self,var):
@@ -78,8 +93,6 @@ class abate(gmspython):
 			return s.combine_first(pd.Series(1, index = self.get('ai'), name = self.n(var)))
 		elif var == 'qS':
 			return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
-		elif var == 'qsumU':
-			return pd.Series(1, index = self.get('ID_e2t'), name = self.n(var))
 		elif var == 'qsumX':
 			return pd.Series(1, index = self.get('ID_e2ai'), name = self.n(var))
 		elif var == 'M0':
@@ -96,23 +109,33 @@ class abate(gmspython):
 			return pd.Series(0.01, index = self.get('ID_kno_inp'),name = self.n(var))
 		elif var == 'eta':
 			return pd.Series(-0.01, index = self.get('ID_kno_out'), name = self.n(var))
-		elif var == 'gamma_tau':
-			return pd.Series(1, index = self.get('ID_e2t'), name = self.n(var))
 		elif var == 'currapp':
-			return pd.Series(0.05, index = self.get('ID_e2t'), name = self.n(var))
+			return pd.Series(0.5, index = self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))), name = self.n(var))
+		elif var == 'currapp_mod':
+			return self.default_var_series('currapp').rename(self.n(var))
+		elif var == 'gamma_tau':
+			return self.default_var_series('currapp').rename(self.n(var))
+		elif var == 's_uc':
+			return pd.Series(0.5, index = self.g('map_ID_CU').rctree_pd(self.g('bra_ID_TU')), name = self.n(var))
+		elif var == 'weight_mu':
+			return DataBase.gpy_symbol(1,**{'name':self.n(var)})
+		elif var == 'minobj':
+			return DataBase.gpy_symbol(0,**{'name':self.n(var)})
+		elif var == 'mubar':
+			return pd.Series(10, index = self.g('map_ID_CU').rctree_pd(self.g('bra_ID_TU')), name = self.n(var))
 
 	def initialize_variables(self,**kwargs):
 		try:
 			if kwargs['check_variables'] is True:
 				for var in self.default_variables:
-					if self.ns[var] not in self.model.database.symbols:
-						self.model.database[self.ns[var]] = self.default_var_series(var)
+					if self.n(var) not in self.model.database.symbols:
+						self.model.database[self.n(var)] = self.default_var_series(var)
 					else:
-						self.model.database[self.ns[var]].vals = DataBase.merge_symbols(self.get(var),self.default_var_series(var))
+						self.model.database[self.n(var)].vals = DataBase.merge_symbols(self.get(var),self.default_var_series(var))
 		except KeyError:
 			for var in self.default_variables:
-				if self.ns[var] not in self.model.database.symbols:
-					self.model.database[self.ns[var]] = self.default_var_series(var)
+				if self.n(var) not in self.model.database.symbols:
+					self.model.database[self.n(var)] = self.default_var_series(var)
 		if 'calibrate' in self.state:
 			self.model.settings.set_conf('solve',self.add_solve + "\n")
 
@@ -142,7 +165,6 @@ class abate(gmspython):
 		db["qD"], db["mu"], db["PwThat"], db["PbT"] = qD, mu, PwThat, PbT
 		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
-
 	# ------------------ 2: Groups  ------------------ #
 	def group_conditions(self,group):
 		if group == 'g_ID_alwaysexo':
@@ -150,32 +172,28 @@ class abate(gmspython):
 			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out')}]
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
-					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'qsumU': self.g('ID_e2t'), 'os': self.g('ID_e2t'),
-					 'M0': None}]
+					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'os': self.g('ID_e2t'),
+					 'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
 		elif group == 'g_ID_endoincalib':
-			return [{'mu': self.g('ID_mu_endoincalib')}]
+			return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_ID_exoincalib':
-			return [{'qD': {'or': [self.g('ai'), self.g('kno_ID_EC'), self.g('kno_ID_CU')]}, 'qsumX': self.g('ID_e2ai')}]
-		elif group == 'g_ID_minobj_alwaysexo':
-			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), {'not': self.g('bra_ID_BU')}]}}]
-		elif group == 'g_ID_minobj_exoincalib':
-			return [{'currapp_ID_mod': self.g('ID_e2t')}]
-		elif group == 'g_minobj_endoincalib_exoinbaseline':
-			return [{'gamma_tau': self.g('ID_e2t')}]
-		elif group == 'g_minobj_endoincalib': 
-			return [{'minobj': None,'currapp': self.g('ID_e2t')}]
-		elif group =='TEST':
+			return [{'qD': {'or': [self.g('ai'), self.g('kno_ID_EC'), self.g('kno_ID_CU')]}, 'qsumX': self.g('ID_e2ai'),
+					 'currapp': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
+					 'currapp_mod': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
+		elif group == 'g_minobj_alwaysendo':
 			return [{'minobj': None}]
+		elif group == 'g_minobj_ID_alwaysexo':
+			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
 
 	@property
 	def exo_groups(self):
 		n = self.model.settings.name+'_'
-		gs = OS(['g_ID_alwaysexo','g_ID_endoincalib','g_minobj_endoincalib_exoinbaseline'])
+		gs = OS(['g_ID_alwaysexo','g_ID_endoincalib'])
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_exoincalib','g_ID_minobj_alwaysexo','g_ID_minobj_exoincalib'])
-														   -OS(['g_ID_endoincalib','g_minobj_endoincalib_exoinbaseline']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_exoincalib','g_minobj_ID_alwaysexo'])
+														   -OS(['g_ID_endoincalib']))}
 	@property 
 	def endo_groups(self):
 		n = self.model.settings.name+'_'
@@ -183,12 +201,12 @@ class abate(gmspython):
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_endoincalib_exoinbaseline','g_minobj_endoincalib'])
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_alwaysendo'])
 														   -OS(['g_ID_exoincalib']))}
 
 	@property
 	def add_solve(self):
-		if self.state == 'EOPcalibrate':
+		if self.state == 'ID_calibrate':
 			return f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
 		else:
 			return None
@@ -199,12 +217,17 @@ class abate(gmspython):
 		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},
 				  **{f"M_{self.model.settings.name}_ID_sum": self.init_ID_sum(),
 					 f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
-					 f"M_{self.model.settings.name}_ID_agg": self.init_agg()}}
+					 f"M_{self.model.settings.name}_ID_agg": self.init_agg(),
+					 f"M_{self.model.settings.name}_ID_calib_aux": self.init_ID_calib_aux()}}
+		if self.state == 'ID_calibrate':
+			blocks[f"M_{self.model.settings.name}_ID_minobj"]= self.init_minobj()
 		return blocks
 	@property
 	def mblocks(self):
-		return set([f"M_{tree}" for tree in self.ns_local]+
-				   [f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg')])
+		mblocks = OS([f"M_{tree}" for tree in self.ns_local]+[f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg','ID_calib_aux')])
+		if self.state == 'ID_calibrate':
+			mblocks += OS([f"M_{self.model.settings.name}_ID_minobj"])
+		return mblocks
 	def init_ID_sum(self):
 		s = getattr(gams_abatement,'ID_sum')()
 		s.add_symbols(self.model.database,self.ns)
@@ -217,6 +240,16 @@ class abate(gmspython):
 		return s.run(self.model.settings.name)
 	def init_agg(self):
 		s = getattr(gams_abatement,'aggregates')(state=self.state)
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
+	def init_ID_calib_aux(self):
+		s = getattr(gams_abatement,'currentapplications')(state=self.state)
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
+	def init_minobj(self):
+		s = getattr(gams_abatement, 'minimize_object')(state=self.state)
 		s.add_symbols(self.model.database,self.ns)
 		s.add_conditions()
 		return s.run(self.model.settings.name)
