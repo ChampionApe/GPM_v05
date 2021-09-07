@@ -59,7 +59,7 @@ def nl(var,loop_name,subset=None):
 	return var+'_'+loop_name if subset is None else var+'_'+loop_name+'_subset'
 
 def sneaky_db(db0,db_star,diff=False,shock_name='shock',n_steps=10,loop_name='l1',update_variables='all',clean_up = True, gridtype='linear',phi=1,error=1e-11):
-	shock_db = DataBase.GPM_database(workspace=db0.workspace,alias=db_star.get('alias_'),**{'name': shock_name})
+	shock_db = DataBase.GPM_database(workspace=db0.workspace,alias=db0.get('alias_'),**{'name': shock_name})
 	shock_db[loop_name] = loop_name+'_'+pd.Index(range(1,n_steps+1),name=loop_name).astype(str)
 	if update_variables=='all':
 		update_variables = [var for var in db0.variables_flat if var in db_star.variables_flat];
@@ -78,7 +78,7 @@ def sneaky_db(db0,db_star,diff=False,shock_name='shock',n_steps=10,loop_name='l1
 		else:
 			shock_db[nl(var,loop_name,subset=True)] = shock_db.get(loop_name)
 			shock_db[nl(var,loop_name)] = DataBase.gpy_symbol(add_grid_to_series(db0.get(var),db_star.get(var),shock_db.get(loop_name),nl(var,loop_name),gridtype=gridtype,phi=phi,scalar=True),**{'gtype':'parameter'})
-	shock_db.update_all_sets()
+	shock_db.update_all_sets(clean_alias=True)
 	shock_db.merge_internal()
 	return shock_db,{'shock_name': shock_name, 'n_steps': n_steps, 'loop_name': loop_name, 'update_variables': update_variables, 'clean_up': clean_up, 'gridtype': gridtype, 'phi': phi}
 

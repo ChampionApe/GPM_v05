@@ -3,6 +3,7 @@ sets
 	alias_map2
 	n
 	z
+	l1
 ;
 
 alias(n,nn,nnn,nnnn,nnnnn);
@@ -89,6 +90,9 @@ sets
 	ID_e2ai[n,nn]
 	ID_mu_endoincalib[n,nn]
 	ID_mu_exo[n,nn]
+	mu_l1_subset[n,nn]
+	sigma_l1_subset[n]
+	eta_l1_subset[n]
 ;
 
 $GDXIN %ID_0%
@@ -97,6 +101,7 @@ $load alias_set
 $load alias_map2
 $load n
 $load z
+$load l1
 $load ID_inp
 $load ID_out
 $load ID_int
@@ -160,6 +165,8 @@ $load bra_o_ID_Y
 $load bra_no_ID_Y
 $load ID_t_all
 $load ai
+$load sigma_l1_subset
+$load eta_l1_subset
 $load alias_
 $load ID_map_all
 $load map_ID_EC
@@ -178,5 +185,6 @@ $load ID_e2ai2i
 $load ID_e2ai
 $load ID_mu_endoincalib
 $load ID_mu_exo
+$load mu_l1_subset
 $GDXIN
 $offMulti
