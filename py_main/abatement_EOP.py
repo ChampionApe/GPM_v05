@@ -46,17 +46,22 @@ class abate(gmspython):
 	@property
 	def default_variables(self):
 		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau']
-		if self.state == 'ID_calibrate':
+		if 'calibrate' in self.state:
 			syms += self.id_calibrate_vars
-		elif self.state == 'EOP':
+		if 'EOP' in self.state:
 			syms += self.eop_vars
+		if self.state == 'EOP_calibrate':
+			syms += self.eop_calibrate_vars
 		return syms
 	@property
 	def id_calibrate_vars(self):
 		return ['weight_mu','mubar','minobj']
 	@property
 	def eop_vars(self):
-		return ['muG','sigmaG']
+		return ['muG','sigmaG','currapp_EOP']
+	@property
+	def eop_calibrate_vars(self):
+		return ['w_mu_EOP','muGbar','sigmaGbar','w_EOP']
 
 	def add_sets(self,tech,state,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
@@ -87,61 +92,55 @@ class abate(gmspython):
 			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 		elif state == 'EOP':
-			self.ns.update({s: df(s,kwargs) for s in ['M2C']})
+			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t']})
 			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech['EOP']['current_coverages_split'], tech["EOP"]["current_applications"], tech["EOP"]["coverage_potentials"]]]; 
-			self.model.database[self.n('M2C')] = pd.MultiIndex.from_tuples([(k,j) for k,v in tech['EOP']['upper_categories'].items() for j in v], names = [self.n('z'),self.n('n')])
+			self.model.database[self.n('m2c')] = pd.MultiIndex.from_tuples([(k,j) for k,v in tech['EOP']['upper_categories'].items() for j in v], names = [self.n('z'),self.n('n')])
 			self.model.database[self.n('EOP_i2ai')] = tech['EOP']['Q2P']
+			u2m = DataBase_wheels.appmap(self.get('map_EOP_CU'), DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn'))
+			self.model.database[self.n('m2t')] = DataBase_wheels.appmap(u2m,DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n')).unique().swaplevel(0,1).set_names([self.n('z'),self.n('n')])
+
+	def df_var(self,val,var,domain=None,scalar=False):
+		return pd.Series(val, index = domain, name = self.n(var)) if not scalar else DataBase.gpy_symbol(val,**{'name': self.n(var)})
 
 	def default_var_series(self,var):
 		if var=='PbT':
-			return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
+			return self.df_var(1,var,domain=self.get('ID_out'))
 		elif var == 'PwT':
-			return pd.Series(1, index = self.get('ID_inp'), name = self.n(var))
+			return self.df_var(1,var,domain=self.get('ID_inp'))
 		elif var == 'PwThat':
-			return pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
-		elif var == 'pM':
-			return pd.Series(1, index = self.get('z'), name = self.n(var))
-		elif var == 'pMhat':
-			return pd.Series(1, index = self.get('z'), name = self.n(var))
+			return self.df_var(1,var,domain=self.get('ID_wT'))
+		elif var in ('pM','pMhat','M','M0'):
+			return self.df_var(1,var,domain=self.get('z'))
 		elif var == 'qD':
-			s = pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
-			return s.combine_first(pd.Series(1, index = self.get('ai'), name = self.n(var)))
+			return self.df_var(1,var,domain=self.get('ID_wT').union(self.get('ai')))
 		elif var == 'qS':
-			return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
+			return self.df_var(1,var,domain=self.get('ID_out'))
 		elif var == 'qsumX':
-			return pd.Series(1, index = self.get('ID_e2ai'), name = self.n(var))
-		elif var == 'M0':
-			return pd.Series(1, index = self.get('z'), name = self.n(var))
-		elif var == 'M':
-			return pd.Series(1, index = self.get('z'), name = self.n(var))
+			return self.df_var(1,var,domain=self.get('ID_e2ai'))
 		elif var == 'phi':
-			return pd.Series(0, index = pd.MultiIndex.from_product([self.get('z'),self.get('ai')]))
+			return self.df_var(0,var,domain=pd.MultiIndex.from_product([self.get('z'),self.get('ai')]))
 		elif var == 'os':
-			return pd.Series(0.5, index = self.get('ID_e2t'), name = self.n(var))
+			return self.df_var(0.5,var,domain=self.get('ID_e2t'))
 		elif var == 'mu':
-			return pd.Series(1, index = self.get('ID_map_all'), name=self.n(var))
+			return self.df_var(1,var,domain=self.get('ID_map_all'))
 		elif var == 'sigma':
-			return pd.Series(0.01, index = self.get('ID_kno_inp'),name = self.n(var))
+			return self.df_var(0.01,var,domain=self.get('ID_kno_inp'))
 		elif var == 'eta':
-			return pd.Series(-0.01, index = self.get('ID_kno_out'), name = self.n(var))
-		elif var == 'currapp':
-			return pd.Series(0.5, index = self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))), name = self.n(var))
-		elif var == 'currapp_mod':
-			return self.default_var_series('currapp').rename(self.n(var))
-		elif var == 'gamma_tau':
-			return self.default_var_series('currapp').rename(self.n(var))
-		elif var == 's_uc':
-			return pd.Series(0.5, index = self.g('map_ID_CU').rctree_pd(self.g('bra_ID_TU')), name = self.n(var))
-		elif var == 'weight_mu':
-			return DataBase.gpy_symbol(1,**{'name':self.n(var)})
-		elif var == 'minobj':
-			return DataBase.gpy_symbol(0,**{'name':self.n(var)})
-		elif var == 'mubar':
-			return pd.Series(10, index = self.g('map_ID_CU').rctree_pd(self.g('bra_ID_TU')), name = self.n(var))
-		elif var == 'muG':
-			return pd.Series(0, index = self.get('kno_EOP_CU'),name=self.n(var))
-		elif var == 'sigmaG':
-			return pd.Series(1, index = self.get('kno_EOP_CU'),name=self.n(var))
+			return self.df_var(-0.01,var,domain=self.get('ID_kno_out'))
+		elif var in ('currapp','currapp_mod','gamma_tau'):
+			return self.df_var(0.5,var,domain=self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))))
+		elif var in ('s_uc','mubar'):
+			return self.df_var(1,var,domain=self.g('map_ID_CU').rctree_pd(self.g('bra_ID_TU')))
+		elif var in ('minobj','w_EOP'):
+			return self.df_var(1,var,scalar=True)
+		elif var in ('weight_mu', 'w_mu_EOP'):
+			return self.df_var(10,var,scalar=True)
+		elif var == 'currapp_EOP':
+			return self.df_var(0.5,var,domain=self.get('m2t'))
+		elif var in ('muG','muGbar'):
+			return self.df_var(0,var,domain=self.get('kno_EOP_CU'))
+		elif var in ('sigmaG','sigmaGbar'):
+			return self.df_var(1,var,domain=self.get('kno_EOP_CU'))
 
 	def initialize_variables(self,**kwargs):
 		try:
@@ -206,11 +205,20 @@ class abate(gmspython):
 					 'currapp': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
 					 'currapp_mod': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_EOP_alwaysexo':
-			return [{'sigma': self.g('EOP_kno_inp'), 'mu': None}]
+			return [{'sigma': self.g('EOP_kno_inp'), 'mu': self.g('EOP_map_all'), 'eta': self.g('EOP_kno_out'),'PwT': self.g('EOP_inp')}]
+		elif group == 'g_EOP_alwaysendo':
+			return [{'PwThat': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'PbT': self.g('EOP_out'), 
+					 'qD': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'qS': self.g('EOP_out'), 'M': None}]
+		elif group == 'g_EOP_endoincalib':
+			[{'muG': self.g('kno_EOP_CU'), 'sigmaG': self.g('kno_EOP_CU')}]
+		elif group == 'g_EOP_exoincalib':
+			return [{'currapp_EOP': self.g('m2t')}]
 		elif group == 'g_minobj_alwaysendo':
 			return [{'minobj': None}]
 		elif group == 'g_minobj_ID_alwaysexo':
 			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
+		elif group == 'g_minobj_EOP_alwaysexo':
+			return [{'w_EOP': None, 'w_mu_EOP': None,'muGbar': self.g('kno_EOP_CU'),'sigmaGbar': self.g('kno_EOP_CU')}]
 
 	@property
 	def exo_groups(self):
