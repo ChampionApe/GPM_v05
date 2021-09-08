@@ -61,7 +61,7 @@ class abate(gmspython):
 		return ['muG','sigmaG','currapp_EOP']
 	@property
 	def eop_calibrate_vars(self):
-		return ['w_mu_EOP','muGbar','sigmaGbar','w_EOP']
+		return ['w_mu_EOP','muGbar','sigmaGbar','w_EOP','theta']
 
 	def add_sets(self,tech,state,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
@@ -92,12 +92,14 @@ class abate(gmspython):
 			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 		elif state == 'EOP':
-			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t']})
+			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta']})
 			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech['EOP']['current_coverages_split'], tech["EOP"]["current_applications"], tech["EOP"]["coverage_potentials"]]]; 
 			self.model.database[self.n('m2c')] = pd.MultiIndex.from_tuples([(k,j) for k,v in tech['EOP']['upper_categories'].items() for j in v], names = [self.n('z'),self.n('n')])
 			self.model.database[self.n('EOP_i2ai')] = tech['EOP']['Q2P']
 			u2m = DataBase_wheels.appmap(self.get('map_EOP_CU'), DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn'))
 			self.model.database[self.n('m2t')] = DataBase_wheels.appmap(u2m,DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n')).unique().swaplevel(0,1).set_names([self.n('z'),self.n('n')])
+			self.model.database[self.n('m2u')] = DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn')).swaplevel(0,1).set_names([self.n('z'),self.n('n')])
+			self.model.database[self.n('theta')] = tech['EOP']['coverage_potentials'].swaplevel(0,1).rename(self.n('theta'))
 
 	def df_var(self,val,var,domain=None,scalar=False):
 		return pd.Series(val, index = domain, name = self.n(var)) if not scalar else DataBase.gpy_symbol(val,**{'name': self.n(var)})
@@ -135,7 +137,7 @@ class abate(gmspython):
 			return self.df_var(1,var,scalar=True)
 		elif var in ('weight_mu', 'w_mu_EOP'):
 			return self.df_var(10,var,scalar=True)
-		elif var == 'currapp_EOP':
+		elif var in ('currapp_EOP','theta'):
 			return self.df_var(0.5,var,domain=self.get('m2t'))
 		elif var in ('muG','muGbar'):
 			return self.df_var(0,var,domain=self.get('kno_EOP_CU'))
@@ -227,8 +229,12 @@ class abate(gmspython):
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_exoincalib','g_minobj_ID_alwaysexo'])
-														   -OS(['g_ID_endoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_exoincalib','g_minobj_ID_alwaysexo'])-OS(['g_ID_endoincalib']))}
+		elif self.state == 'EOP':
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_EOP_endoincalib']))}
+		elif self.state == 'EOP_calibrate':
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib','g_minobj_ID_alwaysexo','g_minobj_EOP_alwaysexo'])-OS(['g_ID_endoincalib']))}
+
 	@property 
 	def endo_groups(self):
 		n = self.model.settings.name+'_'
@@ -236,12 +242,15 @@ class abate(gmspython):
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_alwaysendo'])
-														   -OS(['g_ID_exoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_alwaysendo'])-OS(['g_ID_exoincalib']))}
+		elif self.state == 'EOP':
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_EOP_exoincalib']))}
+		elif self.state == 'EOP_calibrate':
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_ID_endoincalib','g_EOP_endoincalib','g_minobj_alwaysendo'])-OS(['g_EOP_exoincalib']))}
 
 	@property
 	def add_solve(self):
-		if self.state == 'ID_calibrate':
+		if self.state in ('ID_calibrate','EOP_calibrate'):
 			return f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
 		else:
 			return None
@@ -249,19 +258,31 @@ class abate(gmspython):
 	# --- 		4: Define blocks 		--- #
 	@property
 	def blocktext(self):
-		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local},
+		blocks = {**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith('ID_')},
 				  **{f"M_{self.model.settings.name}_ID_sum": self.init_ID_sum(),
 					 f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
-					 f"M_{self.model.settings.name}_ID_agg": self.init_agg(),
+					 f"M_{self.model.settings.name}_ID_agg": self.init_agg('ID'),
 					 f"M_{self.model.settings.name}_ID_calib_aux": self.init_ID_calib_aux()}}
-		if self.state == 'ID_calibrate':
-			blocks[f"M_{self.model.settings.name}_ID_minobj"]= self.init_minobj()
+		if 'calibrate' in self.state:
+			blocks[f"M_{self.model.settings.name}_ID_minobj"]= self.init_minobj('ID')
+		if 'EOP' in self.state:
+			blocks.update({**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.starswith('EOP_')},
+						   **{f"M_{self.model.settings.name}_EOP_agg": self.init_agg('EOP'),
+						      f"M_{self.model.settings.name}_EOP_Em": self.init_EOP_emissions(),
+						      f"M_{self.model.settings.name}_EOP_calib_aux": self.init_EOP_calib_aux()}})
+		if self.state == 'EOP_calibrate':
+			blocks[f"M_{self.model.settings.name}_EOP_minobj"] = self.init_minobj('EOP')
 		return blocks
 	@property
 	def mblocks(self):
-		mblocks = OS([f"M_{tree}" for tree in self.ns_local]+[f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg','ID_calib_aux')])
+		mblocks = OS([f"M_{tree}" for tree in self.ns_local if tree.startswith('ID_')]+[f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg','ID_calib_aux')])
 		if self.state == 'ID_calibrate':
 			mblocks += OS([f"M_{self.model.settings.name}_ID_minobj"])
+		elif 'EOP' in self.state:
+			mblocks += OS([f"M_{tree}" for tree in self.ns_local if tree.startswith('EOP_')]+[f"M_{self.model.settings.name}_"+m for m in ('EOP_agg','EOP_Em','EOP_calib_aux')])
+			mblocks -= OS([f"M_{self.model.settings.name}_ID_agg"])
+		if self.state == 'EOP_calibrate':
+			mblocks += OS([f"M_{self.model.settings.name}_EOP_minobj"])
 		return mblocks
 	def init_ID_sum(self):
 		s = getattr(gams_abatement,'ID_sum')()
@@ -273,8 +294,8 @@ class abate(gmspython):
 		s.add_symbols(self.model.database,self.ns)
 		s.add_conditions()
 		return s.run(self.model.settings.name)
-	def init_agg(self):
-		s = getattr(gams_abatement,'aggregates')(state=self.state)
+	def init_agg(self,state):
+		s = getattr(gams_abatement,'aggregates')(state=state)
 		s.add_symbols(self.model.database,self.ns)
 		s.add_conditions()
 		return s.run(self.model.settings.name)
@@ -283,8 +304,18 @@ class abate(gmspython):
 		s.add_symbols(self.model.database,self.ns)
 		s.add_conditions()
 		return s.run(self.model.settings.name)
-	def init_minobj(self):
-		s = getattr(gams_abatement, 'minimize_object')(state=self.state)
+	def init_EOP_calib_aux(self):
+		s = getattr(gams_abatement,'currapp_EOP')()
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
+	def init_EOP_emissions(self):
+		s = getattr(gams_abatement,'EOP_emissions')()
+		s.add_symbols(self.model.database,self.ns)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
+	def init_minobj(self,state):
+		s = getattr(gams_abatement, 'minimize_object')(state=state)
 		s.add_symbols(self.model.database,self.ns)
 		s.add_conditions()
 		return s.run(self.model.settings.name)
