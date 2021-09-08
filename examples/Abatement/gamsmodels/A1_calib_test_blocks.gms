@@ -43,7 +43,7 @@ $BLOCK M_A1_calib_test_ID_sum
 $ENDBLOCK
 $BLOCK M_A1_calib_test_ID_Em 
 	E_M0_A1_calib_test[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
-	E_ID_PwThat_A1_calib_test[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));	
+	E_ID_PwThat_A1_calib_test[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
 $ENDBLOCK
 $BLOCK M_A1_calib_test_ID_agg 
 	E_aggqD_ID_A1_calib_test[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n]), qD[nn]);
