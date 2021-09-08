@@ -126,12 +126,18 @@ def load_techcats(dict_with_techcats):
         #Empty mu container
         mu = multiindex_series(idx_level_names=["n", "nn"], series_name="mu")
 
-        #Empty potential coverages container (shares that components make up of their upper categories (energy services or emission types))
-        coverage_potentials = multiindex_series(idx_level_names=["n", "nn"], series_name="coverage_potentials")
-        #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
-        current_applications = multiindex_series(idx_level_names=["n", "nn"], series_name="current_applications")
-        current_coverages_split = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages_split")
-
+        if techcat_type == "inputdisp":
+            #Empty potential coverages container (shares that components make up of their upper categories (energy services or emission types))
+            coverage_potentials = multiindex_series(idx_level_names=["n", "nn"], series_name="coverage_potentials")     
+            #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
+            current_applications = multiindex_series(idx_level_names=["n", "nn"], series_name="current_applications")
+            current_coverages_split = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages_split")
+        elif techcat_type == "endofpipe":
+            #Empty potential coverages container (shares that components make up of their upper categories (energy services or emission types))
+            coverage_potentials = multiindex_series(idx_level_names=["n", "z"], series_name="coverage_potentials")     
+            #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
+            current_applications = multiindex_series(idx_level_names=["z", "n"], series_name="current_applications")
+            current_coverages_split = multiindex_series(idx_level_names=["n", "z"], series_name="current_coverages_split")
 
         #Technologies
         tech_series = prefix + "_" + df["tech"].astype("str")
