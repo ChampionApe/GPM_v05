@@ -63,7 +63,7 @@ class abate(gmspython):
 		if state=='ID':
 			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
 			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo','map_gamma']]})
-			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split'], tech['PwT'], tech["ID"]["current_applications"], tech["ID"]["coverage_potentials"]]]; 
+			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split_ID'], tech['PwT'], tech["ID"]["current_applications_ID"], tech["ID"]["coverage_potentials_ID"]]]; 
 			# level sets:
 			self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 			self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
@@ -88,44 +88,69 @@ class abate(gmspython):
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 		elif state == 'EOP':
 			self.ns.update({s: df(s,kwargs) for s in ['M2C']})
-			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech['EOP']['current_coverages_split'], tech["EOP"]["current_applications"], tech["EOP"]["coverage_potentials"]]]; 
+			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech['EOP']['current_coverages_split_EOP'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"]]]; 
 			self.model.database[self.n('M2C')] = pd.MultiIndex.from_tuples([(k,j) for k,v in tech['EOP']['upper_categories'].items() for j in v], names = [self.n('z'),self.n('n')])
 			self.model.database[self.n('EOP_i2ai')] = tech['EOP']['Q2P']
 
 	def default_var_series(self,var):
 		if var=='PbT':
-			return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
+			elif self.state == "EOP":
+				return pd.Series(1, index = self.get("ID_out").append(self.get("EOP_out")), name=self.n(var))
 		elif var == 'PwT':
-			return pd.Series(1, index = self.get('ID_inp'), name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(1, index = self.get('ID_inp'), name = self.n(var))
+			elif self.state == "EOP":
+				return pd.Series(1, index = self.get("ID_inp").append(self.get("EOP_inp")), name=self.n(var))
 		elif var == 'PwThat':
-			return pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
+			elif self.state == "EOP":
+				return pd.Series(1, index = self.get('ID_wT').append(self.get("EOP_wT")), name = self.n(var))
 		elif var == 'pM':
 			return pd.Series(1, index = self.get('z'), name = self.n(var))
 		elif var == 'pMhat':
 			return pd.Series(1, index = self.get('z'), name = self.n(var))
 		elif var == 'qD':
-			s = pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
+			if self.state == "ID":
+				s = pd.Series(1, index = self.get('ID_wT'), name = self.n(var))
+			elif self.state == "EOP":
+				s = pd.Series(1, index = self.get('ID_wT').append(self.get("EOP_wT")), name = self.n(var))
 			return s.combine_first(pd.Series(1, index = self.get('ai'), name = self.n(var)))
 		elif var == 'qS':
-			return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(1, index = self.get('ID_out'), name = self.n(var))
+			elif self.state == "ID":
+				return pd.Series(1, index = self.get('ID_out').append(self.get("EOP_out")), name = self.n(var))
 		elif var == 'qsumX':
 			return pd.Series(1, index = self.get('ID_e2ai'), name = self.n(var))
 		elif var == 'M0':
 			return pd.Series(1, index = self.get('z'), name = self.n(var))
 		elif var == 'M':
-			return pd.Series(1, index = self.get('z'), name = self.n(var))
+			return pd.Series(0.9, index = self.get('z'), name = self.n(var))
 		elif var == 'phi':
 			return pd.Series(0, index = pd.MultiIndex.from_product([self.get('z'),self.get('ai')]))
 		elif var == 'os':
 			return pd.Series(0.5, index = self.get('ID_e2t'), name = self.n(var))
 		elif var == 'mu':
-			return pd.Series(1, index = self.get('ID_map_all'), name=self.n(var))
+			if self.state == "ID":
+				return pd.Series(1, index = self.get('ID_map_all'), name=self.n(var))
+			elif self.state == "ID":
+				return pd.Series(1, index = self.get('ID_map_all').append(self.get("EOP_map_all")), name=self.n(var))
 		elif var == 'sigma':
-			return pd.Series(0.01, index = self.get('ID_kno_inp'),name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(0.01, index = self.get('ID_kno_inp'),name = self.n(var))
+			elif self.state == "ID":
+				return pd.Series(0.01, index = self.get('ID_kno_inp').append(self.get("EOP_kno_inp")), name = self.n(var))
 		elif var == 'eta':
-			return pd.Series(-0.01, index = self.get('ID_kno_out'), name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(-0.01, index = self.get('ID_kno_out'), name = self.n(var))
+			elif self.state == "EOP":
+				return pd.Series(-0.01, index = self.get('ID_kno_out').append(self.get("EOP_kno_out")), name = self.n(var))
 		elif var == 'currapp':
-			return pd.Series(0.5, index = self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))), name = self.n(var))
+			if self.state == "ID":
+				return pd.Series(0.5, index = self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))), name = self.n(var))
 		elif var == 'currapp_mod':
 			return self.default_var_series('currapp').rename(self.n(var))
 		elif var == 'gamma_tau':
