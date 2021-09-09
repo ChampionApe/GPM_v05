@@ -89,8 +89,8 @@ class abate(gmspython):
 			# Merge the two on the level of components, drop the component level and rename sets:
 			self.model.database[self.n('map_gamma')] = DataBase_wheels.mi.add_ndmi(e2t2c,u2t2c_B).droplevel(2).set_names([self.n('n'),self.n('nn'),self.n('nnn'),self.n('nnnn')])
 			u2t_BaseC = self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(self.get('map_gamma').droplevel(0).droplevel(0).set_names([self.n('n'),self.n('nn')]))})
-			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
-			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
 		elif state == 'EOP':
 			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta']})
 			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"]]];
@@ -266,8 +266,8 @@ class abate(gmspython):
 			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
 		elif group == 'g_minobj_EOP_alwaysexo':
 			return [{'w_EOP': None, 'w_mu_EOP': None, 'muGbar': self.g('kno_EOP_CU'),'sigmaGbar': self.g('kno_EOP_CU')}]
-		elif group == 'g_debug':
-			return [{'testminobj': None}]
+		# elif group == 'g_debug':
+		# 	return [{'testminobj': None}] # Debugging state
 
 	@property
 	def exo_groups(self):
@@ -346,9 +346,9 @@ class abate(gmspython):
 		if self.state == 'EOP_calibrate':
 			mblocks += OS([f"M_{self.model.settings.name}_EOP_minobj"])
 		return mblocks
-	@property
-	def M_testminobj(self):
-		return f"E_testminobject..	testminobj =E= 0;"
+	# @property
+	# def M_testminobj(self):
+	# 	return f"E_testminobject..	testminobj =E= 0;" # Debugging state
 	def init_ID_sum(self):
 		s = getattr(gams_abatement,'ID_sum')()
 		s.add_symbols(self.model.database,self.ns)

@@ -24,15 +24,6 @@ parameters
 	load_sigmaG[n]
 	A1_EOP_EOP_modelstat
 	A1_EOP_EOP_solvestat
-	load_minobj
-	load_weight_mu
-	load_mubar[n,nn]
-	load_w_EOP
-	load_w_mu_EOP
-	load_muGbar[n]
-	load_sigmaGbar[n]
-	A1_EOP_EOP_calibrate_modelstat
-	A1_EOP_EOP_calibrate_solvestat
 ;
 
 $GDXIN %ID_0%
@@ -62,13 +53,4 @@ $load load_muG
 $load load_sigmaG
 $load A1_EOP_EOP_modelstat
 $load A1_EOP_EOP_solvestat
-$load load_minobj
-$load load_weight_mu
-$load load_mubar
-$load load_w_EOP
-$load load_w_mu_EOP
-$load load_muGbar
-$load load_sigmaGbar
-$load A1_EOP_EOP_calibrate_modelstat
-$load A1_EOP_EOP_calibrate_solvestat
 $offMulti
