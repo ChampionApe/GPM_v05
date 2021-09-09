@@ -294,7 +294,7 @@ class abate(gmspython):
 		elif self.state == 'EOP':
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_EOP_exoincalib']))}
 		elif self.state == 'EOP_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_ID_endoincalib','g_EOP_endoincalib','g_minobj_alwaysendo'])-OS(['g_EOP_exoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_ID_endoincalib','g_EOP_endoincalib','g_minobj_alwaysendo'])-OS(['g_ID_exoincalib']))}
 
 	@property
 	def add_solve(self):

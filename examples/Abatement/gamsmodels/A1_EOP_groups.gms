@@ -72,11 +72,11 @@ sigmaGbar[n]$(kno_EOP_CU[n]) ""
 ;
 
 @load_level(A1_EOP_g_ID_alwaysendo,%qmark%%ID_0%");
-@load_level(A1_EOP_g_ID_exoincalib,%qmark%%ID_0%");
 @load_level(A1_EOP_g_EOP_alwaysendo,%qmark%%ID_0%");
 @load_level(A1_EOP_g_ID_endoincalib,%qmark%%ID_0%");
 @load_level(A1_EOP_g_EOP_endoincalib,%qmark%%ID_0%");
 @load_level(A1_EOP_g_minobj_alwaysendo,%qmark%%ID_0%");
+@load_fixed(A1_EOP_g_ID_exoincalib,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_EOP_exoincalib,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_ID_alwaysexo,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_EOP_alwaysexo,%qmark%%ID_0%");
