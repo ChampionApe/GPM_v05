@@ -58,7 +58,7 @@ def end_w_gmy(x):
 def nl(var,loop_name,subset=None):
 	return var+'_'+loop_name if subset is None else var+'_'+loop_name+'_subset'
 
-def sneaky_db(db0,db_star,diff=False,shock_name='shock',n_steps=10,loop_name='l1',update_variables='all',clean_up = True, gridtype='linear',phi=1,error=1e-11):
+def sneaky_db(db0,db_star,diff=False,shock_name='shock',n_steps=10,loop_name='l1',update_variables='all',clean_up = True, gridtype='linear',phi=1,error=1e-11,**kwargs):
 	shock_db = DataBase.GPM_database(workspace=db0.workspace,alias=db0.get('alias_'),**{'name': shock_name})
 	shock_db[loop_name] = loop_name+'_'+pd.Index(range(1,n_steps+1),name=loop_name).astype(str)
 	if update_variables=='all':
@@ -102,8 +102,8 @@ class AddShocks:
 		self.prefix=prefix # prefix used in UEVAS part.
 		self.write_components = {} # components used to write 'text'.
 
-	def WriteResolve(self,type_='CNS'):
-		return f"solve {self.name} using {type_};\n"
+	def WriteResolve(self,type_='CNS',solvetext=None):
+		return f"solve {self.name} using {type_};\n" if solvetext is None else solvetext
 
 	@property
 	def text(self):
@@ -140,7 +140,7 @@ class AddShocks:
 					loop = self.loop_text)
 		return self.write_components['loop']
 
-	def UpdateExoVarsAndSolve(self,model,model_name=None):
+	def UpdateExoVarsAndSolve(self,model,model_name=None,solvetext=None):
 		"""
 		(Shorthand: UEVAS, could in principle be a class.)
 		Write a type of 'loop-text' that performs the following steps:
@@ -150,16 +150,17 @@ class AddShocks:
 		"""
 		self.model = model
 		self.name = self.model.settings.name+'_'+self.model.settings.state if model_name is None else model_name
+		self.solvetext = solvetext
 		self.UEVAS = {'sol': {}, 'adj': {}}
 
-	@property 
+	@property
 	def UEVAS_text(self):
 		self.write_components = {}
 		self.write_sets()
 		self.write_pars()
 		if len(self.UEVAS['sol'])>0:
 			self.UEVAS_WritePGroup()
-		self.loop_text = self.UEVAS_UpdateExoVars()+self.WriteResolve()+self.UEVAS_WriteStoreSol()
+		self.loop_text = self.UEVAS_UpdateExoVars()+self.WriteResolve(solvetext=self.solvetext)+self.UEVAS_WriteStoreSol()
 		self.write_loop_text()
 		return self.text
 

@@ -265,7 +265,7 @@ class abate(gmspython):
 		elif group == 'g_minobj_ID_alwaysexo':
 			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
 		elif group == 'g_minobj_EOP_alwaysexo':
-			return [{'w_EOP': None, 'w_mu_EOP': None,'muGbar': self.g('kno_EOP_CU'),'sigmaGbar': self.g('kno_EOP_CU')}]
+			return [{'w_EOP': None, 'w_mu_EOP': None, 'muGbar': self.g('kno_EOP_CU'),'sigmaGbar': self.g('kno_EOP_CU')}]
 		elif group == 'g_debug':
 			return [{'testminobj': None}]
 

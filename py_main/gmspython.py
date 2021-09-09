@@ -169,22 +169,22 @@ class gmspython:
 		return self.model.settings.state
 
 	# --- 		3: Basic write/run methods 		--- #
-	def write_and_run(self,name='baseline',options_add={},add_checkpoint=False,write=True,overwrite=False,kwargs_init={},kwargs_groups={},kwargs_blocks={},kwargs_write={}):
+	def write_and_run(self,name='baseline',options_add={},options_run={},add_checkpoint=False,write=True,overwrite=False,kwargs_init={},kwargs_groups={},kwargs_blocks={},kwargs_write={},kwargs_mi={}):
 		if write is True:
 			self.write(kwargs_init=kwargs_init,kwargs_groups=kwargs_groups,kwargs_blocks=kwargs_blocks)
 		[db.merge_internal() for db in self.model.settings.databases.values()];
-		self.run(name,options_add=options_add,add_checkpoint=add_checkpoint,kwargs_db={'name':name},overwrite=overwrite,kwargs_write=kwargs_write)
+		self.run(name,options_add=options_add,options_run=options_run,add_checkpoint=add_checkpoint,kwargs_db={'name':name},overwrite=overwrite,kwargs_write=kwargs_write,kwargs_mi=kwargs_mi)
 		
-	def run(self,name,options_add={},options_run={},add_checkpoint=False,overwrite=False,kwargs_db={},kwargs_write={}):
-		self.model_instance(name=name)
+	def run(self,name,options_add={},options_run={},add_checkpoint=False,overwrite=False,kwargs_db={},kwargs_write={},kwargs_mi={}):
+		self.model_instance(name=name,kwargs_mi=kwargs_mi)
 		if add_checkpoint is not False:
 			self.checkpoints[add_checkpoint] = self.model_instances[name].ws.add_checkpoint()
 			options_run = {**options_run, **{'checkpoint': self.checkpoints[add_checkpoint]}}
 		self.model_instances[name].run(overwrite=overwrite,kwargs_write=kwargs_write,options_add = options_add, options_run = options_run,kwargs_db=kwargs_db)
 
-	def model_instance(self,name='temp'):
+	def model_instance(self,name='temp',kwargs_mi={}):
 		"""Create model instance"""
-		self.model_instances[name] = DB2Gams.gams_model(gsettings=self.model.settings)
+		self.model_instances[name] = DB2Gams.gams_model(gsettings=self.model.settings,**kwargs_mi)
 
 	def write(self,repo=None,export_settings=False,kwargs_init={},kwargs_groups={},kwargs_blocks={}):
 		""" write components needed for running the model."""

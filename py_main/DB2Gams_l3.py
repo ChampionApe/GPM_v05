@@ -41,8 +41,10 @@ class gams_model:
 		self.add_options(opt_file=self.opt_file)
 
 	def add_options(self,opt_file=None,name='conopt4'):
-		self.opt = default_opt(self.ws,name=end_w_opt(name)) if opt_file is None else self.ws.add_options(opt_file=opt_file)
-		self.opt_file = end_w_opt(name) if opt_file is None else opt_file
+		if opt_file is None:
+			self.opt = default_opt(self.ws,name=end_w_opt(name))
+		else:
+			self.opt = default_opt(self.ws,string=opt_file,name=end_w_opt(name))
 		self.export_settings['opt'] = opt_file if opt_file is not None else end_w_opt(name)
 
 	@property 
@@ -107,7 +109,7 @@ class gams_model:
 		"""
 		Add options using dict with key = option_name, value = option.
 		"""
-		self.job.run(self.opt,databases=self.settings.databases_gdx,**options)
+		self.job.run(gams_options=self.opt,databases=self.settings.databases_gdx,**options)
 
 	def update_placeholders(self):
 		"""
@@ -122,21 +124,21 @@ class gams_model:
 	def solve_sneakily(self,db_star=None,from_cp=False,cp_init=None,run_from_job=False,shock_db=None,options_run={},kwargs_shock={},kwargs_db={},model_name=None):
 		if from_cp is False:
 			cp_init = self.ws.add_checkpoint() if cp_init is None else cp_init
-			self.run(run_from_job=run_from_job,**{'checkpoint': cp_init})
+			self.run(run_from_job=run_from_job,options_run={**options_run,**{'checkpoint': cp_init}})
 		if shock_db is None:
-			(shock_db, kwargs_shock) = ShockFunction.sneaky_db(self.out_db,db_star,**kwargs_shock)
-		shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**kwargs_shock)
+			(shock_db, kwargs_shock2) = ShockFunction.sneaky_db(self.out_db,db_star,**kwargs_shock)
+		shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**{**kwargs_shock,**kwargs_shock2})
 		self.execute_shock_from_cp(shock,cp_init,options_run=options_run,kwargs_db=kwargs_db)
 		if self.settings.solvestat is True:
 			return {'Modelstat': self.modelstat, 'Solvestat': self.solvestat}
 
-	def std_UEVAS_from_db(self,shock_db,loop_name='l1',update_vars='all',shock_name='shock',store_sol={},model_name=None,**kwargs):
+	def std_UEVAS_from_db(self,shock_db,loop_name='l1',update_vars='all',shock_name='shock',store_sol={},model_name=None,solvetext=None,**kwargs):
 		"""
 		Creates a ShockFunction that loops over values in shock_db, for variables in update_vars.
 		The shock_db needs to be arranged with variable names as var+'_loopval', and subsets var+'_subset' for the method to work.
 		"""
 		shock = ShockFunction.AddShocks('shock_'+self.settings.name if shock_name is None else shock_name,shock_db,loop_name,work_folder=self.work_folder)
-		shock.UpdateExoVarsAndSolve(self,model_name=model_name)
+		shock.UpdateExoVarsAndSolve(self,model_name=model_name,solvetext=solvetext)
 		if update_vars=='all':
 			update_vars = [par.split('_'+loop_name)[0] for par in shock_db.parameters['parameters']]
 		for var in update_vars:
