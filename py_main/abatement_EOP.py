@@ -99,7 +99,7 @@ class abate(gmspython):
 			u2m = DataBase_wheels.appmap(self.get('map_EOP_CU'), DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn'))
 			self.model.database[self.n('m2t')] = DataBase_wheels.appmap(u2m,DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n')).unique().swaplevel(0,1).set_names([self.n('z'),self.n('n')])
 			self.model.database[self.n('m2u')] = DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn')).swaplevel(0,1).set_names([self.n('z'),self.n('n')])
-			self.model.database[self.n('theta')] = tech['EOP']['coverage_potentials'].swaplevel(0,1).rename(self.n('theta'))
+			self.model.database[self.n('theta')] = tech['EOP']['coverage_potentials_EOP'].swaplevel(0,1).rename(self.n('theta'))
 
 	def df_var(self,val,var,domain=None,scalar=False):
 		return pd.Series(val, index = domain, name = self.n(var)) if not scalar else DataBase.gpy_symbol(val,**{'name': self.n(var)})
@@ -295,9 +295,20 @@ class abate(gmspython):
 	@property
 	def add_solve(self):
 		if self.state in ('ID_calibrate','EOP_calibrate'):
-			return f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
+			return self.add_bounds + f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
 		else:
 			return None
+
+
+	@property
+	def add_bounds(self):
+		s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib").write()}) = 0;\n""" +\
+			f"""{self.g("gamma_tau").write(l=".lo")}$({self.g("ID_e2t").write()} and {self.g("kno_ID_TU").write(alias={"n":"nn"})}) = 0;\n"""
+		if self.state == "EOP_calibrate":
+			return s + f"""{self.g("sigmaG").write(l=".lo")}$({self.g("kno_EOP_CU").write()}) = 0;\n"""
+		else:
+			return s
+
 
 	# --- 		4: Define blocks 		--- #
 	@property
@@ -312,8 +323,8 @@ class abate(gmspython):
 		if 'EOP' in self.state:
 			blocks.update({**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.starswith('EOP_')},
 						   **{f"M_{self.model.settings.name}_EOP_agg": self.init_agg('EOP'),
-						      f"M_{self.model.settings.name}_EOP_Em": self.init_EOP_emissions(),
-						      f"M_{self.model.settings.name}_EOP_calib_aux": self.init_EOP_calib_aux()}})
+							  f"M_{self.model.settings.name}_EOP_Em": self.init_EOP_emissions(),
+							  f"M_{self.model.settings.name}_EOP_calib_aux": self.init_EOP_calib_aux()}})
 		if self.state == 'EOP_calibrate':
 			blocks[f"M_{self.model.settings.name}_EOP_minobj"] = self.init_minobj('EOP')
 		return blocks
