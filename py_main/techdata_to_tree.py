@@ -359,9 +359,12 @@ def load_techcats(dict_with_techcats):
 
         Q2P = pd.MultiIndex.from_tuples(Q2P, names=["n", "nn"])
 
-        
+        #Convert unit cost dataframe to a series
+        unit_costs = unit_costs.set_index("tech")["unit_cost"]
+        unit_costs.name, unit_costs.index.name = "unit_costs_" + prefix , "n"
+
         output[prefix] = {"techs_inputs":techs_inputs, "techs":techs, "components":components, "upper_categories":upper_categories, 
-                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_applications_" + prefix:current_applications, 
+                            "mu":mu, "Q2P":Q2P, "unit_costs_"+prefix:unit_costs, "current_applications_" + prefix:current_applications, 
                             "current_coverages_split_" + prefix:current_coverages_split, "coverage_potentials_" + prefix:coverage_potentials}
 
         output["PwT"] = inputprices.set_index("input")["price"]
