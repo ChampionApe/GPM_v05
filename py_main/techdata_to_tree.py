@@ -128,16 +128,16 @@ def load_techcats(dict_with_techcats):
 
         if techcat_type == "inputdisp":
             #Empty potential coverages container (shares that components make up of their upper categories (energy services or emission types))
-            coverage_potentials = multiindex_series(idx_level_names=["n", "nn"], series_name="coverage_potentials")     
+            coverage_potentials = multiindex_series(idx_level_names=["n", "nn"], series_name="coverage_potentials_ID")     
             #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
-            current_applications = multiindex_series(idx_level_names=["n", "nn"], series_name="current_applications")
-            current_coverages_split = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages_split")
+            current_applications = multiindex_series(idx_level_names=["n", "nn"], series_name="current_applications_ID")
+            current_coverages_split = multiindex_series(idx_level_names=["n", "nn"], series_name="current_coverages_split_ID")
         elif techcat_type == "endofpipe":
             #Empty potential coverages container (shares that components make up of their upper categories (energy services or emission types))
-            coverage_potentials = multiindex_series(idx_level_names=["n", "z"], series_name="coverage_potentials")     
+            coverage_potentials = multiindex_series(idx_level_names=["n", "z"], series_name="coverage_potentials_EOP")     
             #Empty current coverage container (shares that technology goods (U) make up of their upper categories (E or M))
-            current_applications = multiindex_series(idx_level_names=["z", "n"], series_name="current_applications")
-            current_coverages_split = multiindex_series(idx_level_names=["n", "z"], series_name="current_coverages_split")
+            current_applications = multiindex_series(idx_level_names=["z", "n"], series_name="current_applications_EOP")
+            current_coverages_split = multiindex_series(idx_level_names=["n", "z"], series_name="current_coverages_split_EOP")
 
         #Technologies
         tech_series = prefix + "_" + df["tech"].astype("str")
@@ -361,8 +361,8 @@ def load_techcats(dict_with_techcats):
 
         
         output[prefix] = {"techs_inputs":techs_inputs, "techs":techs, "components":components, "upper_categories":upper_categories, 
-                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_applications":current_applications, 
-                            "current_coverages_split":current_coverages_split, "coverage_potentials":coverage_potentials}
+                            "mu":mu, "Q2P":Q2P, "unit_costs":unit_costs, "current_applications_" + prefix:current_applications, 
+                            "current_coverages_split_" + prefix:current_coverages_split, "coverage_potentials_" + prefix:coverage_potentials}
 
         output["PwT"] = inputprices.set_index("input")["price"]
         output["PwT"].name = "PwT"
