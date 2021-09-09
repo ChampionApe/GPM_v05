@@ -118,14 +118,14 @@ class gmspython:
 		""" Return the variable in 'symbol', sliced according to the union of all exogenous groups."""
 		try:
 			return self.var_custom_group(symbol,[g.split(self.model.settings.name+'_',1)[-1] for g in self.exo_groups.keys()],db=db)
-		except (ValueError,KeyError):
+		except (ValueError,KeyError,TypeError):
 			return None
 
 	def var_endo(self,symbol,db=None):
 		""" Return the variable in 'symbol', sliced according to the union of all endogenous groups."""
 		try:
 			return self.var_custom_group(symbol,[g.split(self.model.settings.name+'_',1)[-1] for g in self.endo_groups.keys()],db=db)
-		except (ValueError,KeyError):
+		except (ValueError,KeyError,TypeError):
 			return None
 
 	def slice_exo(self,db,copy=True,copy_kwargs={}):
@@ -304,14 +304,14 @@ class gmspython_i(gmspython):
 		db = self.model.database if db is None else db
 		try:
 			return db[symbol].rctree_pd({'or': [DataBase.gpy_symbol(m.var_endo(symbol)) for m in self.modules.values() if m.var_endo(symbol) is not None]})
-		except KeyError:
+		except (ValueError,KeyError,TypeError):
 			return None
 
 	def var_exo(self,symbol, db = None):
 		db = self.model.database if db is None else db
 		try:
 			return db[symbol].rctree_pd({'not': [{'or': [DataBase.gpy_symbol(m.var_endo(symbol)) for m in self.modules.values() if m.var_endo(symbol) is not None]}]})
-		except KeyError:
+		except (ValueError,KeyError,TypeError):
 			return None
 
 	@property
