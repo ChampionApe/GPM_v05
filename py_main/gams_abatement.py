@@ -450,7 +450,7 @@ class aggregates:
 		if self.state == 'ID':
 			[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_i2ai','qD','pM','pMhat')];
 		elif self.state == 'EOP':
-			[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_i2ai','EOP_i2ai','m2c','qD','pM','pMhat','theta','muG','sigmaG')];
+			[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','ai','ID_i2ai','EOP_i2ai','m2c','qD','pM','pMhat','PbT','theta','muG','sigmaG')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'qD': self.ai.write(), 'pMhat': ''}
@@ -461,8 +461,8 @@ class aggregates:
 			text = self.e_qD(f"E_aggqD_ID_{name}", self.conditions['qD'], self.a('n',[(0,1)]), self.a('ID_i2ai',[(0,1),(1,0)]), self.a('qD',[(0,1)]))+'\n\t'
 			text += self.e_pMhat_ID(f"E_pMhat_ID_{name}", self.conditions['pMhat'])
 		elif self.state == 'EOP':
-			text = self.e_qD_EOP(f"E_aggqD_EOP_{name}", self.conditions['qD'], self.a('n',[(0,1)]), self.a('ID_i2ai',[(0,1),(1,0)]), self.a('EPO_i2ai',[(0,1),(1,0)]), self.a('qD',[(0,1)]))+'\n\t'
-			text += self.e_pMhat_EOP(f"E_pMhat_EOP_{name}",self.conditions['pMhat'],self.a('n'),self.a('m2c'),self.a('theta'),self.a('PbT'),self.a('muG'),self.a('sigmaG'))
+			text = self.e_qD_EOP(f"E_aggqD_EOP_{name}", self.conditions['qD'], self.a('n',[(0,1)]), self.a('ID_i2ai',[(0,1),(1,0)]), self.a('EOP_i2ai',[(0,1),(1,0)]), self.a('qD',[(0,1)]))+'\n\t'
+			text += self.e_pMhat_EOP(f"E_pMhat_EOP_{name}",self.conditions['pMhat'],self.a('n'),self.a('m2c'),self.a('pM'),self.a('theta'),self.a('PbT'),self.a('muG'),self.a('sigmaG'))
 		return text
 	def e_qD(self,name,conditions,nn,i2ai_2,qD_2):
 		return equation(name,self.qD.doms(),conditions,self.qD.write(),f"""sum({nn}$({i2ai_2}), {qD_2})""")
@@ -475,8 +475,8 @@ class aggregates:
 		return equation(name,self.pMhat.doms(),conditions,self.pMhat.write(),self.pM.write())
 
 class currentapplications:
-	def __init__(self,state='ID'):
-		self.state=state
+	def __init__(self):
+		pass
 	def add_symbols(self,db,ns):
 		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','ID_e2t','ID_e2u','map_ID_CU','map_ID_EC','bra_ID_TU','bra_ID_BU','kno_ID_TU','ID_u2t','sigma','mu','gamma_tau','PwThat','qD','currapp','s_uc','currapp_mod')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
@@ -500,10 +500,9 @@ class currentapplications:
 		P, P_2, P_3, P_5 = self.a('PwThat'), self.a('PwThat',[(0,1)]), self.a('PwThat',[(0,2)]), self.a('PwThat',[(0,4)])
 		qD, qD_3, qD_4 = self.a('qD'), self.a('qD',[(0,2)]), self.a('qD',[(0,3)])
 		s_uc_2 = self.a('s_uc',[(0,2),(1,3)])
-		if self.state in ('ID','ID_calibrate'):
-			text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], nnn, ID_u2t_4,ID_e2u_2, qD, qD_3, self.currapp) +'\n\t'
-			text += self.e_s_uc(f"E_share_uc_{name}", self.conditions['share_uc'], nnn, nnnn, nnnnn, ID_u2c_2, ID_tu_3, ID_bu_3, ID_e2u_3, ID_u2t_2, ID_u2t_3, sigma_2, mu, mu_2, gamma_tau_2, P, P_2, P_3, P_5,self.s_uc)+'\n\t'
-			text += self.e_currapp_mod(f"E_currapp_mod_{name}", self.conditions['currapp_mod'],nnn,nnnn,ID_u2t_4,ID_c2e_2,ID_u2c_3,s_uc_2,qD,qD_4,self.currapp_mod)
+		text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], nnn, ID_u2t_4,ID_e2u_2, qD, qD_3, self.currapp) +'\n\t'
+		text += self.e_s_uc(f"E_share_uc_{name}", self.conditions['share_uc'], nnn, nnnn, nnnnn, ID_u2c_2, ID_tu_3, ID_bu_3, ID_e2u_3, ID_u2t_2, ID_u2t_3, sigma_2, mu, mu_2, gamma_tau_2, P, P_2, P_3, P_5,self.s_uc)+'\n\t'
+		text += self.e_currapp_mod(f"E_currapp_mod_{name}", self.conditions['currapp_mod'],nnn,nnnn,ID_u2t_4,ID_c2e_2,ID_u2c_3,s_uc_2,qD,qD_4,self.currapp_mod)
 		return text
 	def e_currapp(self,name,conditions,nnn,u2t_4,e2u_2,qD,qD_3,currapp):
 		RHS = f"""sum({nnn}$({u2t_4} and {e2u_2}), {qD_3})/{qD}"""
@@ -524,7 +523,7 @@ class minimize_object:
 	def add_symbols(self,db,ns):
 		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','map_gamma','map_ID_CU','bra_ID_TU','mu','mubar','weight_mu','gamma_tau','minobj')];
 		if self.state == 'EOP':
-			[(setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('kno_EOP_CU','muG','sigmaG','w_EOP','w_mu_EOP','muGbar','sigmaGbar'))];
+			[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('kno_EOP_CU','muG','sigmaG','w_EOP','w_mu_EOP','muGbar','sigmaGbar')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'minobj': ''}
@@ -540,11 +539,11 @@ class minimize_object:
 			return self.e_minobj(f"E_minobj_ID_{name}",self.conditions['minobj'],RHS_ID,self.minobj)
 		elif self.state == 'EOP':
 			RHS_EOP = self.e_minobj_EOP_text(n,self.a('kno_EOP_CU'),self.a('w_EOP'),self.a('w_mu_EOP'),self.a('muG'),self.a('muGbar'),self.a('sigmaG'),self.a('sigmaGbar'))
-			return self.e_minobj(f"E_minobj_EOP_{name}",self.conditions['minobj'],RHS_ID+RHS_EOP,self.minobj)
+			return self.e_minobj(f"E_minobj_EOP_{name}",self.conditions['minobj'],RHS_ID+'+'+RHS_EOP,self.minobj)
 	def e_minobj_ID_text(self,n,nn,map_gamma,u2c,bu,mu,mu_2,mubar,weight_mu,gamma_tau):
 		return f"""sum({map_gamma}, Sqr({mu_2}-{gamma_tau}))+{weight_mu}*sum([{n},{nn}]$({u2c} and {bu}), Sqr({mu}-{mubar}))"""
 	def e_minobj_EOP_text(self,n,kno_EOP_CU,w_EOP,w_mu_EOP,muG,muGbar,sigmaG,sigmaGbar):
-		return f"""{w_EOP}*sum({n}$({kno_EOP_CU}, Sqr({muG}-{muGbar})+{w_mu_EOP}*Sqr({sigmaG}-{sigmaGbar}))"""
+		return f"""{w_EOP}*sum({n}$({kno_EOP_CU}), Sqr({muG}-{muGbar})+{w_mu_EOP}*Sqr({sigmaG}-{sigmaGbar}))"""
 	def e_minobj(self,name,conditions,RHS,minobj):
 		return equation(name,minobj.doms(), conditions, minobj.write(), RHS)
 
@@ -552,10 +551,10 @@ class currapp_EOP:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[(setattr,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','m2u','map_EOP_TU','qD','M0')];
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','m2u','m2t','map_EOP_TU','qD','M0','currapp_EOP')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
-		self.conditions = {'currapp_EOP': self.g('m2t')}
+		self.conditions = {'currapp_EOP': self.m2t.write()}
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
@@ -568,10 +567,10 @@ class EOP_emissions:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[(setattr,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','m2c','EOP_out','EOP_inp','EOP_i2ai','theta','phi','qS','qD','M0','M','pM','pMhat','PbT','PwT','PwThat','muG','sigmaG')];
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','m2c','EOP_out','EOP_inp','EOP_i2ai','theta','phi','qS','qD','M0','M','pM','pMhat','PbT','PwT','PwThat','muG','sigmaG')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
-		self.conditions = {'qS': self.g('EOP_out'), 'M': None, 'PwThat': self.g('EOP_inp')}
+		self.conditions = {'qS': self.EOP_out.write(), 'M': '', 'PwThat': self.EOP_inp.write()}
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
@@ -581,9 +580,9 @@ class EOP_emissions:
 		muG,sigmaG = self.a('muG'),self.a('sigmaG')
 		pM,pMhat,PbT,PwT = self.a('pM'), self.a('pMhat'),self.a('PbT'), self.a('PwT')
 		qS = self.a('qS')
-		text = self.e_qS(f"E_EOP_qS_{name}",conditions['qS'],z,m2c,theta,M0,pM,PbT,muG,sigmaG)+'\n\t'
-		text += self.e_M(f"E_EOP_M_{name}",conditions['M'],n,m2c,M0,qS)+'\n\t'
-		text += self.e_PwThat(f"E_EOP_PwThat_{name}",conditions['PwThat'],nn,z,phi_2,PwT,pMhat,EOP_i2ai)
+		text = self.e_qS(f"E_EOP_qS_{name}",self.conditions['qS'],z,m2c,theta,M0,pM,PbT,muG,sigmaG)+'\n\t'
+		text += self.e_M(f"E_EOP_M_{name}",self.conditions['M'],n,m2c,M0,qS)+'\n\t'
+		text += self.e_PwThat(f"E_EOP_PwThat_{name}",self.conditions['PwThat'],nn,z,phi_2,PwT,pMhat,EOP_i2ai)
 		return text
 	def e_qS(self,name,conditions,z,m2c,theta,M0,pM,PbT,muG,sigmaG):
 		RHS = f"""sum({z}$({m2c}), {M0}*{theta}*errorf(({pM}-{PbT}+{muG})/{sigmaG}))"""
@@ -592,7 +591,7 @@ class EOP_emissions:
 		RHS = f"""{M0}-sum({n}$({m2c}), {qS})"""
 		return equation(name,self.M.doms(),conditions,self.M.write(),RHS)
 	def e_PwThat(self,name,conditions,nn,z,phi,PwT,pMhat,i2ai):
-		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),RHS = f"""{PwT}+sum({z}, sum({nn}$({i2ai}) {phi}*{pMhat}))""")
+		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),RHS = f"""{PwT}+sum({z}, sum({nn}$({i2ai}), {phi}*{pMhat}))""")
 
 class ict_v1:
 	""" Installation costs """
