@@ -218,19 +218,16 @@ class abate(gmspython):
 		if self.state == "EOP":
 			db = DataBase.GPM_database()
 			qS = (((pd.Series(0, index=self.get("m2c")) + self.get("pM") - (pd.Series(0, index=DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n'))) + self.get("unit_costs_EOP")).droplevel(0).groupby("nn").min().rename_axis("n")) / self.default_var_series("sigmaG")).apply(norm.cdf)).droplevel(0)
-			scale = 1/qS
-			# qS = self.df_var(10,"qS",domain=self.get('EOP_out'))
 			mu = pd.Series(1, self.get("map_EOP_CU")).groupby("nn").apply(lambda x: x/len(x)) #Shares from C to U simply 1/N
 			qD = (qS.rename_axis(self.n('nn')) * mu).droplevel(1) #U quantities
 			qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_EOP_CU")], DataBase_wheels.map_from_mi(self.get("map_EOP_TU"), "n", "nn")).groupby(by="n").sum()) #tech quantities
-			scale = scale.append(1/qD[self.get("kno_EOP_TU")])
 			qD = qD.append((self.get("mu")[self.get("map_EOP_TX")] * qD[self.get("kno_EOP_TX")].rename_axis(self.n('nn'))).droplevel(1)) #X inputs
 			PwThat = (pd.Series(0, index=self.get("EOP_i2ai")) + (self.get("phi") * self.get("pM")).droplevel(0).rename_axis(self.n('nn')).groupby("nn").sum() + self.g("PwT").rctree_pd(self.g("ai")).rename_axis(self.n('nn'))).droplevel(1) #prices of all X
 			PwThat = PwThat.append(((pd.Series(0, index=self.get("map_EOP_TX")) + qD[self.get("bra_EOP_TX")] * PwThat[self.get("bra_EOP_TX")]).groupby("nn").sum() / qD[self.get("kno_EOP_TX")]).rename_axis(self.n('n'))) #Price of technologies
 			PwThat = PwThat.append((pd.Series(0, index=self.get("map_EOP_TU")) + PwThat[self.get("kno_EOP_TX")].rename_axis(self.n('nn'))).droplevel(1)) #Prices of technology goods
 			PbT = ((pd.Series(0, index=self.get("map_EOP_CU"), name="PbT") + qD[self.get("bra_EOP_CU")] * PwThat[self.get("bra_EOP_CU")]).groupby("nn").sum() / qS).rename_axis(self.n('n')) #Price of components
-			qS.name, scale.name, qD.name, PwThat.name, PbT.name = "qS", "scale", "qD", "PwThat", "PbT"
-			db["qS"], db["scale"], db["qD"], db["mu"], db["PwThat"], db["PbT"] = qS, scale, qD, mu, PwThat, PbT
+			qS.name, qD.name, PwThat.name, PbT.name = "qS", "qD", "PwThat", "PbT"
+			db["qS"], db["qD"], db["mu"], db["PwThat"], db["PbT"] = qS, qD, mu, PwThat, PbT
 			DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
 

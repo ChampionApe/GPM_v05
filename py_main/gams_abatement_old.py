@@ -33,7 +33,7 @@ class CES:
 		""" add gpy_symbols with writing methods. ns is a namespace to update symbol names if they are nonstandard """
 		for sym in ['map_']:
 			setattr(self,sym,db[ns_local[sym]])
-		for sym in ['PbT','PwThat','qD','qS','mu','sigma','n']:
+		for sym in ['PbT','PwThat','qD','qS','mu','sigma','n','scale']:
 			setattr(self,sym,db[df(sym,ns_global)])
 		if dynamic is True:
 			for sym in ('txE','t0','tE','tx0E'):
@@ -58,27 +58,28 @@ class CES:
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
 		qD,qD2 = self.a('qD'), self.a('qD',[(0,1)])
 		qS,qS2 = self.a('qS'), self.a('qS',[(0,1)])
-		text = self.zero_profit(f"E_zp_out_{name}",conditions['zp_out'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=True)+'\n\t'
-		text += self.zero_profit(f"E_zp_nout_{name}",conditions['zp_nout'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=False)+'\n\t'
-		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,map_,mu,PwThat,PwThat2,PbT2,qD,qD2,qS2,sigma2,output=True)+'\n\t'
-		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,map_,mu,PwThat,PwThat2,PbT2,qD,qD2,qS2,sigma2,output=False)
+		scale, scale2 = self.a("scale"), self.a("scale", [(0,1)])
+		text = self.zero_profit(f"E_zp_out_{name}",conditions['zp_out'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=True)+'\n\t'
+		text += self.zero_profit(f"E_zp_nout_{name}",conditions['zp_nout'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=False)+'\n\t'
+		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,map_,mu,PwThat,PwThat2,PbT2,qD,qD2,qS2,sigma2,scale2,output=True)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,map_,mu,PwThat,PwThat2,PbT2,qD,qD2,qS2,sigma2,scale2,output=False)
 		return text
 		
-	def demand(self,name,conditions,nn,map_,mu,PwThat,PwThat2,PbT2,qD,qD2,qS2,sigma2,output=False):
+	def demand(self,name,conditions,nn,map_,mu,PwThat,PwThat2,PbT2,qD,qD2,qS2,sigma2,scale2,output=False):
 		""" ces demand """
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PwThat2}/{PwThat})**({sigma2}) * {qD2})"""
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * ({PwThat2}/{PwThat})**({sigma2}) * {qD2})"""
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT2}/{PwThat})**({sigma2}) * {qS2})"""
-		return equation(name,self.qD.doms(),conditions,qD,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * ({PbT2}/{PwThat})**({sigma2}) * {qS2})"""
+		return equation(name,self.qD.doms(),conditions,f"sum({nn}$({map_}), {scale2}) * {qD}",RHS)
 
-	def zero_profit(self,name,conditions,nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=False):
+	def zero_profit(self,name,conditions,nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=False):
 		""" zero profits condition """
-		RHS = f"""sum({nn}$({map_2}), {qD2}*{PwThat2})"""
+		RHS = f"""{scale} * sum({nn}$({map_2}), {qD2}*{PwThat2})"""
 		if output is True:
-			return equation(name,self.PbT.doms(),conditions,f"{PbT}*{qS}",RHS)
+			return equation(name,self.PbT.doms(),conditions,f"{scale}*{PbT}*{qS}",RHS)
 		else:
-			return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
+			return equation(name,self.PwThat.doms(),conditions,f"{scale}*{PwThat}*{qD}",RHS)
 
 class CES_norm:
 	""" collection of price indices / demand systems for ces nests """
@@ -91,7 +92,7 @@ class CES_norm:
 		""" add gpy_symbols with writing methods. ns is a namespace to update symbol names if they are nonstandard """
 		for sym in ['map_']:
 			setattr(self,sym,db[ns_local[sym]])
-		for sym in ['PbT','PwThat','qD','qS','mu','sigma','n']:
+		for sym in ['PbT','PwThat','qD','qS','mu','sigma','n','scale']:
 			setattr(self,sym,db[df(sym,ns_global)])
 		if dynamic is True:
 			for sym in ('txE','t0','tE','tx0E'):
@@ -118,27 +119,28 @@ class CES_norm:
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
 		qS,qS2 = self.a('qS'),self.a('qS',[(0,1)])
-		text = self.zero_profit(f"E_zp_out_{name}",conditions['zp_out'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=True)+'\n\t'
-		text += self.zero_profit(f"E_zp_nout_{name}",conditions['zp_nout'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=False)+'\n\t'
-		text += self.demand(f"E_q_out_{name}", conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,output=True)+'\n\t'
-		text += self.demand(f"E_q_nout_{name}", conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,output=False)
+		scale,scale2 = self.a("scale"),self.a("scale",[(0,1)])
+		text = self.zero_profit(f"E_zp_out_{name}",conditions['zp_out'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=True)+'\n\t'
+		text += self.zero_profit(f"E_zp_nout_{name}",conditions['zp_nout'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=False)+'\n\t'
+		text += self.demand(f"E_q_out_{name}", conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,scale2,output=True)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}", conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,scale2,output=False)
 		return text
 
-	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,output=False):
+	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,scale2,output=False):
 		""" ces demand """
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PwThat2}/{PwThat})**({sigma2}) * {qD2} / sum({nnn}$({map_3}), {mu3} * ({PwThat2}/{PwThat3})**({sigma2})))"""
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * ({PwThat2}/{PwThat})**({sigma2}) * {qD2} / sum({nnn}$({map_3}), {mu3} * ({PwThat2}/{PwThat3})**({sigma2})))"""
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT2}/{PwThat})**({sigma2}) * {qS2} / sum({nnn}$({map_3}), {mu3} * ({PbT2}/{PwThat3})**({sigma2})))"""
-		return equation(name,self.qD.doms(),conditions,qD,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * ({PbT2}/{PwThat})**({sigma2}) * {qS2} / sum({nnn}$({map_3}), {mu3} * ({PbT2}/{PwThat3})**({sigma2})))"""
+		return equation(name,self.qD.doms(),conditions,f"sum({nn}$({map_}), {scale2}) * {qD}",RHS)
 
-	def zero_profit(self,name,conditions,nn,map_,qD,qD2,qS,PbT,PwThat,PwThat2,output=False):
+	def zero_profit(self,name,conditions,nn,map_,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=False):
 		""" zero profits condition """
-		RHS = f"""sum({nn}$({map_}), {qD2}*{PwThat2})"""
+		RHS = f"""{scale} * sum({nn}$({map_}), {qD2}*{PwThat2})"""
 		if output is True:
-			return equation(name,self.PbT.doms(),conditions,f"{PbT}*{qS}",RHS)
+			return equation(name,self.PbT.doms(),conditions,f"{scale}*{PbT}*{qS}",RHS)
 		else:
-			return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
+			return equation(name,self.PwThat.doms(),conditions,f"{scale}*{PwThat}*{qD}",RHS)
 
 class CET:
 	""" collection of equations for CET nests """
@@ -149,7 +151,7 @@ class CET:
 	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
 		for sym in ['map_']:
 			setattr(self,sym,db[ns_local[sym]])
-		for sym in ('PbT','PwThat','qD','qS','mu','eta','n'):
+		for sym in ('PbT','PwThat','qD','qS','mu','eta','n','scale'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		for sym in ['out']:
 			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
@@ -170,22 +172,23 @@ class CET:
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
 		qD,qD2 = self.a('qD'), self.a('qD',[(0,1)])
 		qS,qS2 = self.a('qS'), self.a('qS',[(0,1)])
-		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2)+'\n\t'
-		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,map_,mu,PwThat,PwThat2,PbT,qD,qD2,qS,eta2,output=True)+'\n\t'
-		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,map_,mu,PwThat,PwThat2,PbT,qD,qD2,qS,eta2,output=False)
+		scale,scale2 = self.a("scale"),self.a("scale",[(0,1)])
+		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2,scale)+'\n\t'
+		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,map_,mu,PwThat,PwThat2,PbT,qD,qD2,qS,eta2,scale2,output=True)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,map_,mu,PwThat,PwThat2,PbT,qD,qD2,qS,eta2,scale2,output=False)
 		return text
 
-	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2):
-		RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
-		return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
+	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2,scale):
+		RHS = f"""{scale}*sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
+		return equation(name,self.PwThat.doms(),conditions,f"{scale}*{PwThat}*{qD}",RHS)
 
-	def demand(self,name,conditions,nn,map_,mu,PwThat,PwThat2,PbT,qD,qD2,qS,eta2,output=False):
+	def demand(self,name,conditions,nn,map_,mu,PwThat,PwThat2,PbT,qD,qD2,qS,eta2,scale2,output=False):
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PwThat}/{PwThat2})**(-{eta2}) * {qD2})"""
-			return equation(name,self.qD.doms(),conditions,qD,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * ({PwThat}/{PwThat2})**(-{eta2}) * {qD2})"""
+			return equation(name,self.qD.doms(),conditions,f"sum({nn}$({map_}), {scale2}) * {qD}",RHS)
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT}/{PwThat2})**(-{eta2}) * {qD2})"""
-			return equation(name,self.qS.doms(),conditions,qS,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * ({PbT}/{PwThat2})**(-{eta2}) * {qD2})"""
+			return equation(name,self.qS.doms(),conditions,f"sum({nn}$({map_}), {scale2}) * {qS}",RHS)
 
 class CET_norm:
 	""" collection of price indices / demand systems for CET nests """
@@ -197,7 +200,7 @@ class CET_norm:
 	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
 		for sym in ['map_']:
 			setattr(self,sym,db[ns_local[sym]])
-		for sym in ('PbT','PwThat','qD','qS','mu','eta','n'):
+		for sym in ('PbT','PwThat','qD','qS','mu','eta','n','scale'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		for sym in ['out']:
 			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
@@ -221,22 +224,23 @@ class CET_norm:
 		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
 		qS,qS2 = self.a('qS'),self.a('qS',[(0,1)])
-		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2)+'\n\t'
-		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=True)+'\n\t'
-		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=False)
+		scale,scale2 = self.a("scale"),self.a("scale",[(0,1)])
+		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2,scale)+'\n\t'
+		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,scale2,output=True)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,scale2,output=False)
 		return text
 
-	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=False):
+	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,scale2,output=False):
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PwThat}/{PwThat2})**(-{eta2}) * {qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*({PbT3}/{PwThat2})**(-{eta2}))+sum({nnn}$({map_3} and not {out3}), {mu3}*({PwThat3}/{PwThat2})**(-{eta2}))))"""
-			return equation(name,self.qD.doms(),conditions,qD,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2}*{mu} * ({PwThat}/{PwThat2})**(-{eta2}) * {qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*({PbT3}/{PwThat2})**(-{eta2}))+sum({nnn}$({map_3} and not {out3}), {mu3}*({PwThat3}/{PwThat2})**(-{eta2}))))"""
+			return equation(name,self.qD.doms(),conditions,f"sum({nn}$({map_}), {scale2})*{qD}",RHS)
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * ({PbT}/{PwThat2})**(-{eta2}) * {qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*({PbT3}/{PwThat2})**(-{eta2}))+sum({nnn}$({map_3} and not {out3}), {mu3}*({PwThat3}/{PwThat2})**(-{eta2}))))"""
-			return equation(name,self.qS.doms(),conditions,qS,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2}*{mu} * ({PbT}/{PwThat2})**(-{eta2}) * {qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*({PbT3}/{PwThat2})**(-{eta2}))+sum({nnn}$({map_3} and not {out3}), {mu3}*({PwThat3}/{PwThat2})**(-{eta2}))))"""
+			return equation(name,self.qS.doms(),conditions,f"sum({nn}$({map_}), {scale2})*{qS}",RHS)
 
-	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2):
-		RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
-		return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
+	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2,scale):
+		RHS = f"""{scale} * (sum({nn}$({map_2} and {out2}), {qS2}*{PbT2}) + sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2}))"""
+		return equation(name,self.PwThat.doms(),conditions,f"{scale}*{PwThat}*{qD}",RHS)
 
 
 class MNL:
@@ -250,7 +254,7 @@ class MNL:
 		""" add gpy_symbols with writing methods. ns is a namespace to update symbol names if they are nonstandard """
 		for sym in ['map_']:
 			setattr(self,sym,db[ns_local[sym]])
-		for sym in ('PbT','PwThat','qD','qS','mu','sigma','n'):
+		for sym in ('PbT','PwThat','qD','qS','mu','sigma','n','scale'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 
@@ -272,27 +276,28 @@ class MNL:
 		PbT,PbT2 = self.a('PbT'),self.a('PbT',[(0,1)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
 		qS,qS2 = self.a('qS'),self.a('qS',[(0,1)])
-		text = self.zero_profit(f"E_zp_out_{name}",conditions['zp_out'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=True)+'\n\t'
-		text += self.zero_profit(f"E_zp_nout_{name}",conditions['zp_nout'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,output=False)+'\n\t'
-		text += self.demand(f"E_q_out_{name}", conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,output=True)+'\n\t'
-		text += self.demand(f"E_q_nout_{name}", conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,output=False)
+		scale, scale2 = self.a("scale"), self.a("scale", [(0,1)])
+		text = self.zero_profit(f"E_zp_out_{name}",conditions['zp_out'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=True)+'\n\t'
+		text += self.zero_profit(f"E_zp_nout_{name}",conditions['zp_nout'],nn,map_2,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=False)+'\n\t'
+		text += self.demand(f"E_q_out_{name}", conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,scale2,output=True,)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}", conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,scale2,output=False,)
 		return text
 
-	def zero_profit(self,name,conditions,nn,map_,qD,qD2,qS,PbT,PwThat,PwThat2,output=False):
+	def zero_profit(self,name,conditions,nn,map_,qD,qD2,qS,PbT,PwThat,PwThat2,scale,output=False):
 		""" zero profits condition """
-		RHS = f"""sum({nn}$({map_}), {qD2}*{PwThat2})"""
+		RHS = f"""{scale} * sum({nn}$({map_}), {qD2}*{PwThat2})"""
 		if output is True:
-			return equation(name,self.PbT.doms(),conditions,f"{PbT}*{qS}",RHS)
+			return equation(name,self.PbT.doms(),conditions,f"{scale}*{PbT}*{qS}",RHS)
 		else:
-			return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
+			return equation(name,self.PwThat.doms(),conditions,f"{scale}*{PwThat}*{qD}",RHS)
 
-	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,output=False):
+	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,sigma2,PwThat,PwThat2,PwThat3,PbT2,qD,qD2,qS2,scale2,output=False):
 		""" MNL demand """
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * exp(({PwThat2}-{PwThat})*{sigma2}) * {qD2}/ sum({nnn}$({map_3}), {mu3}*exp(({PwThat2}-{PwThat3})*{sigma2})))"""
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * exp(({PwThat2}-{PwThat})*{sigma2}) * {qD2}/ sum({nnn}$({map_3}), {mu3}*exp(({PwThat2}-{PwThat3})*{sigma2})))"""
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * exp(({PbT2}-{PwThat})*{sigma2}) * {qS2}/ sum({nnn}$({map_3}), {mu3}*exp(({PbT2}-{PwThat3})*{sigma2})))"""
-		return equation(name,self.qD.doms(),conditions,qD,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * exp(({PbT2}-{PwThat})*{sigma2}) * {qS2}/ sum({nnn}$({map_3}), {mu3}*exp(({PbT2}-{PwThat3})*{sigma2})))"""
+		return equation(name,self.qD.doms(),conditions,f"sum({nn}$({map_}), {scale2}) * {qD}",RHS)
 
 class MNL_out:
 	""" collection of price indices / demand systems for CET nests """
@@ -304,7 +309,7 @@ class MNL_out:
 	def add_symbols(self,db,ns_local,ns_global={},**kwargs):
 		for sym in ['map_']:
 			setattr(self,sym,db[ns_local[sym]])
-		for sym in ('PbT','PwThat','qD','qS','mu','eta','n'):
+		for sym in ('PbT','PwThat','qD','qS','mu','eta','n','scale'):
 			setattr(self,sym,db[df(sym,ns_global)])
 		for sym in ['out']:
 			setattr(self, self.state + "_" + sym, db[df(self.state + "_" + sym, ns_global)])
@@ -327,22 +332,23 @@ class MNL_out:
 		PbT,PbT2,PbT3 = self.a('PbT'),self.a('PbT',[(0,1)]),self.a('PbT',[(0,2)])
 		qD,qD2 = self.a('qD'),self.a('qD',[(0,1)])
 		qS,qS2 = self.a('qS'),self.a('qS',[(0,1)])
-		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2)+'\n\t'
-		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=True)+'\n\t'
-		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=False)
+		scale, scale2 = self.a("scale"), self.a("scale", [(0,1)])
+		text = self.zero_profit(f"E_zp_{name}",conditions['zp'],nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2,scale)+'\n\t'
+		text += self.demand(f"E_q_out_{name}",conditions['q_out'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,scale2,output=True)+'\n\t'
+		text += self.demand(f"E_q_nout_{name}",conditions['q_nout'],nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,scale2,output=False)
 		return text
 
-	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,output=False):
+	def demand(self,name,conditions,nn,nnn,map_,map_3,mu,mu3,out3,eta2,qD,qD2,qS,PwThat,PwThat2,PwThat3,PbT,PbT3,scal2,output=False):
 		if output is False:
-			RHS = f"""sum({nn}$({map_}), {mu} * exp(({PwThat}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}-{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
-			return equation(name,self.qD.doms(),conditions,qD,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * exp(({PwThat}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}-{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
+			return equation(name,self.qD.doms(),conditions,f"sum({nn}$({map_}), {scale2})*{qD}",RHS)
 		else:
-			RHS = f"""sum({nn}$({map_}), {mu} * exp(({PbT}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}/{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
-			return equation(name,self.qS.doms(),conditions,qS,RHS)
+			RHS = f"""sum({nn}$({map_}), {scale2} * {mu} * exp(({PbT}-{PwThat2})*(-{eta2}))*{qD2}/(sum({nnn}$({map_3} and {out3}), {mu3}*exp(({PbT3}/{PwThat2})/(-{eta2})))+sum({nnn}$({map_3} and not {out3}), {mu3}*exp(({PwThat3}-{PwThat2})*(-{eta2})))))"""
+			return equation(name,self.qS.doms(),conditions,f"sum({nn}$({map_}), {scale2})*{qS}",RHS)
 
-	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2):
-		RHS = f"""sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2})"""
-		return equation(name,self.PwThat.doms(),conditions,f"{PwThat}*{qD}",RHS)
+	def zero_profit(self,name,conditions,nn,map_2,out2,qD,qD2,qS2,PbT2,PwThat,PwThat2,scale):
+		RHS = f"""{scale}*(sum({nn}$({map_2} and {out2}), {qS2}*{PbT2})+sum({nn}$({map_2} and not {out2}), {qD2}*{PwThat2}))"""
+		return equation(name,self.PwThat.doms(),conditions,f"{scale}*{PwThat}*{qD}",RHS)
 
 
 class linear_out:
@@ -567,7 +573,7 @@ class EOP_emissions:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','m2c','EOP_out','EOP_inp','EOP_i2ai','theta','phi','qS','qD','M0','M','pM','pMhat','PbT','PwT','PwThat','muG','sigmaG','epsi')];
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','m2c','EOP_out','EOP_inp','EOP_i2ai','theta','phi','qS','qD','M0','M','pM','pMhat','PbT','PwT','PwThat','muG','sigmaG')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'qS': self.EOP_out.write(), 'M': '', 'PwThat': self.EOP_inp.write()}
@@ -579,16 +585,16 @@ class EOP_emissions:
 		M0,M,theta = self.a('M0'), self.a('M'),self.a('theta')
 		muG,sigmaG = self.a('muG'),self.a('sigmaG')
 		pM,pMhat,PbT,PwT = self.a('pM'), self.a('pMhat'),self.a('PbT'), self.a('PwT')
-		qS,epsi = self.a('qS'), self.a('epsi')
-		text = self.e_qS(f"E_EOP_qS_{name}",self.conditions['qS'],z,m2c,theta,M0,pM,PbT,muG,sigmaG,epsi)+'\n\t'
-		text += self.e_M(f"E_EOP_M_{name}",self.conditions['M'],n,m2c,M0,qS,epsi)+'\n\t'
+		qS = self.a('qS')
+		text = self.e_qS(f"E_EOP_qS_{name}",self.conditions['qS'],z,m2c,theta,M0,pM,PbT,muG,sigmaG)+'\n\t'
+		text += self.e_M(f"E_EOP_M_{name}",self.conditions['M'],n,m2c,M0,qS)+'\n\t'
 		text += self.e_PwThat(f"E_EOP_PwThat_{name}",self.conditions['PwThat'],nn,z,phi_2,PwT,pMhat,EOP_i2ai)
 		return text
-	def e_qS(self,name,conditions,z,m2c,theta,M0,pM,PbT,muG,sigmaG,epsi):
-		RHS = f"""sum({z}$({m2c}), {M0}*{theta}*errorf(({pM}-{PbT}+{muG})/{sigmaG}))+{epsi}"""
+	def e_qS(self,name,conditions,z,m2c,theta,M0,pM,PbT,muG,sigmaG):
+		RHS = f"""sum({z}$({m2c}), {M0}*{theta}*errorf(({pM}-{PbT}+{muG})/{sigmaG}))"""
 		return equation(name,self.qS.doms(),conditions,self.qS.write(),RHS)
-	def e_M(self,name,conditions,n,m2c,M0,qS,epsi):
-		RHS = f"""{M0}-sum({n}$({m2c}), {qS}-{epsi})"""
+	def e_M(self,name,conditions,n,m2c,M0,qS):
+		RHS = f"""{M0}-sum({n}$({m2c}), {qS})"""
 		return equation(name,self.M.doms(),conditions,self.M.write(),RHS)
 	def e_PwThat(self,name,conditions,nn,z,phi,PwT,pMhat,i2ai):
 		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),RHS = f"""{PwT}+sum({z}, sum({nn}$({i2ai}), {phi}*{pMhat}))""")
