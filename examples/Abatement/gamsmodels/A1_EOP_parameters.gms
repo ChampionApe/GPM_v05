@@ -18,7 +18,6 @@ parameters
 	load_phi[z,n]
 	load_pM[z]
 	load_PwT[n]
-	load_epsi
 	load_gamma_tau[n,nn]
 	load_theta[z,n]
 	load_muG[n]
@@ -48,7 +47,6 @@ $load load_eta
 $load load_phi
 $load load_pM
 $load load_PwT
-$load load_epsi
 $load load_gamma_tau
 $load load_theta
 $load load_muG

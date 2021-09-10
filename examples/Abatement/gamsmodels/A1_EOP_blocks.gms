@@ -79,8 +79,8 @@ $BLOCK M_A1_EOP_EOP_agg
 	E_pMhat_EOP_A1_EOP[z]..	pMhat[z] =E= pM[z];
 $ENDBLOCK
 $BLOCK M_A1_EOP_EOP_Em 
-	E_EOP_qS_A1_EOP[n]$(EOP_out[n])..	qS[n] =E= sum(z$(m2c[z,n]), M0[z]*theta[z,n]*errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n]))+epsi;
-	E_EOP_M_A1_EOP[z]..	M[z] =E= M0[z]-sum(n$(m2c[z,n]), qS[n]-epsi);
+	E_EOP_qS_A1_EOP[n]$(EOP_out[n])..	qS[n] =E= sum(z$(m2c[z,n]), M0[z]*theta[z,n]*errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n]));
+	E_EOP_M_A1_EOP[z]..	M[z] =E= M0[z]-sum(n$(m2c[z,n]), qS[n]);
 	E_EOP_PwThat_A1_EOP[n]$(EOP_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(EOP_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
 $ENDBLOCK
 $BLOCK M_A1_EOP_EOP_calib_aux 

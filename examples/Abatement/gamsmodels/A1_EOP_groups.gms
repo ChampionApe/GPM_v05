@@ -35,7 +35,6 @@ phi[z,n]$(ai[n]) ""
 pM[z] ""
 PwT[n]$(ID_inp[n]) ""
 qS[n]$(ID_out[n]) ""
-epsi ""
 ;
 
 $GROUP A1_EOP_g_ID_endoincalib
@@ -73,13 +72,13 @@ sigmaGbar[n]$(kno_EOP_CU[n]) ""
 ;
 
 @load_level(A1_EOP_g_ID_alwaysendo,%qmark%%ID_0%");
-@load_level(A1_EOP_g_ID_exoincalib,%qmark%%ID_0%");
 @load_level(A1_EOP_g_EOP_alwaysendo,%qmark%%ID_0%");
-@load_level(A1_EOP_g_EOP_exoincalib,%qmark%%ID_0%");
+@load_level(A1_EOP_g_ID_endoincalib,%qmark%%ID_0%");
+@load_level(A1_EOP_g_EOP_endoincalib,%qmark%%ID_0%");
+@load_level(A1_EOP_g_minobj_alwaysendo,%qmark%%ID_0%");
+@load_fixed(A1_EOP_g_ID_exoincalib,%qmark%%ID_0%");
+@load_fixed(A1_EOP_g_EOP_exoincalib,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_ID_alwaysexo,%qmark%%ID_0%");
-@load_fixed(A1_EOP_g_ID_endoincalib,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_EOP_alwaysexo,%qmark%%ID_0%");
-@load_fixed(A1_EOP_g_EOP_endoincalib,%qmark%%ID_0%");
-@load_fixed(A1_EOP_g_minobj_alwaysendo,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_minobj_ID_alwaysexo,%qmark%%ID_0%");
 @load_fixed(A1_EOP_g_minobj_EOP_alwaysexo,%qmark%%ID_0%");
