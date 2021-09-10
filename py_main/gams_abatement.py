@@ -573,7 +573,7 @@ class EOP_emissions:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','m2c','EOP_out','EOP_inp','EOP_i2ai','theta','phi','qS','qD','M0','M','pM','pMhat','PbT','PwT','PwThat','muG','sigmaG')];
+		[setattr(self,sym,db[rK_if_KE(ns,sym)]) for sym in ('n','z','m2c','EOP_out','EOP_inp','EOP_i2ai','theta','phi','qS','qD','M0','M','pM','pMhat','PbT','PwT','PwThat','muG','sigmaG','epsi')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'qS': self.EOP_out.write(), 'M': '', 'PwThat': self.EOP_inp.write()}
@@ -585,16 +585,16 @@ class EOP_emissions:
 		M0,M,theta = self.a('M0'), self.a('M'),self.a('theta')
 		muG,sigmaG = self.a('muG'),self.a('sigmaG')
 		pM,pMhat,PbT,PwT = self.a('pM'), self.a('pMhat'),self.a('PbT'), self.a('PwT')
-		qS = self.a('qS')
-		text = self.e_qS(f"E_EOP_qS_{name}",self.conditions['qS'],z,m2c,theta,M0,pM,PbT,muG,sigmaG)+'\n\t'
-		text += self.e_M(f"E_EOP_M_{name}",self.conditions['M'],n,m2c,M0,qS)+'\n\t'
+		qS,epsi = self.a('qS'), self.a('epsi')
+		text = self.e_qS(f"E_EOP_qS_{name}",self.conditions['qS'],z,m2c,theta,M0,pM,PbT,muG,sigmaG,epsi)+'\n\t'
+		text += self.e_M(f"E_EOP_M_{name}",self.conditions['M'],n,m2c,M0,qS,epsi)+'\n\t'
 		text += self.e_PwThat(f"E_EOP_PwThat_{name}",self.conditions['PwThat'],nn,z,phi_2,PwT,pMhat,EOP_i2ai)
 		return text
-	def e_qS(self,name,conditions,z,m2c,theta,M0,pM,PbT,muG,sigmaG):
-		RHS = f"""sum({z}$({m2c}), {M0}*{theta}*errorf(({pM}-{PbT}+{muG})/{sigmaG}))"""
+	def e_qS(self,name,conditions,z,m2c,theta,M0,pM,PbT,muG,sigmaG,epsi):
+		RHS = f"""sum({z}$({m2c}), {M0}*{theta}*errorf(({pM}-{PbT}+{muG})/{sigmaG}))+{epsi}"""
 		return equation(name,self.qS.doms(),conditions,self.qS.write(),RHS)
-	def e_M(self,name,conditions,n,m2c,M0,qS):
-		RHS = f"""{M0}-sum({n}$({m2c}), {qS})"""
+	def e_M(self,name,conditions,n,m2c,M0,qS,epsi):
+		RHS = f"""{M0}-sum({n}$({m2c}), {qS}-{epsi})"""
 		return equation(name,self.M.doms(),conditions,self.M.write(),RHS)
 	def e_PwThat(self,name,conditions,nn,z,phi,PwT,pMhat,i2ai):
 		return equation(name,self.PwThat.doms(),conditions,self.PwThat.write(),RHS = f"""{PwT}+sum({z}, sum({nn}$({i2ai}), {phi}*{pMhat}))""")

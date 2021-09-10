@@ -63,6 +63,8 @@ def run_text(g_exo=None,g_endo=None,name=None,blocks=None,solvestat=False,solve=
 	out += add_or_replace_code(fix(g_exo),'g_exo',**kwargs)
 	out += add_or_replace_code(unfix(g_endo),'g_endo',**kwargs)
 	out += add_or_replace_code(model_blocks(name,blocks),'blocks',**kwargs)
+	if name is not None:
+		out += f"""{name}.optfile=1;"""+'\n'
 	if solvestat is True:
 		out += add_solvestat(name)
 	out += add_or_replace_code(default_solve(name,solve),'solve',**kwargs)
@@ -120,32 +122,35 @@ $FUNCTION load_fixed({group}, {gdx}):
 $ENDFUNCTION
 """
 
-def default_opt(ws,name="options.opt"):
+def default_opt(ws,string=None,name="options.opt"):
 	opt = ws.add_options()
 	opt.all_model_types = "CONOPT4" # use solver
 	file = open(os.path.join(ws.working_directory, name), "w") # open options file and write:
-	file.write("\
-		# Tell the solver that the system is square \n\
-		# lssqrs = t \n\
-		\n\
-		# Keep searching for a solution even if a bound is hit (due to non linearities) \n\
-		lmmxsf = 1 \n\
-		\n\
-		# Time limit in seconds \n\
-		rvtime = 1000000 \n\
-		reslim = 1000000 \n\
-		\n\
-		# Limit for slow progress, Range: [12,MAXINT], Default: 12 \n\
-		# lfnicr = 100 \n\
-		\n\
-		# Optimality tolerance for reduced gradient \n\
-		#  RTREDG = 1.e-9 \n\
-		\n\
-		# Absolute pivot tolerance, Range: [2.2e-16, 1.e-7], Default: 1.e-10 \n\
-		# rtpiva = 2.22044605e-16 \n\
-		Threads = 4 \n\
-		THREADF=4 \n\
-		")
+	if string is None:
+		file.write("\
+			# Tell the solver that the system is square \n\
+			# lssqrs = t \n\
+			\n\
+			# Keep searching for a solution even if a bound is hit (due to non linearities) \n\
+			lmmxsf = 1 \n\
+			\n\
+			# Time limit in seconds \n\
+			rvtime = 1000000 \n\
+			reslim = 1000000 \n\
+			\n\
+			# Limit for slow progress, Range: [12,MAXINT], Default: 12 \n\
+			# lfnicr = 100 \n\
+			\n\
+			# Optimality tolerance for reduced gradient \n\
+			#  RTREDG = 1.e-9 \n\
+			\n\
+			# Absolute pivot tolerance, Range: [2.2e-16, 1.e-7], Default: 1.e-10 \n\
+			# rtpiva = 2.22044605e-16 \n\
+			Threads = 4 \n\
+			THREADF=4 \n\
+			")
+	else: 
+		file.write(string)
 	file.close()
 	opt.file = 1
 	return opt
