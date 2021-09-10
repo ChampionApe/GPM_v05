@@ -217,7 +217,8 @@ class abate(gmspython):
 		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 		if self.state == "EOP":
 			db = DataBase.GPM_database()
-			qS = (((pd.Series(0, index=self.get("m2c")) + self.get("pM") - (pd.Series(0, index=DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n'))) + self.get("unit_costs_EOP")).droplevel(0).groupby("nn").min().rename_axis("n")) / self.default_var_series("sigmaG")).apply(norm.cdf)).droplevel(0)
+			qS = self.df_var(10,"qS",domain=self.get('EOP_out'))
+			#qS = (((pd.Series(0, index=self.get("m2c")) + self.get("pM") - (pd.Series(0, index=DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n'))) + self.get("unit_costs_EOP")).droplevel(0).groupby("nn").min().rename_axis("n")) / self.default_var_series("sigmaG")).apply(norm.cdf)).droplevel(0)
 			mu = pd.Series(1, self.get("map_EOP_CU")).groupby("nn").apply(lambda x: x/len(x)) #Shares from C to U simply 1/N
 			qD = (qS.rename_axis(self.n('nn')) * mu).droplevel(1) #U quantities
 			qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_EOP_CU")], DataBase_wheels.map_from_mi(self.get("map_EOP_TU"), "n", "nn")).groupby(by="n").sum()) #tech quantities

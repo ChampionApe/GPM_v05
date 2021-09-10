@@ -35,7 +35,7 @@ phi[z,n]$(ai[n]) ""
 pM[z] ""
 PwT[n]$(ID_inp[n]) ""
 qS[n]$(ID_out[n]) ""
-scale[n]$(ID_kno_inp[n]) ""
+epsi ""
 ;
 
 $GROUP A1_g_ID_endoincalib
@@ -49,7 +49,6 @@ mu[n,nn]$(EOP_map_all[n,nn]) ""
 eta[n]$(EOP_kno_out[n]) ""
 theta[z,n]$(m2c[z,n]) ""
 PwT[n]$(EOP_inp[n]) ""
-scale[n]$(EOP_kno_inp[n]) ""
 ;
 
 $GROUP A1_g_EOP_endoincalib
