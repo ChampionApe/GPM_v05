@@ -472,7 +472,7 @@ class aggregates:
 		return equation(name,self.pMhat.doms(), conditions, self.pMhat.write(),self.pM.write())
 	def e_pMhat_EOP(self,name,conditions,n,m2c,pM,theta,PbT,muG,sigmaG):
 		RHS = f"""{pM}+sum({n}$({m2c}), {theta}*(errorf(({pM}-{PbT}+{muG})/{sigmaG})*({PbT}-{pM}-{muG})-{sigmaG}*@std_pdf(({pM}-{PbT}+{muG})/{sigmaG})))"""
-		return equation(name,self.pMhat.doms(),conditions,self.pMhat.write(),self.pM.write())
+		return equation(name,self.pMhat.doms(),conditions,self.pMhat.write(),RHS)
 
 class currentapplications:
 	def __init__(self):

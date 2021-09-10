@@ -14,6 +14,7 @@ class abate(gmspython):
 			if use_EOP:
 				self.setstate('EOP',init=False)
 				self.init_state_from_tree(nts['EOP'],tech,'EOP',kwargs_ns)
+		self.add_functions()
 
 	# ------------------ 1: Initialization  ------------------ #
 	def init_state_from_tree(self,nt,tech,state,kwargs_ns):
@@ -43,6 +44,9 @@ class abate(gmspython):
 	def namespace_global_variables(self,kwargs):
 		"""create global namespace for variables used in partial equilibrium model. kwargs modify the names."""
 		return {varname: df(varname,kwargs) for varname in self.default_variables}
+
+	def add_functions(self):
+		self.model.functions = {"std_pdf":"$FUNCTION std_pdf({x}): ((1/(sqrt(2*Pi)))*exp(-(Sqr({x}))/2)) $ENDFUNCTION"}
 
 	@property
 	def default_variables(self):
