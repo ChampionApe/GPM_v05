@@ -73,9 +73,10 @@ class gams_model:
 			self.add_job(options_add)
 		self.run_job(options_run)
 		self.out_db = DataBase.GPM_database(workspace=self.settings.ws,db=self.job.out_db,**kwargs_db)
-		if self.settings.solvestat is True:
-			self.modelstat = self.out_db.get(self.settings.name+'_'+self.settings.state+'_modelstat')
-			self.solvestat = self.out_db.get(self.settings.name+'_'+self.settings.state+'_solvestat')
+
+	@property
+	def get_solvestat(self):
+		return {k: self.out_db.get(self.settings.get_conf('name')+'_'+k) for k in ('modelstat','solvestat')}
 
 	def model_instance(self,add_default_placeholders=True,overwrite=False,**kwargs):
 		if add_default_placeholders is True:
@@ -130,7 +131,7 @@ class gams_model:
 		shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**{**kwargs_shock,**kwargs_shock2})
 		self.execute_shock_from_cp(shock,cp_init,options_run=options_run,kwargs_db=kwargs_db)
 		if self.settings.solvestat is True:
-			return {'Modelstat': self.modelstat, 'Solvestat': self.solvestat}
+			return self.get_solvestat
 
 	def std_UEVAS_from_db(self,shock_db,loop_name='l1',update_vars='all',shock_name='shock',store_sol={},model_name=None,solvetext=None,**kwargs):
 		"""

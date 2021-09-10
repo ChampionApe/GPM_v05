@@ -45,7 +45,7 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau']
+		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau','epsi']
 		if 'calibrate' in self.state:
 			syms += self.id_calibrate_vars
 		if 'EOP' in self.state:
@@ -171,6 +171,8 @@ class abate(gmspython):
 			return self.df_var(0.5,var,domain=self.get('m2t'))
 		elif var == 'theta':
 			return self.df_var(0.1,var,domain=self.get('m2c'))
+		elif var == 'epsi':
+			return self.df_var(1e-6,var,scalar=True)
 
 	def initialize_variables(self,**kwargs):
 		try:
@@ -240,7 +242,7 @@ class abate(gmspython):
 	def group_conditions(self,group):
 		if group == 'g_ID_alwaysexo':
 			return [{'sigma': self.g('ID_kno_inp'), 'mu': self.g('ID_mu_exo'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'),
-			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out')}]
+			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'),'epsi': None}]
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
 					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'os': self.g('ID_e2t'),
