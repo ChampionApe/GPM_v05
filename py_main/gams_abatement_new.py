@@ -255,8 +255,8 @@ class MNL:
 		share,share_2,epsi = self.a('share'),self.a('share',[(0,1),(1,0)]),self.a('epsi')
 		text = self.e_share(f"E_sout_{name}",self.conditions['s_out'],nnn,map_3,mu,mu_3,PwThat,PwThat2,PwThat3,PbT2,sigma2,output=True)+'\n\t'
 		text += self.e_share(f"E_snout_{name}",self.conditions['s_nout'],nnn,map_3,mu,mu_3,PwThat,PwThat2,PwThat3,PbT2,sigma2,output=False)+'\n\t'
-		text += self.e_price(f"E_pout_{name}",self.conditions['p_out'],nn,map_2,mu_2,share_2,PwThat2,output=True)+'\n\t'
-		text += self.e_price(f"E_pnout_{name}",self.conditions['p_nout'],nn,map_2,mu_2,share_2,PwThat2,output=False)+'\n\t'
+		text += self.e_price(f"E_pout_{name}",self.conditions['p_out'],nn,map_2,share_2,PwThat2,output=True)+'\n\t'
+		text += self.e_price(f"E_pnout_{name}",self.conditions['p_nout'],nn,map_2,share_2,PwThat2,output=False)+'\n\t'
 		text += self.e_quant(f"E_qout_{name}", self.conditions['q_out'],nn,map_,share,qS2,qD2,epsi,output=True)+'\n\t'
 		text += self.e_quant(f"E_qnout_{name}",self.conditions['q_nout'],nn,map_,share,qS2,qD2,epsi,output=False)
 		return text
@@ -268,8 +268,8 @@ class MNL:
 			RHS = f"{mu} * exp(({PbT2}-{PwThat})*{sigma2})/sum({nnn}$({map_3}), {mu3} * exp(({PbT2}-{PwThat3})*{sigma2}))"
 		return equation(name,self.share.doms(),conditions,self.share.write(),RHS)
 
-	def e_price(self,name,conditions,nn,map_2,mu_2,share_2,PwThat2,output=True):
-		RHS = f"""sum({nn}$({map_2}), {mu_2}*{share_2}*{PwThat2})"""
+	def e_price(self,name,conditions,nn,map_2,share_2,PwThat2,output=True):
+		RHS = f"""sum({nn}$({map_2}), {share_2}*{PwThat2})"""
 		if output is True:
 			return equation(name,self.PbT.doms(),conditions,self.PbT.write(),RHS)
 		else:
