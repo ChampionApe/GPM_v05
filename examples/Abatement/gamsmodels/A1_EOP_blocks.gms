@@ -76,7 +76,7 @@ $BLOCK M_EOP_TX
 $ENDBLOCK
 $BLOCK M_A1_EOP_EOP_agg 
 	E_aggqD_EOP_A1_EOP[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n] or EOP_i2ai[nn,n]), qD[nn]);
-	E_pMhat_EOP_A1_EOP[z]..	pMhat[z] =E= pM[z];
+	E_pMhat_EOP_A1_EOP[z]..	pMhat[z] =E= pM[z]+sum(n$(m2c[z,n]), theta[z,n]*(errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n])*(PbT[n]-pM[z]-muG[n])-sigmaG[n]*@std_pdf((pM[z]-PbT[n]+muG[n])/sigmaG[n])));
 $ENDBLOCK
 $BLOCK M_A1_EOP_EOP_Em 
 	E_EOP_qS_A1_EOP[n]$(EOP_out[n])..	qS[n] =E= sum(z$(m2c[z,n]), M0[z]*theta[z,n]*errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n]))+epsi;
@@ -85,4 +85,10 @@ $BLOCK M_A1_EOP_EOP_Em
 $ENDBLOCK
 $BLOCK M_A1_EOP_EOP_calib_aux 
 	E_currapp_EOP_A1_EOP[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
+$ENDBLOCK
+$BLOCK M_A1_EOP_ID_minobj 
+	E_minobj_ID_A1_EOP..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
+$ENDBLOCK
+$BLOCK M_A1_EOP_EOP_minobj 
+	E_minobj_EOP_A1_EOP..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]))+w_EOP*sum(n$(kno_EOP_CU[n]), Sqr(muG[n]-muGbar[n])+w_mu_EOP*Sqr(sigmaG[n]-sigmaGbar[n]));
 $ENDBLOCK

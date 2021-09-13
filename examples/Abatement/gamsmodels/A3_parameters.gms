@@ -6,6 +6,7 @@ parameters
 	load_os[n,nn]
 	load_M0[z]
 	load_s_uc[n,nn]
+	load_share[n,nn]
 	load_qsumX[n,nn]
 	load_currapp[n,nn]
 	load_currapp_mod[n,nn]
@@ -23,8 +24,8 @@ parameters
 	load_theta[z,n]
 	load_muG[n]
 	load_sigmaG[n]
-	A1_EOP_EOP_modelstat
-	A1_EOP_EOP_solvestat
+	A3_EOP_modelstat
+	A3_EOP_solvestat
 ;
 
 $GDXIN %ID_0%
@@ -36,6 +37,7 @@ $load load_qD
 $load load_os
 $load load_M0
 $load load_s_uc
+$load load_share
 $load load_qsumX
 $load load_currapp
 $load load_currapp_mod
@@ -53,6 +55,6 @@ $load load_gamma_tau
 $load load_theta
 $load load_muG
 $load load_sigmaG
-$load A1_EOP_EOP_modelstat
-$load A1_EOP_EOP_solvestat
+$load A3_EOP_modelstat
+$load A3_EOP_solvestat
 $offMulti

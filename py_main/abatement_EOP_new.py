@@ -1,8 +1,7 @@
 from gmspython import *
-import gams_abatement,global_settings
+import gams_abatement_new as gams_abatement,global_settings
 from DB2Gams import OrdSet as OS
 import excel2py
-from scipy.stats import norm
 
 class abate(gmspython):
 	def __init__(self,nts={},tech=None,pickle_path=None,work_folder=None,kwargs_ns={},use_EOP=False,**kwargs_gs):
@@ -15,7 +14,6 @@ class abate(gmspython):
 			if use_EOP:
 				self.setstate('EOP',init=False)
 				self.init_state_from_tree(nts['EOP'],tech,'EOP',kwargs_ns)
-		self.add_functions()
 
 	# ------------------ 1: Initialization  ------------------ #
 	def init_state_from_tree(self,nt,tech,state,kwargs_ns):
@@ -49,12 +47,9 @@ class abate(gmspython):
 		"""create global namespace for variables used in partial equilibrium model. kwargs modify the names."""
 		return {varname: df(varname,kwargs) for varname in self.default_variables}
 
-	def add_functions(self):
-		self.model.functions = {"std_pdf":"$FUNCTION std_pdf({x}): ((1/(sqrt(2*Pi)))*exp(-(Sqr({x}))/2)) $ENDFUNCTION"}
-
 	@property
 	def default_variables(self):
-		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau','epsi']
+		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau','share','epsi']
 		if 'calibrate' in self.state:
 			syms += self.id_calibrate_vars
 		if 'EOP' in self.state:
@@ -72,12 +67,19 @@ class abate(gmspython):
 	def eop_calibrate_vars(self):
 		return ['w_mu_EOP','muGbar','sigmaGbar','w_EOP','theta']
 
+	def u2t_unique(self,state):
+		map_ = empty_index(self.get(state+'_map_all'))
+		for n,tree in self.ns_local.items():
+			if (tree['type_io'] == 'output') & (n.startswith(state)):
+				map_ = map_.append(pd.MultiIndex.from_tuples([(self.get('map_',tree=n)[self.get('map_',tree=n).get_level_values('nn')==kno][0]) for kno in self.get('knots',tree=n)]))
+		return map_
+
 	def add_sets(self,tech,state,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		if state=='ID':
-			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
+			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai','q_unique']]})
 			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo','map_gamma']]})
-			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split_ID'], tech['PwT'], tech["ID"]["current_applications_ID"], tech["ID"]["coverage_potentials_ID"], tech["ID"]["unit_costs_ID"]]]; 
+			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split_ID'], tech['PwT'], tech["ID"]["current_applications_ID"], tech["ID"]["coverage_potentials_ID"]]]; 
 			# level sets:
 			self.model.database[self.n('ID_t_all')] = self.get('kno_ID_TX').union(self.get('kno_ID_BX'))
 			self.model.database[self.n('ID_i2ai')] = tech['ID']['Q2P']
@@ -100,15 +102,17 @@ class abate(gmspython):
 			u2t_BaseC = self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(self.get('map_gamma').droplevel(0).droplevel(0).set_names([self.n('n'),self.n('nn')]))})
 			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n('ID_q_unique')] = self.u2t_unique(state='ID').levels[0]
 		elif state == 'EOP':
-			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta']})
-			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"], tech["EOP"]["unit_costs_EOP"]]];
+			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta','EOP_u2t_unique']})
+			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"]]];
 			self.model.database[self.n('m2c')] = pd.MultiIndex.from_tuples([(k,j) for k,v in tech['EOP']['upper_categories'].items() for j in v], names = [self.n('z'),self.n('n')])
 			self.model.database[self.n('EOP_i2ai')] = tech['EOP']['Q2P']
 			u2m = DataBase_wheels.appmap(self.get('map_EOP_CU'), DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn'))
 			self.model.database[self.n('m2t')] = DataBase_wheels.appmap(u2m,DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n')).unique().swaplevel(0,1).set_names([self.n('z'),self.n('n')])
 			self.model.database[self.n('m2u')] = DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn')).swaplevel(0,1).set_names([self.n('z'),self.n('n')])
 			self.model.database[self.n('theta')] = tech['EOP']['coverage_potentials_EOP'].swaplevel(0,1).rename(self.n('theta'))
+			self.model.database[self.n('EOP_q_unique')] = self.u2t_unique(state='EOP').levels[0]
 
 	def df_var(self,val,var,domain=None,scalar=False):
 		return pd.Series(val, index = domain, name = self.n(var)) if not scalar else DataBase.gpy_symbol(val,**{'name': self.n(var)})
@@ -182,6 +186,8 @@ class abate(gmspython):
 			return self.df_var(0.1,var,domain=self.get('m2c'))
 		elif var == 'epsi':
 			return self.df_var(1e-6,var,scalar=True)
+		elif var == 'share':
+			return self.df_var(1,var,domain=self.get('ID_map_all')) if 'ID' in self.state else self.df_var(1,var,domain=self.get('ID_map_all').union(self.get('EOP_map_all')))
 
 	def initialize_variables(self,**kwargs):
 		try:
@@ -196,7 +202,7 @@ class abate(gmspython):
 				if self.n(var) not in self.model.database.symbols:
 					self.model.database[self.n(var)] = self.default_var_series(var)
 		if 'calibrate' in self.state:
-			self.model.settings.set_conf('solve',self.add_solve + "\n") # Remove if statement for debugging state
+			self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
 
 	def initialize_variables_leontief(self):
 		db = DataBase.GPM_database()
@@ -226,7 +232,6 @@ class abate(gmspython):
 		if self.state == "EOP":
 			db = DataBase.GPM_database()
 			qS = self.df_var(10,"qS",domain=self.get('EOP_out'))
-			#qS = (((pd.Series(0, index=self.get("m2c")) + self.get("pM") - (pd.Series(0, index=DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n'))) + self.get("unit_costs_EOP")).droplevel(0).groupby("nn").min().rename_axis("n")) / self.default_var_series("sigmaG")).apply(norm.cdf)).droplevel(0)
 			mu = pd.Series(1, self.get("map_EOP_CU")).groupby("nn").apply(lambda x: x/len(x)) #Shares from C to U simply 1/N
 			qD = (qS.rename_axis(self.n('nn')) * mu).droplevel(1) #U quantities
 			qD = qD.append(DataBase_wheels.appmap_s(qD[self.get("bra_EOP_CU")], DataBase_wheels.map_from_mi(self.get("map_EOP_TU"), "n", "nn")).groupby(by="n").sum()) #tech quantities
@@ -235,7 +240,8 @@ class abate(gmspython):
 			PwThat = PwThat.append(((pd.Series(0, index=self.get("map_EOP_TX")) + qD[self.get("bra_EOP_TX")] * PwThat[self.get("bra_EOP_TX")]).groupby("nn").sum() / qD[self.get("kno_EOP_TX")]).rename_axis(self.n('n'))) #Price of technologies
 			PwThat = PwThat.append((pd.Series(0, index=self.get("map_EOP_TU")) + PwThat[self.get("kno_EOP_TX")].rename_axis(self.n('nn'))).droplevel(1)) #Prices of technology goods
 			PbT = ((pd.Series(0, index=self.get("map_EOP_CU"), name="PbT") + qD[self.get("bra_EOP_CU")] * PwThat[self.get("bra_EOP_CU")]).groupby("nn").sum() / qS).rename_axis(self.n('n')) #Price of components
-			db[self.n('qS')], db[self.n('qD')], db[self.n('mu')], db[self.n('PwThat')], db[self.n('PbT')] = qS, qD, mu, PwThat, PbT
+			qD.name, PwThat.name, PbT.name = "qD", "PwThat", "PbT"
+			db["qS"], db["qD"], db["mu"], db["PwThat"], db["PbT"] = qS, qD, mu, PwThat, PbT
 			DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
 	def add_calib_data(self, inputIO):
@@ -250,11 +256,11 @@ class abate(gmspython):
 	def group_conditions(self,group):
 		if group == 'g_ID_alwaysexo':
 			return [{'sigma': self.g('ID_kno_inp'), 'mu': self.g('ID_mu_exo'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'),
-			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'), 'epsi': None}]
+			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'),'epsi': None}]
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
 					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'os': self.g('ID_e2t'),
-					 'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
+					 'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}, 'share': self.g('ID_map_all')}]
 		elif group == 'g_ID_endoincalib':
 			return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_ID_exoincalib':
@@ -265,7 +271,7 @@ class abate(gmspython):
 			return [{'sigma': self.g('EOP_kno_inp'), 'mu': self.g('EOP_map_all'), 'eta': self.g('EOP_kno_out'), 'theta': self.g('m2c'),'PwT': self.g('EOP_inp')}]
 		elif group == 'g_EOP_alwaysendo':
 			return [{'PwThat': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'PbT': self.g('EOP_out'), 
-					 'qD': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'qS': self.g('EOP_out'), 'M': None}]
+					 'qD': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'qS': self.g('EOP_out'), 'M': None, 'share': self.g('EOP_map_all')}]
 		elif group == 'g_EOP_endoincalib':
 			return [{'muG': self.g('kno_EOP_CU'), 'sigmaG': self.g('kno_EOP_CU')}]
 		elif group == 'g_EOP_exoincalib':
@@ -400,7 +406,7 @@ class abate(gmspython):
 			treestate = "ID"
 		elif "EOP" in tree_name:
 			treestate = "EOP"
-		gams_class = getattr(gams_abatement,tree['type_f'])(version=tree['version'], state=treestate)
+		gams_class = getattr(gams_abatement,tree['type_f'])(state=treestate)
 		gams_class.add_symbols(self.model.database,tree,ns_global=self.ns)
 		gams_class.add_conditions(self.model.database,tree)
 		return gams_class.run(tree_name)
