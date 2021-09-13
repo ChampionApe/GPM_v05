@@ -201,7 +201,7 @@ class abate(gmspython):
 			for var in self.default_variables:
 				if self.n(var) not in self.model.database.symbols:
 					self.model.database[self.n(var)] = self.default_var_series(var)
-		#if 'calibrate' in self.state:
+		# if 'calibrate' in self.state:
 		self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
 
 	def initialize_variables_leontief(self):
