@@ -72,6 +72,9 @@ $BLOCK M_A3_ID_calib_aux
 	);
 	E_currapp_mod_A3[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n]);
 $ENDBLOCK
+$BLOCK M_testminobj 
+	E_testminobject..	testminobj =E= 0;
+$ENDBLOCK
 $BLOCK M_EOP_CU 
 	E_sout_EOP_CU[n,nn]$(map_EOP_CU[n,nn] and bra_o_EOP_CU[n])..	share[n,nn] =E= mu[n,nn] * exp((PbT[nn]-PwThat[n])*sigma[nn])/sum(nnn$(map_EOP_CU[nnn,nn]), mu[nnn,nn] * exp((PbT[nn]-PwThat[nnn])*sigma[nn]));
 	E_snout_EOP_CU[n,nn]$(map_EOP_CU[n,nn] and bra_no_EOP_CU[n])..	share[n,nn] =E= mu[n,nn] * exp((PwThat[nn]-PwThat[n])*sigma[nn])/sum(nnn$(map_EOP_CU[nnn,nn]), mu[nnn,nn] * exp((PwThat[nn]-PwThat[nnn])*sigma[nn]));

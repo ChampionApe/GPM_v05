@@ -16,6 +16,10 @@ currapp[n,nn]$((ID_e2t[n,nn] and kno_ID_TU[nn])) ""
 currapp_mod[n,nn]$((ID_e2t[n,nn] and kno_ID_TU[nn])) ""
 ;
 
+$GROUP A3_g_debug
+testminobj ""
+;
+
 $GROUP A3_g_EOP_alwaysendo
 PwThat[n]$((EOP_int[n] or EOP_inp[n])) ""
 PbT[n]$(EOP_out[n]) ""
@@ -60,6 +64,7 @@ sigmaG[n]$(kno_EOP_CU[n]) ""
 
 @load_level(A3_g_ID_alwaysendo,%qmark%%ID_0%");
 @load_level(A3_g_ID_exoincalib,%qmark%%ID_0%");
+@load_level(A3_g_debug,%qmark%%ID_0%");
 @load_level(A3_g_EOP_alwaysendo,%qmark%%ID_0%");
 @load_level(A3_g_EOP_exoincalib,%qmark%%ID_0%");
 @load_fixed(A3_g_ID_alwaysexo,%qmark%%ID_0%");
