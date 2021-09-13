@@ -37,25 +37,25 @@ $BLOCK M_ID_Y
 	E_q_out_ID_Y[n]$(bra_o_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
 	E_q_nout_ID_Y[n]$(bra_no_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
-$BLOCK M_A1_EOP_ID_sum 
-	E_ID_os_A1_EOP[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
-	E_ID_qsumX_A1_EOP[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E=  sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn]), qD[nnn]*os[n,nnnn]);
+$BLOCK M_main_model_ID_sum 
+	E_ID_os_main_model[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
+	E_ID_qsumX_main_model[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E=  sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn]), qD[nnn]*os[n,nnnn]);
 $ENDBLOCK
-$BLOCK M_A1_EOP_ID_Em 
-	E_M0_A1_EOP[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
-	E_ID_PwThat_A1_EOP[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
+$BLOCK M_main_model_ID_Em 
+	E_M0_main_model[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
+	E_ID_PwThat_main_model[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
 $ENDBLOCK
-$BLOCK M_A1_EOP_ID_agg 
-	E_aggqD_ID_A1_EOP[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n]), qD[nn]);
-	E_pMhat_ID_A1_EOP[z]..	pMhat[z] =E= pM[z];
+$BLOCK M_main_model_ID_agg 
+	E_aggqD_ID_main_model[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n]), qD[nn]);
+	E_pMhat_ID_main_model[z]..	pMhat[z] =E= pM[z];
 $ENDBLOCK
-$BLOCK M_A1_EOP_ID_calib_aux 
-	E_currapp_ID_A1_EOP[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp[n,nn] =E= sum(nnn$(ID_u2t[nnn,nn] and ID_e2u[n,nnn]), qD[nnn])/qD[n];
-	E_share_uc_A1_EOP[n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n])..	s_uc[n,nn] =E= mu[n,nn]*exp((PwThat[nn]-PwThat[n])*sigma[nn])/(
+$BLOCK M_main_model_ID_calib_aux 
+	E_currapp_ID_main_model[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp[n,nn] =E= sum(nnn$(ID_u2t[nnn,nn] and ID_e2u[n,nnn]), qD[nnn])/qD[n];
+	E_share_uc_main_model[n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n])..	s_uc[n,nn] =E= mu[n,nn]*exp((PwThat[nn]-PwThat[n])*sigma[nn])/(
 	sum(nnn$(map_ID_CU[nnn,nn] and bra_ID_TU[nnn]), mu[nnn,nn]*exp((PwThat[nn]-PwThat[nnn])*sigma[nn]))+
 	sum(nnn$(map_ID_CU[nnn,nn] and bra_ID_BU[nnn]), mu[nnn,nn]*exp(sigma[nn]*(PwThat[nn]-sum(nnnn$(ID_e2u[nnnn,n]), sum(nnnnn$(ID_u2t[n,nnnnn]), gamma_tau[nnnn,nnnnn])*sum(nnnnn$(ID_u2t[nnn,nnnnn]), PwThat[nnnnn])))))
 	);
-	E_currapp_mod_A1_EOP[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n]);
+	E_currapp_mod_main_model[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n]);
 $ENDBLOCK
 $BLOCK M_EOP_CU 
 	E_zp_out_EOP_CU[n]$(EOP_out_EOP_CU[n])..	PbT[n]*qS[n] =E= sum(nn$(map_EOP_CU[nn,n]), qD[nn]*PwThat[nn]);
@@ -74,21 +74,15 @@ $BLOCK M_EOP_TX
 	E_q_out_EOP_TX[n]$(bra_o_EOP_TX[n])..	qD[n] =E= sum(nn$(map_EOP_TX[n,nn]), mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]) * qS[nn]);
 	E_q_nout_EOP_TX[n]$(bra_no_EOP_TX[n])..	qD[n] =E= sum(nn$(map_EOP_TX[n,nn]), mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]) * qD[nn]);
 $ENDBLOCK
-$BLOCK M_A1_EOP_EOP_agg 
-	E_aggqD_EOP_A1_EOP[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n] or EOP_i2ai[nn,n]), qD[nn]);
-	E_pMhat_EOP_A1_EOP[z]..	pMhat[z] =E= pM[z]+sum(n$(m2c[z,n]), theta[z,n]*(errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n])*(PbT[n]-pM[z]-muG[n])-sigmaG[n]*@std_pdf((pM[z]-PbT[n]+muG[n])/sigmaG[n])));
+$BLOCK M_main_model_EOP_agg 
+	E_aggqD_EOP_main_model[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n] or EOP_i2ai[nn,n]), qD[nn]);
+	E_pMhat_EOP_main_model[z]..	pMhat[z] =E= pM[z]+sum(n$(m2c[z,n]), theta[z,n]*(errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n])*(PbT[n]-pM[z]-muG[n])-sigmaG[n]*@std_pdf((pM[z]-PbT[n]+muG[n])/sigmaG[n])));
 $ENDBLOCK
-$BLOCK M_A1_EOP_EOP_Em 
-	E_EOP_qS_A1_EOP[n]$(EOP_out[n])..	qS[n] =E= sum(z$(m2c[z,n]), M0[z]*theta[z,n]*errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n]))+epsi;
-	E_EOP_M_A1_EOP[z]..	M[z] =E= M0[z]-sum(n$(m2c[z,n]), qS[n]-epsi);
-	E_EOP_PwThat_A1_EOP[n]$(EOP_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(EOP_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
+$BLOCK M_main_model_EOP_Em 
+	E_EOP_qS_main_model[n]$(EOP_out[n])..	qS[n] =E= sum(z$(m2c[z,n]), M0[z]*theta[z,n]*errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n]))+epsi;
+	E_EOP_M_main_model[z]..	M[z] =E= M0[z]-sum(n$(m2c[z,n]), qS[n]-epsi);
+	E_EOP_PwThat_main_model[n]$(EOP_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(EOP_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
 $ENDBLOCK
-$BLOCK M_A1_EOP_EOP_calib_aux 
-	E_currapp_EOP_A1_EOP[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
-$ENDBLOCK
-$BLOCK M_A1_EOP_ID_minobj 
-	E_minobj_ID_A1_EOP..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
-$ENDBLOCK
-$BLOCK M_A1_EOP_EOP_minobj 
-	E_minobj_EOP_A1_EOP..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]))+w_EOP*sum(n$(kno_EOP_CU[n]), Sqr(muG[n]-muGbar[n])+w_mu_EOP*Sqr(sigmaG[n]-sigmaGbar[n]));
+$BLOCK M_main_model_EOP_calib_aux 
+	E_currapp_EOP_main_model[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
 $ENDBLOCK

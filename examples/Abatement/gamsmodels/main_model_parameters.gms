@@ -23,8 +23,12 @@ parameters
 	load_theta[z,n]
 	load_muG[n]
 	load_sigmaG[n]
-	A1_EOP_EOP_modelstat
-	A1_EOP_EOP_solvestat
+	main_model_EOP_modelstat
+	main_model_EOP_solvestat
+	sigma_l1[n,l1]
+	sigmaG_l1[n,l1]
+	mu_l1[n,nn,l1]
+	eta_l1[n,l1]
 ;
 
 $GDXIN %ID_0%
@@ -53,6 +57,10 @@ $load load_gamma_tau
 $load load_theta
 $load load_muG
 $load load_sigmaG
-$load A1_EOP_EOP_modelstat
-$load A1_EOP_EOP_solvestat
+$load main_model_EOP_modelstat
+$load main_model_EOP_solvestat
+$load sigma_l1
+$load sigmaG_l1
+$load mu_l1
+$load eta_l1
 $offMulti
