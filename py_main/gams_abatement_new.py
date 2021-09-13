@@ -181,8 +181,10 @@ class CET_norm:
 		self.conditions = {'p': self.a(db[ns_tree['knots']]), 
 						   's_out': f"{self.a(db[ns_tree['map_']])} and {self.a(db[ns_tree['bra_o']])}", 
 						   's_nout': f"{self.a(db[ns_tree['map_']])} and {self.a(db[ns_tree['bra_no']])}",
-						   'q_out': f"{self.a(db[ns_tree['bra_o']])} and {self.a('q_unique')}",
-						   'q_nout': f"{self.a(db[ns_tree['bra_no']])} and {self.a('q_unique')}"}
+						   'q_out': f"{self.a(db[ns_tree['bra_o']])}",
+						   'q_nout': f"{self.a(db[ns_tree['bra_no']])}"}
+						   # 'q_out': f"{self.a(db[ns_tree['bra_o']])} and {self.a('q_unique')}",
+						   # 'q_nout': f"{self.a(db[ns_tree['bra_no']])} and {self.a('q_unique')}"}
 		if dynamic is True:
 			self.conditions = {key: value+' and '+self.txE.write() for key,value in self.conditions.items()}
 
