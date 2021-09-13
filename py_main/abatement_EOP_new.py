@@ -1,5 +1,5 @@
 from gmspython import *
-import gams_abatement,global_settings
+import gams_abatement_new as gams_abatement,global_settings
 from DB2Gams import OrdSet as OS
 import excel2py
 
@@ -49,7 +49,7 @@ class abate(gmspython):
 
 	@property
 	def default_variables(self):
-		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau','epsi']
+		syms = ['PbT','PwT','PwThat','pM','pMhat','qD','qS','qsumX','M0','M','phi','os','mu','sigma','eta','currapp','s_uc','currapp_mod','gamma_tau','share','epsi']
 		if 'calibrate' in self.state:
 			syms += self.id_calibrate_vars
 		if 'EOP' in self.state:
@@ -67,10 +67,17 @@ class abate(gmspython):
 	def eop_calibrate_vars(self):
 		return ['w_mu_EOP','muGbar','sigmaGbar','w_EOP','theta']
 
+	def u2t_unique(self,state):
+		map_ = empty_index(self.get(state+'_map_all'))
+		for n,tree in self.ns_local.items():
+			if (tree['type_io'] == 'output') & (n.startswith(state)):
+				map_ = map_.append(pd.MultiIndex.from_tuples([(self.get('map_',tree=n)[self.get('map_',tree=n).get_level_values('nn')==kno][0]) for kno in self.get('knots',tree=n)]))
+		return map_
+
 	def add_sets(self,tech,state,kwargs):
 		""" Define global 'levels' mappings and subsets, e.g. all technology goods across nesting trees. """
 		if state=='ID':
-			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai']]})
+			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['t_all','ai','q_unique']]})
 			self.ns.update({s: df(s,kwargs) for s in ['ID_'+ss for ss in ['i2ai','i2t','u2t','e2u','e2t','e2ai2i','e2ai','mu_endoincalib','mu_exo','map_gamma']]})
 			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['ID']['mu'], tech['ID']['current_coverages_split_ID'], tech['PwT'], tech["ID"]["current_applications_ID"], tech["ID"]["coverage_potentials_ID"]]]; 
 			# level sets:
@@ -95,8 +102,9 @@ class abate(gmspython):
 			u2t_BaseC = self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(self.get('map_gamma').droplevel(0).droplevel(0).set_names([self.n('n'),self.n('nn')]))})
 			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n('ID_q_unique')] = self.u2t_unique(state='ID').levels[0]
 		elif state == 'EOP':
-			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta']})
+			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta','EOP_u2t_unique']})
 			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"]]];
 			self.model.database[self.n('m2c')] = pd.MultiIndex.from_tuples([(k,j) for k,v in tech['EOP']['upper_categories'].items() for j in v], names = [self.n('z'),self.n('n')])
 			self.model.database[self.n('EOP_i2ai')] = tech['EOP']['Q2P']
@@ -104,6 +112,7 @@ class abate(gmspython):
 			self.model.database[self.n('m2t')] = DataBase_wheels.appmap(u2m,DataBase_wheels.map_from_mi(self.get('map_EOP_TU'),self.n('n'),self.n('nn')),self.n('n')).unique().swaplevel(0,1).set_names([self.n('z'),self.n('n')])
 			self.model.database[self.n('m2u')] = DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn')).swaplevel(0,1).set_names([self.n('z'),self.n('n')])
 			self.model.database[self.n('theta')] = tech['EOP']['coverage_potentials_EOP'].swaplevel(0,1).rename(self.n('theta'))
+			self.model.database[self.n('EOP_q_unique')] = self.u2t_unique(state='EOP').levels[0]
 
 	def df_var(self,val,var,domain=None,scalar=False):
 		return pd.Series(val, index = domain, name = self.n(var)) if not scalar else DataBase.gpy_symbol(val,**{'name': self.n(var)})
@@ -177,6 +186,8 @@ class abate(gmspython):
 			return self.df_var(0.1,var,domain=self.get('m2c'))
 		elif var == 'epsi':
 			return self.df_var(1e-6,var,scalar=True)
+		elif var == 'share':
+			return self.df_var(1,var,domain=self.get('ID_map_all')) if 'ID' in self.state else self.df_var(1,var,domain=self.get('ID_map_all').union(self.get('EOP_map_all')))
 
 	def initialize_variables(self,**kwargs):
 		try:
@@ -191,7 +202,7 @@ class abate(gmspython):
 				if self.n(var) not in self.model.database.symbols:
 					self.model.database[self.n(var)] = self.default_var_series(var)
 		if 'calibrate' in self.state:
-			self.model.settings.set_conf('solve',self.add_solve + "\n") # Remove if statement for debugging state
+			self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
 
 	def initialize_variables_leontief(self):
 		db = DataBase.GPM_database()
@@ -249,7 +260,7 @@ class abate(gmspython):
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
 					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'os': self.g('ID_e2t'),
-					 'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
+					 'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}, 'share': self.g('ID_map_all')}]
 		elif group == 'g_ID_endoincalib':
 			return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_ID_exoincalib':
@@ -260,7 +271,7 @@ class abate(gmspython):
 			return [{'sigma': self.g('EOP_kno_inp'), 'mu': self.g('EOP_map_all'), 'eta': self.g('EOP_kno_out'), 'theta': self.g('m2c'),'PwT': self.g('EOP_inp')}]
 		elif group == 'g_EOP_alwaysendo':
 			return [{'PwThat': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'PbT': self.g('EOP_out'), 
-					 'qD': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'qS': self.g('EOP_out'), 'M': None}]
+					 'qD': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'qS': self.g('EOP_out'), 'M': None, 'share': self.g('EOP_map_all')}]
 		elif group == 'g_EOP_endoincalib':
 			return [{'muG': self.g('kno_EOP_CU'), 'sigmaG': self.g('kno_EOP_CU')}]
 		elif group == 'g_EOP_exoincalib':
@@ -395,7 +406,7 @@ class abate(gmspython):
 			treestate = "ID"
 		elif "EOP" in tree_name:
 			treestate = "EOP"
-		gams_class = getattr(gams_abatement,tree['type_f'])(version=tree['version'], state=treestate)
+		gams_class = getattr(gams_abatement,tree['type_f'])(state=treestate)
 		gams_class.add_symbols(self.model.database,tree,ns_global=self.ns)
 		gams_class.add_conditions(self.model.database,tree)
 		return gams_class.run(tree_name)
