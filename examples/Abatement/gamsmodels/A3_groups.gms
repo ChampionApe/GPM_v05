@@ -58,22 +58,6 @@ muG[n]$(kno_EOP_CU[n]) ""
 sigmaG[n]$(kno_EOP_CU[n]) ""
 ;
 
-$GROUP A3_g_minobj_alwaysendo
-minobj ""
-;
-
-$GROUP A3_g_minobj_ID_alwaysexo
-weight_mu ""
-mubar[n,nn]$((map_ID_CU[n,nn] and bra_ID_TU[n])) ""
-;
-
-$GROUP A3_g_minobj_EOP_alwaysexo
-w_EOP ""
-w_mu_EOP ""
-muGbar[n]$(kno_EOP_CU[n]) ""
-sigmaGbar[n]$(kno_EOP_CU[n]) ""
-;
-
 @load_level(A3_g_ID_alwaysendo,%qmark%%ID_0%");
 @load_level(A3_g_ID_exoincalib,%qmark%%ID_0%");
 @load_level(A3_g_EOP_alwaysendo,%qmark%%ID_0%");
@@ -82,6 +66,3 @@ sigmaGbar[n]$(kno_EOP_CU[n]) ""
 @load_fixed(A3_g_ID_endoincalib,%qmark%%ID_0%");
 @load_fixed(A3_g_EOP_alwaysexo,%qmark%%ID_0%");
 @load_fixed(A3_g_EOP_endoincalib,%qmark%%ID_0%");
-@load_fixed(A3_g_minobj_alwaysendo,%qmark%%ID_0%");
-@load_fixed(A3_g_minobj_ID_alwaysexo,%qmark%%ID_0%");
-@load_fixed(A3_g_minobj_EOP_alwaysexo,%qmark%%ID_0%");

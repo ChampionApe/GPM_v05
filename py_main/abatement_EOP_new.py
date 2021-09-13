@@ -201,8 +201,8 @@ class abate(gmspython):
 			for var in self.default_variables:
 				if self.n(var) not in self.model.database.symbols:
 					self.model.database[self.n(var)] = self.default_var_series(var)
-		if 'calibrate' in self.state:
-			self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
+		#if 'calibrate' in self.state:
+		self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
 
 	def initialize_variables_leontief(self):
 		db = DataBase.GPM_database()
@@ -282,8 +282,8 @@ class abate(gmspython):
 			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
 		elif group == 'g_minobj_EOP_alwaysexo':
 			return [{'w_EOP': None, 'w_mu_EOP': None, 'muGbar': self.g('kno_EOP_CU'),'sigmaGbar': self.g('kno_EOP_CU')}]
-		# elif group == 'g_debug':
-		# 	return [{'testminobj': None}] # Debugging state
+		elif group == 'g_debug':
+			return [{'testminobj': None}] # Debugging state
 
 	@property
 	def exo_groups(self):
@@ -302,7 +302,7 @@ class abate(gmspython):
 	def endo_groups(self):
 		n = self.model.settings.name+'_'
 		gs = OS(['g_ID_alwaysendo','g_ID_exoincalib'])
-		# gs += OS(['g_debug']) # debugging state
+		gs += OS(['g_debug']) # debugging state
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
@@ -317,8 +317,8 @@ class abate(gmspython):
 		if self.state in ('ID_calibrate','EOP_calibrate'):
 			return self.add_bounds + f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
 		else:
-			# return f"""solve {self.model.settings.get_conf('name')} using NLP min {'testminobj'};""" # debugging state
-			return None
+			return f"""solve {self.model.settings.get_conf('name')} using NLP min {'testminobj'};""" # debugging state
+			# return None
 
 
 	@property
@@ -339,7 +339,7 @@ class abate(gmspython):
 					 f"M_{self.model.settings.name}_ID_Em": self.init_ID_emissions(),
 					 f"M_{self.model.settings.name}_ID_agg": self.init_agg('ID'),
 					 f"M_{self.model.settings.name}_ID_calib_aux": self.init_ID_calib_aux()}}
-		# blocks.update({f"M_testminobj": self.M_testminobj}) # debugging state
+		blocks.update({f"M_testminobj": self.M_testminobj}) # debugging state
 		if 'calibrate' in self.state:
 			blocks[f"M_{self.model.settings.name}_ID_minobj"]= self.init_minobj('ID')
 		if 'EOP' in self.state:
@@ -353,7 +353,7 @@ class abate(gmspython):
 	@property
 	def mblocks(self):
 		mblocks = OS([f"M_{tree}" for tree in self.ns_local if tree.startswith('ID_')]+[f"M_{self.model.settings.name}_"+m for m in ('ID_sum','ID_Em','ID_agg','ID_calib_aux')])
-		# mblocks += OS([f"M_testminobj"]) # debugging state
+		mblocks += OS([f"M_testminobj"]) # debugging state
 		if self.state == 'ID_calibrate':
 			mblocks += OS([f"M_{self.model.settings.name}_ID_minobj"])
 		elif 'EOP' in self.state:
@@ -362,9 +362,9 @@ class abate(gmspython):
 		if self.state == 'EOP_calibrate':
 			mblocks += OS([f"M_{self.model.settings.name}_EOP_minobj"])
 		return mblocks
-	# @property
-	# def M_testminobj(self):
-	# 	return f"E_testminobject..	testminobj =E= 0;" # Debugging state
+	@property
+	def M_testminobj(self):
+		return f"E_testminobject..	testminobj =E= 0;" # Debugging state
 	def init_ID_sum(self):
 		s = getattr(gams_abatement,'ID_sum')()
 		s.add_symbols(self.model.database,self.ns)
