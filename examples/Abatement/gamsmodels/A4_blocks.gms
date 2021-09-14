@@ -18,8 +18,8 @@ $BLOCK M_ID_TU
 	E_p_ID_TU[n]$(kno_ID_TU[n])..	PwThat[n] =E= sum(nn$(map_ID_TU[nn,n] and ID_out[nn]), share[nn,n]*PbT[nn])+sum(nn$(map_ID_TU[nn,n] and not ID_out[nn]), share[nn,n]*PwThat[nn]);
 	E_sout_ID_TU[n,nn]$(map_ID_TU[n,nn] and bra_o_ID_TU[n])..	share[n,nn] =E= mu[n,nn]*(PbT[n]/PwThat[nn])**(-eta[nn])/(sum(nnn$(map_ID_TU[nnn,nn] and ID_out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwThat[nn])**(-eta[nn]))+sum(nnn$(map_ID_TU[nnn,nn] and not ID_out[nnn]), mu[nnn,nn]*(PwThat[nnn]/PwThat[nn])**(-eta[nn])));
 	E_snout_ID_TU[n,nn]$(map_ID_TU[n,nn] and bra_no_ID_TU[n])..	share[n,nn] =E= mu[n,nn]*(PwThat[n]/PwThat[nn])**(-eta[nn])/(sum(nnn$(map_ID_TU[nnn,nn] and ID_out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwThat[nn])**(-eta[nn]))+sum(nnn$(map_ID_TU[nnn,nn] and not ID_out[nnn]), mu[nnn,nn]*(PwThat[nnn]/PwThat[nn])**(-eta[nn])));
-	E_qout_ID_TU[n]$(bra_o_ID_TU[n])..	qS[n] =E= sum(nn$(map_ID_TU[n,nn]), share[n,nn]*(qD[nn]-epsi));
-	E_qnout_ID_TU[n]$(bra_no_ID_TU[n])..	qD[n] =E= sum(nn$(map_ID_TU[n,nn]), share[n,nn]*(qD[nn]-epsi))+epsi;
+	E_qout_ID_TU[n]$(bra_o_ID_TU[n])..	qS[n] =E= sum(nn$(map_ID_TU[n,nn]), share[n,nn]*(qD[nn]));
+	E_qnout_ID_TU[n]$(bra_no_ID_TU[n])..	qD[n] =E= sum(nn$(map_ID_TU[n,nn]), share[n,nn]*(qD[nn]));
 $ENDBLOCK
 $BLOCK M_ID_TX 
 	E_sout_ID_TX[n,nn]$(map_ID_TX[n,nn] and bra_o_ID_TX[n])..	share[n,nn] =E= mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]);
@@ -52,26 +52,23 @@ $BLOCK M_ID_Y
 	E_qout_ID_Y[n]$(bra_o_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), share[n,nn]*qS[nn])+epsi;
 	E_qnout_ID_Y[n]$(bra_no_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), share[n,nn]*(qD[nn]-epsi))+epsi;
 $ENDBLOCK
-$BLOCK M_A3_ID_sum 
-	E_ID_os_A3[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
-	E_ID_qsumX_A3[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E=  sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn]), qD[nnn]*os[n,nnnn]);
+$BLOCK M_A4_ID_sum 
+	E_ID_os_A4[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
+	E_ID_qsumX_A4[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E=  sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn]), qD[nnn]*os[n,nnnn]);
 $ENDBLOCK
-$BLOCK M_A3_ID_Em 
-	E_M0_A3[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
-	E_ID_PwThat_A3[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
+$BLOCK M_A4_ID_Em 
+	E_M0_A4[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
+	E_ID_PwThat_A4[n]$(ID_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(ID_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
 $ENDBLOCK
-$BLOCK M_A3_ID_agg 
-	E_aggqD_ID_A3[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n]), qD[nn]);
-	E_pMhat_ID_A3[z]..	pMhat[z] =E= pM[z];
+$BLOCK M_A4_ID_agg 
+	E_aggqD_ID_A4[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n]), qD[nn]);
+	E_pMhat_ID_A4[z]..	pMhat[z] =E= pM[z];
 $ENDBLOCK
-$BLOCK M_A3_ID_calib_aux 
-	E_currapp_ID_A3[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp[n,nn] =E= sum(nnn$(ID_u2t[nnn,nn] and ID_e2u[n,nnn]), qD[nnn])/qD[n];
-	E_share_uc_A3[n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n])..	s_uc[n,nn] =E= mu[n,nn]*exp((PwThat[nn]-PwThat[n])*sigma[nn])/(
+$BLOCK M_A4_ID_calib_aux 
+	E_currapp_ID_A4[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp[n,nn] =E= sum(nnn$(ID_u2t[nnn,nn] and ID_e2u[n,nnn]), qD[nnn])/qD[n];
+	E_share_uc_A4[n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n])..	s_uc[n,nn] =E= mu[n,nn]*exp((PwThat[nn]-PwThat[n])*sigma[nn])/(
 	sum(nnn$(map_ID_CU[nnn,nn] and bra_ID_TU[nnn]), mu[nnn,nn]*exp((PwThat[nn]-PwThat[nnn])*sigma[nn]))+
 	sum(nnn$(map_ID_CU[nnn,nn] and bra_ID_BU[nnn]), mu[nnn,nn]*exp(sigma[nn]*(PwThat[nn]-sum(nnnn$(ID_e2u[nnnn,n]), sum(nnnnn$(ID_u2t[n,nnnnn]), gamma_tau[nnnn,nnnnn])*sum(nnnnn$(ID_u2t[nnn,nnnnn]), PwThat[nnnnn])))))
 	);
-	E_currapp_mod_A3[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n]);
-$ENDBLOCK
-$BLOCK M_A3_ID_minobj 
-	E_minobj_ID_A3..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
+	E_currapp_mod_A4[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n]);
 $ENDBLOCK
