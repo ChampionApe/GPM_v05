@@ -320,16 +320,16 @@ class abate(gmspython):
 			# return f"""solve {self.model.settings.get_conf('name')} using NLP min {'testminobj'};""" # debugging state
 			return None
 
-
 	@property
 	def add_bounds(self):
 		s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib").write()}) = 0;\n""" +\
-			f"""{self.g("gamma_tau").write(l=".lo")}$({self.g("ID_e2t").write()} and {self.g("kno_ID_TU").write(alias={"n":"nn"})}) = 0;\n"""
+			f"""{self.g("gamma_tau").write(l=".lo")}$({self.g("ID_e2t").write()} and {self.g("kno_ID_TU").write(alias={"n":"nn"})}) = 0;\n"""+\
+			f"""{self.g('PwThat').write(l='.lo')}$({self.g('ID_int').write()} or {self.g('ID_inp').write()}) = 0;\n"""
 		if self.state == "EOP_calibrate":
-			return s + f"""{self.g("sigmaG").write(l=".lo")}$({self.g("kno_EOP_CU").write()}) = 0;\n"""
+			return s + f"""{self.g("sigmaG").write(l=".lo")}$({self.g("kno_EOP_CU").write()}) = 0;\n"""+\
+					   f"""{self.g('PwThat').write(l='.lo')}$({self.g('EOP_int').write()} or {self.g('EOP_inp').write()})=0;\n"""
 		else:
 			return s
-
 
 	# --- 		4: Define blocks 		--- #
 	@property

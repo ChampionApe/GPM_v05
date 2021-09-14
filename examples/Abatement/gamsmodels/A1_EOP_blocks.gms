@@ -86,9 +86,3 @@ $ENDBLOCK
 $BLOCK M_A1_EOP_EOP_calib_aux 
 	E_currapp_EOP_A1_EOP[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
 $ENDBLOCK
-$BLOCK M_A1_EOP_ID_minobj 
-	E_minobj_ID_A1_EOP..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
-$ENDBLOCK
-$BLOCK M_A1_EOP_EOP_minobj 
-	E_minobj_EOP_A1_EOP..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]))+w_EOP*sum(n$(kno_EOP_CU[n]), Sqr(muG[n]-muGbar[n])+w_mu_EOP*Sqr(sigmaG[n]-sigmaGbar[n]));
-$ENDBLOCK
