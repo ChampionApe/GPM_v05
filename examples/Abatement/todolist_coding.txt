@@ -6,3 +6,5 @@ PS: Lige nu er det implementeret lidt ad-hoc i bunden af initialize_variables ve
 - Gør således at hver state får sin egen run-fil, og collect-fil (ligesom de allerede har med blocks, groups etc.). Det medfører at man slipper for at køre m.reset_settings() efter man har skiftet state. Lige nu er dette nødvendigt, da den eksisterende run- og collect-fil fra den anden state vil forblive brugt og ikke nulstillet.
 
 - Udvid sneaky_solve så hver iteration også rapporterer modelstatus og solvestatus. 
+
+- Gør sådan at når man exporterer classen, så husker den funktionerne i m.model.functions. Lige pt. når man initialiserer classen fra en pickle køres self.add_functions() ikke igen, og derfor er funktionen ikke med.

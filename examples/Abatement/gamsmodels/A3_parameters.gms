@@ -26,6 +26,10 @@ parameters
 	load_sigmaG[n]
 	A3_EOP_modelstat
 	A3_EOP_solvestat
+	sigmaG_l1[n,l1]
+	sigma_l1[n,l1]
+	mu_l1[n,nn,l1]
+	eta_l1[n,l1]
 ;
 
 $GDXIN %ID_0%
@@ -57,4 +61,8 @@ $load load_muG
 $load load_sigmaG
 $load A3_EOP_modelstat
 $load A3_EOP_solvestat
+$load sigmaG_l1
+$load sigma_l1
+$load mu_l1
+$load eta_l1
 $offMulti
