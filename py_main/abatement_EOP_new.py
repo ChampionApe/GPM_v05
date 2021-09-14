@@ -244,13 +244,18 @@ class abate(gmspython):
 			db["qS"], db["qD"], db["mu"], db["PwThat"], db["PbT"] = qS, qD, mu, PwThat, PbT
 			DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
-	def add_calib_data(self, inputIO):
-		db = excel2py.xl2PM.pm_from_workbook(inputIO,{'IO': 'vars'})
-		db["currapp"] = self.get("current_applications_ID").rename("currapp")
-		db["qD"] = db["qD"].vals.append((self.get("coverage_potentials_ID") * db.database.get("qD").vals.rename_axis(self.n('nn'))).droplevel(1))
-		if 'EOP' in self.state:
-			db["currapp_EOP"] = self.get("current_applications_EOP").rename("currapp_EOP")
-		DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
+	def add_calib_data(self, inputIO, currapp=True):
+		pm = excel2py.xl2PM.pm_from_workbook(inputIO,{'IO': 'vars'})
+		db = DataBase.GPM_database()
+		db["qD"] = pm.database["qD"].vals
+		db["qS"] = pm.database["qS"].vals
+		db["qD"] = db["qD"].vals.append((self.get("coverage_potentials_ID") * db.get("qD").rename_axis(self.n('nn'))).droplevel(1))
+		if currapp:
+			db["currapp"] = self.get("current_applications_ID").rename("currapp")
+			if 'EOP' in self.state:
+				db["currapp_EOP"] = self.get("current_applications_EOP").rename("currapp_EOP")
+		return db 
+		# DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
 	# ------------------ 2: Groups  ------------------ #
 	def group_conditions(self,group):

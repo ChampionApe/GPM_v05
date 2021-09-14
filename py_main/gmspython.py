@@ -227,14 +227,14 @@ class gmspython:
 		elif state is not None:
 			self.model.settings.conf.__setitem__(state,self.model.settings.std_configuration(state=state))
 
-	def calibrate_sneaky(self,db_star, name_base = 'baseline', name_calib = 'calib', kwargs_init = {}, overwrite = False,**kwargs):
+	def calibrate_sneaky(self,db_star, name_base = 'baseline', name_calib = 'calib', state_names={"baseline":"B", "calibrate":"DC"}, kwargs_init = {}, overwrite = False,**kwargs):
 		self.initialize_variables(**kwargs_init)
-		self.setstate('DC')
+		self.setstate(state_names["calibrate"])
 		kwargs_write ={'end': DB2Gams.run_text(g_exo=self.exo_groups.keys(),g_endo=self.endo_groups.keys(),blocks=self.model.settings.get_conf('blocks'),name=self.model.settings.get_conf('name'))}
-		self.setstate('B')
+		self.setstate(state_names["baseline"])
 		self.write_and_run(overwrite=overwrite,write=True,kwargs_write=kwargs_write,add_checkpoint=name_base)
 		shock_db,kwargs_shock = ShockFunction.sneaky_db(self.model_instances[name_base].out_db,db_star,**kwargs)
-		return self.model_instances[name_base].solve_sneakily(from_cp=True,cp_init=self.checkpoints[name_base],shock_db =shock_db,kwargs_shock=kwargs_shock,kwargs_db={'name':name_calib},model_name=self.model.settings.conf['DC']['name'])
+		return self.model_instances[name_base].solve_sneakily(from_cp=True,cp_init=self.checkpoints[name_base],shock_db =shock_db,kwargs_shock=kwargs_shock,kwargs_db={'name':name_calib},model_name=self.model.settings.conf[state_names["calibrate"]]['name'])
 
 class gmspython_i(gmspython):
 	def __init__(self,module='gmspython_i',pickle_path=None,work_folder=None,databases=None,database_kw={},**kwargs_gs):
