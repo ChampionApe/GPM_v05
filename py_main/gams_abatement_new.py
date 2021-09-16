@@ -418,10 +418,10 @@ class ID_sum:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[df(sym,ns)]) for sym in ('n','ID_e2t','ID_e2u','ID_u2t','ID_e2ai','ID_e2ai2i','ID_i2t','qsumX','os','qD','epsi')];
+		[setattr(self,sym,db[df(sym,ns)]) for sym in ('n','ID_e2t','ID_e2u','ID_u2t','ID_e2ai','ID_e2ai2i','ID_i2t','qsumX','os','qD','epsi','kno_ID_TU','bra_ID_BX')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
-		self.conditions = {'os': self.ID_e2t.write(),'qsumX': self.ID_e2ai.write()}
+		self.conditions = {'os': self.ID_e2t.write() + ' and ' + self.kno_ID_TU.write(alias={"n":"nn"}),'qsumX': self.ID_e2ai.write()}
 	def a(self,attr,lot_indices=[],l='',lag={}):
 		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
 	def run(self,name):
@@ -434,14 +434,16 @@ class ID_sum:
 		i2t_2 = self.a('ID_i2t',[(0,2),(1,3)])
 		os_2 = self.a('os',[(1,3)])
 		epsi = self.a('epsi')
+		kno_ID_TU4 = self.a("kno_ID_TU",[(0,3)])
+		bra_ID_BX3 = self.a("bra_ID_BX",[(0,2)])
 		text = self.e_os(f"E_ID_os_{name}", self.conditions['os'],nnn,e2u_2,u2t_2,qD_2,qD_3)+'\n\t'
-		text += self.e_qsumX(f"E_ID_qsumX_{name}", self.conditions['qsumX'],nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2)
+		text += self.e_qsumX(f"E_ID_qsumX_{name}", self.conditions['qsumX'],nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2,kno_ID_TU4,bra_ID_BX3)
 		return text
 	def e_os(self,name,conditions,nnn,e2u_2,u2t_2,qD_2,qD_3):
 		RHS = f"""sum({nnn}$({e2u_2} and {u2t_2}), {qD_3})/{qD_2}"""
 		return equation(name,self.os.doms(),conditions,self.os.write(),RHS)
-	def e_qsumX(self,name,conditions,nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2):
-		RHS = f""" sum([{nnn},{nnnn}]$({e2ai2i} and {e2t_2} and {i2t_2}), {qD_3}*{os_2})"""
+	def e_qsumX(self,name,conditions,nnn,nnnn,e2ai2i,e2t_2,i2t_2,qD_3,os_2,kno_ID_TU4,bra_ID_BX3):
+		RHS = f"""sum([{nnn}]$({e2ai2i} and {bra_ID_BX3}), {qD_3}) + sum([{nnn},{nnnn}]$({e2ai2i} and {e2t_2} and {i2t_2} and {kno_ID_TU4}), {qD_3}*{os_2})"""
 		return equation(name,self.qsumX.doms(),conditions,self.qsumX.write(),RHS)
 
 class ID_emissions:

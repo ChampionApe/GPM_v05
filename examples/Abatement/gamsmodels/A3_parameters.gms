@@ -10,20 +10,35 @@ parameters
 	load_qsumX[n,nn]
 	load_currapp[n,nn]
 	load_currapp_mod[n,nn]
+	load_qS[n]
+	load_M[z]
+	load_currapp_EOP[z,n]
 	load_sigma[n]
 	load_mu[n,nn]
 	load_eta[n]
 	load_phi[z,n]
 	load_pM[z]
 	load_PwT[n]
-	load_qS[n]
 	load_epsi
 	load_gamma_tau[n,nn]
-	A3_ID_modelstat
-	A3_ID_solvestat
+	load_theta[z,n]
+	load_muG[n]
+	load_sigmaG[n]
+	A3_EOP_modelstat
+	A3_EOP_solvestat
+	mu_l1[n,nn,l1]
+	sigmaG_l1[n,l1]
 	sigma_l1[n,l1]
 	eta_l1[n,l1]
-	mu_l1[n,nn,l1]
+	load_minobj
+	load_weight_mu
+	load_mubar[n,nn]
+	load_w_EOP
+	load_w_mu_EOP
+	load_muGbar[n]
+	load_sigmaGbar[n]
+	A3_EOP_calibrate_modelstat
+	A3_EOP_calibrate_solvestat
 ;
 
 $GDXIN %ID_0%
@@ -39,18 +54,33 @@ $load load_share
 $load load_qsumX
 $load load_currapp
 $load load_currapp_mod
+$load load_qS
+$load load_M
+$load load_currapp_EOP
 $load load_sigma
 $load load_mu
 $load load_eta
 $load load_phi
 $load load_pM
 $load load_PwT
-$load load_qS
 $load load_epsi
 $load load_gamma_tau
-$load A3_ID_modelstat
-$load A3_ID_solvestat
+$load load_theta
+$load load_muG
+$load load_sigmaG
+$load A3_EOP_modelstat
+$load A3_EOP_solvestat
+$load mu_l1
+$load sigmaG_l1
 $load sigma_l1
 $load eta_l1
-$load mu_l1
+$load load_minobj
+$load load_weight_mu
+$load load_mubar
+$load load_w_EOP
+$load load_w_mu_EOP
+$load load_muGbar
+$load load_sigmaGbar
+$load A3_EOP_calibrate_modelstat
+$load A3_EOP_calibrate_solvestat
 $offMulti
