@@ -39,6 +39,15 @@ def try_(kwargs,key):
 	except KeyError:
 		return {}
 
+def iteNone(x):
+	return x if x is not None else [x]
+
+def NoneIfAllNone(x):
+	if x is None:
+		return x
+	else:
+		return None if not any(x) else x
+
 class OrdSet:
 	def __init__(self,i=[]):
 		self.v = list(dict.fromkeys(i))
@@ -126,10 +135,10 @@ class gams_settings:
 	def set_conf(self,k,v):
 		self.conf[self.state][k] = v
 
-	def clean_g_exo(self,all_conf=True):
-		if all_conf is True:
+	def clean_g_exo(self,clean=True):
+		if clean is True:
 			[self.conf[k].__setitem__('g_exo',self.conf[k]['g_exo']-self.conf[k]['g_endo']) for k in self.conf.keys()];
-		else:
+		elif clean is False:
 			self.set_conf('g_exo', self.get_conf('g_exo')-self.get_conf('g_endo'))
 
 	###################################################################################################
@@ -316,7 +325,7 @@ class mgs:
 		return {key: value for s in ls for key,value in s.files.items()}
 	@staticmethod
 	def merge_collect_files(ls):
-		return OrdSet([x for y in ls for x in y.collect_files])
+		return NoneIfAllNone(OrdSet([x for y in ls for x in iteNone(y.collect_files)]))
 
 class gams_model_py:
 	def __init__(self, pickle_path = None, gsettings = None, kwargs_gs = {}, **kwargs):
