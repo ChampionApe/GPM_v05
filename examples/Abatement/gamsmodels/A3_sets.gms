@@ -130,9 +130,9 @@ sets
 	m2t[z,n]
 	m2u[z,n]
 	EOP_q_unique[n]
-	sigma_l1_subset[n]
-	sigmaG_l1_subset[n]
 	mu_l1_subset[n,nn]
+	sigmaG_l1_subset[n]
+	sigma_l1_subset[n]
 	eta_l1_subset[n]
 ;
 
@@ -237,8 +237,8 @@ $load kno_no_EOP_TX
 $load bra_o_EOP_TX
 $load bra_no_EOP_TX
 $load EOP_q_unique
-$load sigma_l1_subset
 $load sigmaG_l1_subset
+$load sigma_l1_subset
 $load eta_l1_subset
 $load alias_
 $load ID_map_all

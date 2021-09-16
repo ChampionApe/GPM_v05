@@ -53,8 +53,8 @@ $BLOCK M_ID_Y
 	E_qnout_ID_Y[n]$(bra_no_ID_Y[n])..	qD[n] =E= sum(nn$(map_ID_Y[n,nn]), share[n,nn]*(qD[nn]-epsi))+epsi;
 $ENDBLOCK
 $BLOCK M_A3_ID_sum 
-	E_ID_os_A3[n,nn]$(ID_e2t[n,nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
-	E_ID_qsumX_A3[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E=  sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn]), qD[nnn]*os[n,nnnn]);
+	E_ID_os_A3[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	os[n,nn] =E= sum(nnn$(ID_e2u[n,nnn] and ID_u2t[nnn,nn]), qD[nnn])/qD[nn];
+	E_ID_qsumX_A3[n,nn]$(ID_e2ai[n,nn])..	qsumX[n,nn] =E= sum([nnn]$(ID_e2ai2i[n,nn,nnn] and bra_ID_BX[nnn]), qD[nnn]) + sum([nnn,nnnn]$(ID_e2ai2i[n,nn,nnn] and ID_e2t[n,nnnn] and ID_i2t[nnn,nnnn] and kno_ID_TU[nnnn]), qD[nnn]*os[n,nnnn]);
 $ENDBLOCK
 $BLOCK M_A3_ID_Em 
 	E_M0_A3[z]..	M0[z] =E= sum(n$(ai[n]), phi[z,n]*qD[n]);
@@ -106,4 +106,10 @@ $BLOCK M_A3_EOP_Em
 $ENDBLOCK
 $BLOCK M_A3_EOP_calib_aux 
 	E_currapp_EOP_A3[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
+$ENDBLOCK
+$BLOCK M_A3_ID_minobj 
+	E_minobj_ID_A3..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
+$ENDBLOCK
+$BLOCK M_A3_EOP_minobj 
+	E_minobj_EOP_A3..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]))+w_EOP*sum(n$(kno_EOP_CU[n]), Sqr(muG[n]-muGbar[n])+w_mu_EOP*Sqr(sigmaG[n]-sigmaGbar[n]));
 $ENDBLOCK

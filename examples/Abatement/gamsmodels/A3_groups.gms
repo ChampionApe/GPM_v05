@@ -3,7 +3,7 @@ PwThat[n]$((ID_int[n] or ID_inp[n])) ""
 PbT[n]$(ID_out[n]) ""
 pMhat[z] ""
 qD[n]$(((ID_int[n] or ID_inp[n]) and not (kno_ID_EC[n] or kno_ID_CU[n]))) ""
-os[n,nn]$(ID_e2t[n,nn]) ""
+os[n,nn]$((ID_e2t[n,nn] and kno_ID_TU[nn])) ""
 M0[z] ""
 s_uc[n,nn]$((map_ID_CU[n,nn] and bra_ID_TU[n])) ""
 share[n,nn]$(ID_map_all[n,nn]) ""
@@ -58,11 +58,30 @@ muG[n]$(kno_EOP_CU[n]) ""
 sigmaG[n]$(kno_EOP_CU[n]) ""
 ;
 
+$GROUP A3_g_minobj_alwaysendo
+minobj ""
+;
+
+$GROUP A3_g_minobj_ID_alwaysexo
+weight_mu ""
+mubar[n,nn]$((map_ID_CU[n,nn] and bra_ID_TU[n])) ""
+;
+
+$GROUP A3_g_minobj_EOP_alwaysexo
+w_EOP ""
+w_mu_EOP ""
+muGbar[n]$(kno_EOP_CU[n]) ""
+sigmaGbar[n]$(kno_EOP_CU[n]) ""
+;
+
 @load_level(A3_g_ID_alwaysendo,%qmark%%ID_0%");
-@load_level(A3_g_ID_exoincalib,%qmark%%ID_0%");
 @load_level(A3_g_EOP_alwaysendo,%qmark%%ID_0%");
-@load_level(A3_g_EOP_exoincalib,%qmark%%ID_0%");
+@load_level(A3_g_ID_endoincalib,%qmark%%ID_0%");
+@load_level(A3_g_EOP_endoincalib,%qmark%%ID_0%");
+@load_level(A3_g_minobj_alwaysendo,%qmark%%ID_0%");
+@load_fixed(A3_g_ID_exoincalib,%qmark%%ID_0%");
+@load_fixed(A3_g_EOP_exoincalib,%qmark%%ID_0%");
 @load_fixed(A3_g_ID_alwaysexo,%qmark%%ID_0%");
-@load_fixed(A3_g_ID_endoincalib,%qmark%%ID_0%");
 @load_fixed(A3_g_EOP_alwaysexo,%qmark%%ID_0%");
-@load_fixed(A3_g_EOP_endoincalib,%qmark%%ID_0%");
+@load_fixed(A3_g_minobj_ID_alwaysexo,%qmark%%ID_0%");
+@load_fixed(A3_g_minobj_EOP_alwaysexo,%qmark%%ID_0%");

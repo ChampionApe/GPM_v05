@@ -127,10 +127,7 @@ class gams_model:
 			self.run(run_from_job=run_from_job,options_run={**options_run,**{'checkpoint': cp_init}})
 		if shock_db is None:
 			(shock_db, kwargs_shock2) = ShockFunction.sneaky_db(self.out_db,db_star,**kwargs_shock)
-			shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**{**kwargs_shock,**kwargs_shock2})
-		else:
-			shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**{**kwargs_shock})
-		
+		shock = self.std_UEVAS_from_db(shock_db,model_name=model_name,**{**kwargs_shock,**kwargs_shock2})
 		self.execute_shock_from_cp(shock,cp_init,options_run=options_run,kwargs_db=kwargs_db)
 		if self.settings.solvestat is True:
 			return {'Modelstat': self.modelstat, 'Solvestat': self.solvestat}

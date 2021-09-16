@@ -100,8 +100,9 @@ class abate(gmspython):
 			# Merge the two on the level of components, drop the component level and rename sets:
 			self.model.database[self.n('map_gamma')] = DataBase_wheels.mi.add_ndmi(e2t2c,u2t2c_B).droplevel(2).set_names([self.n('n'),self.n('nn'),self.n('nnn'),self.n('nnnn')])
 			u2t_BaseC = self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(self.get('map_gamma').droplevel(0).droplevel(0).set_names([self.n('n'),self.n('nn')]))})
-			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
-			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
+			baseC = DataBase_wheels.appmap(u2t_BaseC.get_level_values(0),DataBase_wheels.map_from_mi(self.get("map_ID_CU"), "n", "nn"))
+			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_q_unique')] = self.u2t_unique(state='ID').levels[0]
 		elif state == 'EOP':
 			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta','EOP_u2t_unique']})
@@ -149,8 +150,8 @@ class abate(gmspython):
 			return self.df_var(1,var,domain=self.get('ID_e2ai'))
 		elif var == 'phi':
 			return self.df_var(0,var,domain=pd.MultiIndex.from_product([self.get('z'),self.get('ai')]))
-		elif var == 'os':
-			return self.df_var(0.5,var,domain=self.get('ID_e2t'))
+		# elif var == 'os':
+		# 	return self.df_var(0.5,var,domain=self.get('ID_e2t'))
 		elif var == 'mu':
 			if 'ID' in self.state:
 				return self.df_var(1,var,domain=self.get('ID_map_all'))
@@ -168,8 +169,8 @@ class abate(gmspython):
 				return s
 			elif "EOP" in self.state:
 				return pd.concat([s, self.df_var(-2,var,domain=self.get("EOP_kno_out"))])
-		elif var in ('currapp','currapp_mod','gamma_tau'):
-			return self.df_var(0.5,var,domain=self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))))
+		elif var in ('currapp','currapp_mod','gamma_tau', "os"):
+			return self.df_var(1,var,domain=self.g('ID_e2t').rctree_pd(DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')))))
 		elif var in ('s_uc','mubar'):
 			return self.df_var(1,var,domain=self.g('map_ID_CU').rctree_pd(self.g('bra_ID_TU')))
 		elif var in ('minobj','w_EOP'):
@@ -203,6 +204,8 @@ class abate(gmspython):
 					self.model.database[self.n(var)] = self.default_var_series(var)
 		if 'calibrate' in self.state:
 			self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
+			DataBase.GPM_database.add_or_merge(self.model.database,self.get("currapp").rename("currapp_mod"),'second')
+
 
 	def initialize_variables_leontief(self):
 		db = DataBase.GPM_database()
@@ -249,6 +252,7 @@ class abate(gmspython):
 		db = DataBase.GPM_database()
 		db["qD"] = pm.database["qD"].vals
 		db["qS"] = pm.database["qS"].vals
+		db["qsumX"] = pm.database["qsumX"].vals
 		db["qD"] = db["qD"].vals.append((self.get("coverage_potentials_ID") * db.get("qD").rename_axis(self.n('nn'))).droplevel(1))
 		if currapp:
 			db["currapp"] = self.get("current_applications_ID").rename("currapp")
@@ -264,8 +268,9 @@ class abate(gmspython):
 			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'),'epsi': None}]
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
-					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 'os': self.g('ID_e2t'),
-					 'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}, 'share': self.g('ID_map_all')}]
+					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 
+					'os': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
+					'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}, 'share': self.g('ID_map_all')}]
 		elif group == 'g_ID_endoincalib':
 			return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_ID_exoincalib':
@@ -327,7 +332,7 @@ class abate(gmspython):
 
 	@property
 	def add_bounds(self):
-		s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib").write()}) = 0;\n""" +\
+		s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib").write()}) = 0.000001;\n""" +\
 			f"""{self.g("gamma_tau").write(l=".lo")}$({self.g("ID_e2t").write()} and {self.g("kno_ID_TU").write(alias={"n":"nn"})}) = 0;\n"""+\
 			f"""{self.g('PwThat').write(l='.lo')}$({self.g('ID_int').write()} or {self.g('ID_inp').write()}) = 0;\n"""
 		if self.state == "EOP_calibrate":
