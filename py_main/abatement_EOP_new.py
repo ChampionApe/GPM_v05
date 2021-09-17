@@ -101,14 +101,11 @@ class abate(gmspython):
 			self.model.database[self.n('map_gamma')] = DataBase_wheels.mi.add_ndmi(e2t2c,u2t2c_B).droplevel(2).set_names([self.n('n'),self.n('nn'),self.n('nnn'),self.n('nnnn')])
 			u2t_BaseC = self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(self.get('map_gamma').droplevel(0).droplevel(0).set_names([self.n('n'),self.n('nn')]))})
 			baseC = DataBase_wheels.appmap(u2t_BaseC.get_level_values(0),DataBase_wheels.map_from_mi(self.get("map_ID_CU"), "n", "nn"))
+			self.model.database[self.n("ID_nonbaseC")] = self.g('bra_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)})
 			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
-			# mu til C0 holdes eksogen i disse:
-			# self.model.database[self.n("ID_mu_endoincalib_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}))]), names = [self.n('n'),self.n('nn')])
-			# self.model.database[self.n("ID_mu_exo_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.get("map_ID_BU"))]), names = [self.n('n'),self.n('nn')])
-			#Endogeniseres i disse:
-			self.model.database[self.n("ID_mu_endoincalib_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}))]), names = [self.n('n'),self.n('nn')])
-			self.model.database[self.n("ID_mu_exo_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.get("map_ID_BU"))]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n("ID_mu_endoincalib_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}))]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n("ID_mu_exo_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.get("map_ID_BU"))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_q_unique')] = self.u2t_unique(state='ID').levels[0]
 		elif state == 'EOP':
 			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta','EOP_u2t_unique']})
@@ -260,7 +257,7 @@ class abate(gmspython):
 		db["qD"] = pm.database["qD"].vals
 		db["qS"] = pm.database["qS"].vals
 		db["qsumX"] = pm.database["qsumX"].vals
-		db["qD"] = db["qD"].vals.append((self.get("coverage_potentials_ID") * db.get("qD").rename_axis(self.n('nn'))).droplevel(1))
+		db["qD"] = db["qD"].vals.append((self.g("coverage_potentials_ID").rctree_pd(self.g("ID_nonbaseC")) * db.get("qD").rename_axis(self.n('nn'))).droplevel(1))
 		if currapp:
 			db["currapp"] = self.get("current_applications_ID").rename("currapp")
 			if 'EOP' in self.state:
@@ -283,7 +280,7 @@ class abate(gmspython):
 			return [{"mu":self.g("ID_mu_endoincalib_CNScalib")}] 
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
-					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 
+					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g("ID_nonbaseC")]}]}]}, 
 					'os': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
 					'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}, 'share': self.g('ID_map_all')}]
 		# elif group == 'g_ID_endoincalib':
@@ -293,7 +290,7 @@ class abate(gmspython):
 			# return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 			return [{'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_ID_exoincalib':
-			return [{'qD': {'or': [self.g('ai'), self.g('kno_ID_EC'), self.g('kno_ID_CU')]}, 'qsumX': self.g('ID_e2ai')}]
+			return [{'qD': {'or': [self.g('ai'), self.g('kno_ID_EC'), self.g("ID_nonbaseC")]}, 'qsumX': self.g('ID_e2ai')}]
 		elif group == "g_ID_currapp":
 			return [{'currapp': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
 					 'currapp_mod': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]

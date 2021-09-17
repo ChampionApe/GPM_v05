@@ -89,13 +89,14 @@ sets
 	ID_e2ai2i[n,nn,nnn]
 	ID_e2ai[n,nn]
 	map_gamma[n,nn,nnn,nnnn]
+	ID_nonbaseC[n]
 	ID_mu_endoincalib[n,nn]
 	ID_mu_exo[n,nn]
 	ID_mu_endoincalib_CNScalib[n,nn]
 	ID_mu_exo_CNScalib[n,nn]
 	ID_q_unique[n]
-	sigma_l1_subset[n]
 	eta_l1_subset[n]
+	sigma_l1_subset[n]
 	mu_l1_subset[n,nn]
 ;
 
@@ -169,9 +170,10 @@ $load bra_o_ID_Y
 $load bra_no_ID_Y
 $load ID_t_all
 $load ai
+$load ID_nonbaseC
 $load ID_q_unique
-$load sigma_l1_subset
 $load eta_l1_subset
+$load sigma_l1_subset
 $load alias_
 $load ID_map_all
 $load map_ID_EC
