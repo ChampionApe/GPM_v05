@@ -103,6 +103,12 @@ class abate(gmspython):
 			baseC = DataBase_wheels.appmap(u2t_BaseC.get_level_values(0),DataBase_wheels.map_from_mi(self.get("map_ID_CU"), "n", "nn"))
 			self.model.database[self.n('ID_mu_endoincalib')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}), self.g('map_ID_BU').rctree_pd({'not': DataBase.gpy_symbol(u2t_BaseC)}))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_mu_exo')] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), u2t_BaseC)]), names = [self.n('n'),self.n('nn')])
+			# mu til C0 holdes eksogen i disse:
+			# self.model.database[self.n("ID_mu_endoincalib_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}))]), names = [self.n('n'),self.n('nn')])
+			# self.model.database[self.n("ID_mu_exo_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.get("map_ID_BU"))]), names = [self.n('n'),self.n('nn')])
+			#Endogeniseres i disse:
+			self.model.database[self.n("ID_mu_endoincalib_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.get('map_ID_EC'), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}))]), names = [self.n('n'),self.n('nn')])
+			self.model.database[self.n("ID_mu_exo_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.get("map_ID_BU"))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_q_unique')] = self.u2t_unique(state='ID').levels[0]
 		elif state == 'EOP':
 			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta','EOP_u2t_unique']})
@@ -202,9 +208,10 @@ class abate(gmspython):
 			for var in self.default_variables:
 				if self.n(var) not in self.model.database.symbols:
 					self.model.database[self.n(var)] = self.default_var_series(var)
-		if 'calibrate' in self.state:
+		if 'calibrate' in self.state: 
 			self.model.settings.set_conf('solve',self.add_solve + "\n") # drop the if statement in debugging state
-			DataBase.GPM_database.add_or_merge(self.model.database,self.get("currapp").rename("currapp_mod"),'second')
+			if "CNS" not in self.state:
+				DataBase.GPM_database.add_or_merge(self.model.database,self.get("currapp").rename("currapp_mod"),'second')
 
 
 	def initialize_variables_leontief(self):
@@ -264,18 +271,31 @@ class abate(gmspython):
 	# ------------------ 2: Groups  ------------------ #
 	def group_conditions(self,group):
 		if group == 'g_ID_alwaysexo':
-			return [{'sigma': self.g('ID_kno_inp'), 'mu': self.g('ID_mu_exo'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'),
-			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'),'epsi': None}]
+			return [{'sigma': self.g('ID_kno_inp'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'), 
+			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'),'epsi': None}] #'mu': self.g('ID_mu_exo')
+		elif group == "g_ID_mu_exo":
+			return [{"mu":self.g("ID_mu_exo")}]
+		elif group == "g_ID_mu_exo_CNScalib":
+			return [{"mu":self.g("ID_mu_exo_CNScalib")}]
+		elif group == "g_ID_mu_endoincalib":
+			return [{"mu":self.g("ID_mu_endoincalib")}]
+		elif group == "g_ID_mu_endoincalib_CNScalib":
+			return [{"mu":self.g("ID_mu_endoincalib_CNScalib")}] 
 		elif group == 'g_ID_alwaysendo':
 			return [{'PwThat': {'or': [self.g('ID_int'), self.g('ID_inp')]}, 'PbT': self.g('ID_out'), 'pMhat': None,
 					'qD': {'and': [{'or': [self.g('ID_int'), self.g('ID_inp')]}, {'not': [{'or': [self.g('kno_ID_EC'), self.g('kno_ID_CU')]}]}]}, 
 					'os': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
 					'M0': None, 's_uc': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}, 'share': self.g('ID_map_all')}]
-		elif group == 'g_ID_endoincalib':
-			return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
+		# elif group == 'g_ID_endoincalib':
+		# 	# return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
+		# 	return [{'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
+		elif group == 'g_ID_gamma_tau':
+			# return [{'mu': self.g('ID_mu_endoincalib'), 'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
+			return [{'gamma_tau': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_ID_exoincalib':
-			return [{'qD': {'or': [self.g('ai'), self.g('kno_ID_EC'), self.g('kno_ID_CU')]}, 'qsumX': self.g('ID_e2ai'),
-					 'currapp': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
+			return [{'qD': {'or': [self.g('ai'), self.g('kno_ID_EC'), self.g('kno_ID_CU')]}, 'qsumX': self.g('ID_e2ai')}]
+		elif group == "g_ID_currapp":
+			return [{'currapp': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
 					 'currapp_mod': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_EOP_alwaysexo':
 			return [{'sigma': self.g('EOP_kno_inp'), 'mu': self.g('EOP_map_all'), 'eta': self.g('EOP_kno_out'), 'theta': self.g('m2c'),'PwT': self.g('EOP_inp')}]
@@ -298,43 +318,52 @@ class abate(gmspython):
 	@property
 	def exo_groups(self):
 		n = self.model.settings.name+'_'
-		gs = OS(['g_ID_alwaysexo','g_ID_endoincalib'])
+		gs = OS(['g_ID_alwaysexo','g_ID_gamma_tau', "g_ID_mu_exo", "g_ID_mu_endoincalib"])
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_exoincalib','g_minobj_ID_alwaysexo'])-OS(['g_ID_endoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_exoincalib','g_minobj_ID_alwaysexo',"g_ID_currapp"])-OS(['g_ID_gamma_tau', "g_ID_mu_endoincalib"]))}
+		elif self.state == "ID_calibrate_CNS":
+			return {n+g: self.add_group(g,n=n) for g in (gs + OS(['g_ID_exoincalib',"g_ID_mu_exo_CNScalib"]) - OS(["g_ID_mu_exo","g_ID_mu_endoincalib"]))}
 		elif self.state == 'EOP':
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_EOP_endoincalib']))}
 		elif self.state == 'EOP_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib','g_minobj_ID_alwaysexo','g_minobj_EOP_alwaysexo'])-OS(['g_ID_endoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib','g_minobj_ID_alwaysexo','g_minobj_EOP_alwaysexo',"g_ID_currapp"])-OS(['g_ID_gamma_tau']))}
 
 	@property 
 	def endo_groups(self):
 		n = self.model.settings.name+'_'
-		gs = OS(['g_ID_alwaysendo','g_ID_exoincalib'])
+		gs = OS(['g_ID_alwaysendo','g_ID_exoincalib', "g_ID_currapp"])
 		# gs += OS(['g_debug']) # debugging state
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_endoincalib','g_minobj_alwaysendo'])-OS(['g_ID_exoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_ID_gamma_tau','g_minobj_alwaysendo',"g_ID_mu_endoincalib"])-OS(['g_ID_exoincalib', "g_ID_currapp"]))}
+		elif self.state == "ID_calibrate_CNS":
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(["g_ID_mu_endoincalib_CNScalib"])-OS(['g_ID_exoincalib']))}
 		elif self.state == 'EOP':
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_EOP_exoincalib']))}
 		elif self.state == 'EOP_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_ID_endoincalib','g_EOP_endoincalib','g_minobj_alwaysendo'])-OS(['g_ID_exoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_ID_gamma_tau',"g_ID_mu_endoincalib",'g_EOP_endoincalib','g_minobj_alwaysendo'])-OS(['g_ID_exoincalib', "g_ID_currapp"]))}
 
 	@property
 	def add_solve(self):
 		if self.state in ('ID_calibrate','EOP_calibrate'):
 			return self.add_bounds + f"""solve {self.model.settings.get_conf('name')} using NLP min {self.g('minobj').write()};"""
+		elif self.state in ("ID_calibrate_CNS"):
+			return self.add_bounds + f"""solve {self.model.settings.get_conf('name')} using CNS;"""
 		else:
 			# return f"""solve {self.model.settings.get_conf('name')} using NLP min {'testminobj'};""" # debugging state
 			return None
 
 	@property
 	def add_bounds(self):
-		s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib").write()}) = 0.000001;\n""" +\
-			f"""{self.g("gamma_tau").write(l=".lo")}$({self.g("ID_e2t").write()} and {self.g("kno_ID_TU").write(alias={"n":"nn"})}) = 0;\n"""+\
-			f"""{self.g('PwThat').write(l='.lo')}$({self.g('ID_int').write()} or {self.g('ID_inp').write()}) = 0;\n"""
+		if self.state in ("ID_calibrate", "EOP_calibrate"):
+			s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib").write()}) = 0.000001;\n"""+\
+				f"""{self.g("gamma_tau").write(l=".lo")}$({self.g("ID_e2t").write()} and {self.g("kno_ID_TU").write(alias={"n":"nn"})}) = 0;\n"""
+		elif self.state in ("ID_calibrate_CNS"):
+			s = f"""{self.g("mu").write(l=".lo")}$({self.g("ID_mu_endoincalib_CNScalib").write()}) = 0.000001;\n"""
+		s += f"""{self.g('PwThat').write(l='.lo')}$({self.g('ID_int').write()} or {self.g('ID_inp').write()}) = 0;\n"""
 		if self.state == "EOP_calibrate":
 			return s + f"""{self.g("sigmaG").write(l=".lo")}$({self.g("kno_EOP_CU").write()}) = 0;\n"""+\
 					   f"""{self.g('PwThat').write(l='.lo')}$({self.g('EOP_int').write()} or {self.g('EOP_inp').write()})=0;\n"""
@@ -350,7 +379,7 @@ class abate(gmspython):
 					 f"M_{self.model.settings.name}_ID_agg": self.init_agg('ID'),
 					 f"M_{self.model.settings.name}_ID_calib_aux": self.init_ID_calib_aux()}}
 		# blocks.update({f"M_testminobj": self.M_testminobj}) # debugging state
-		if 'calibrate' in self.state:
+		if self.state in ("ID_calibrate", "EOP_calibrate"):
 			blocks[f"M_{self.model.settings.name}_ID_minobj"]= self.init_minobj('ID')
 		if 'EOP' in self.state:
 			blocks.update({**{f"M_{tree}": self.eqtext(tree) for tree in self.ns_local if tree.startswith('EOP_')},
