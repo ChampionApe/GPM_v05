@@ -260,6 +260,7 @@ class abate(gmspython):
 		db["qD"] = db["qD"].vals.append((self.g("coverage_potentials_ID").rctree_pd(self.g("ID_nonbaseC")) * db.get("qD").rename_axis(self.n('nn'))).droplevel(1))
 		if currapp:
 			db["currapp"] = self.get("current_applications_ID").rename("currapp")
+			db["currapp_mod"] = self.get("current_applications_ID").rename("currapp_mod")
 			if 'EOP' in self.state:
 				db["currapp_EOP"] = self.get("current_applications_EOP").rename("currapp_EOP")
 		return db 

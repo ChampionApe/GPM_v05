@@ -21,14 +21,15 @@ parameters
 	load_mu[n,nn]
 	A3_ID_modelstat
 	A3_ID_solvestat
-	eta_l1[n,l1]
-	sigma_l1[n,l1]
-	mu_l1[n,nn,l1]
 	load_minobj
 	load_weight_mu
 	load_mubar[n,nn]
 	A3_ID_calibrate_modelstat
 	A3_ID_calibrate_solvestat
+	sol_qD[l1,n]
+	sol_PwThat[l1,n]
+	sol_mu[l1,n,nn]
+	sol_gamma_tau[l1,n,nn]
 ;
 
 $GDXIN %ID_0%
@@ -55,12 +56,13 @@ $load load_gamma_tau
 $load load_mu
 $load A3_ID_modelstat
 $load A3_ID_solvestat
-$load eta_l1
-$load sigma_l1
-$load mu_l1
 $load load_minobj
 $load load_weight_mu
 $load load_mubar
 $load A3_ID_calibrate_modelstat
 $load A3_ID_calibrate_solvestat
+$load sol_qD
+$load sol_PwThat
+$load sol_mu
+$load sol_gamma_tau
 $offMulti

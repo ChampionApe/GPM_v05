@@ -95,9 +95,6 @@ sets
 	ID_mu_endoincalib_CNScalib[n,nn]
 	ID_mu_exo_CNScalib[n,nn]
 	ID_q_unique[n]
-	eta_l1_subset[n]
-	sigma_l1_subset[n]
-	mu_l1_subset[n,nn]
 ;
 
 $GDXIN %ID_0%
@@ -172,8 +169,6 @@ $load ID_t_all
 $load ai
 $load ID_nonbaseC
 $load ID_q_unique
-$load eta_l1_subset
-$load sigma_l1_subset
 $load alias_
 $load ID_map_all
 $load map_ID_EC
@@ -195,6 +190,5 @@ $load ID_mu_endoincalib
 $load ID_mu_exo
 $load ID_mu_endoincalib_CNScalib
 $load ID_mu_exo_CNScalib
-$load mu_l1_subset
 $GDXIN
 $offMulti
