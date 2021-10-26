@@ -72,6 +72,38 @@ $BLOCK M_A3_ID_calib_aux
 	);
 	E_currapp_mod_A3[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * ((qD[nnnn]-epsi)/qD[n])) + epsi;
 $ENDBLOCK
-$BLOCK M_A3_ID_minobj 
-	E_minobj_ID_A3..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
+$BLOCK M_EOP_CU 
+	E_sout_EOP_CU[n,nn]$(map_EOP_CU[n,nn] and bra_o_EOP_CU[n])..	share[n,nn] =E= mu[n,nn] * exp((PbT[nn]-PwThat[n])*sigma[nn])/sum(nnn$(map_EOP_CU[nnn,nn]), mu[nnn,nn] * exp((PbT[nn]-PwThat[nnn])*sigma[nn]));
+	E_snout_EOP_CU[n,nn]$(map_EOP_CU[n,nn] and bra_no_EOP_CU[n])..	share[n,nn] =E= mu[n,nn] * exp((PwThat[nn]-PwThat[n])*sigma[nn])/sum(nnn$(map_EOP_CU[nnn,nn]), mu[nnn,nn] * exp((PwThat[nn]-PwThat[nnn])*sigma[nn]));
+	E_pout_EOP_CU[n]$(EOP_out_EOP_CU[n])..	PbT[n] =E= sum(nn$(map_EOP_CU[nn,n]), share[nn,n]*PwThat[nn]);
+	E_pnout_EOP_CU[n]$(kno_no_EOP_CU[n])..	PwThat[n] =E= sum(nn$(map_EOP_CU[nn,n]), share[nn,n]*PwThat[nn]);
+	E_qout_EOP_CU[n]$(bra_o_EOP_CU[n])..	qD[n] =E= sum(nn$(map_EOP_CU[n,nn]), share[n,nn]*qS[nn])+epsi;
+	E_qnout_EOP_CU[n]$(bra_no_EOP_CU[n])..	qD[n] =E= sum(nn$(map_EOP_CU[n,nn]), share[n,nn]*(qD[nn]-epsi))+epsi;
+$ENDBLOCK
+$BLOCK M_EOP_TU 
+	E_p_EOP_TU[n]$(kno_EOP_TU[n])..	PwThat[n] =E= sum(nn$(map_EOP_TU[nn,n] and EOP_out[nn]), share[nn,n]*PbT[nn])+sum(nn$(map_EOP_TU[nn,n] and not EOP_out[nn]), share[nn,n]*PwThat[nn]);
+	E_sout_EOP_TU[n,nn]$(map_EOP_TU[n,nn] and bra_o_EOP_TU[n])..	share[n,nn] =E= mu[n,nn]*(PbT[n]/PwThat[nn])**(-eta[nn])/(sum(nnn$(map_EOP_TU[nnn,nn] and EOP_out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwThat[nn])**(-eta[nn]))+sum(nnn$(map_EOP_TU[nnn,nn] and not EOP_out[nnn]), mu[nnn,nn]*(PwThat[nnn]/PwThat[nn])**(-eta[nn])));
+	E_snout_EOP_TU[n,nn]$(map_EOP_TU[n,nn] and bra_no_EOP_TU[n])..	share[n,nn] =E= mu[n,nn]*(PwThat[n]/PwThat[nn])**(-eta[nn])/(sum(nnn$(map_EOP_TU[nnn,nn] and EOP_out[nnn]), mu[nnn,nn]*(PbT[nnn]/PwThat[nn])**(-eta[nn]))+sum(nnn$(map_EOP_TU[nnn,nn] and not EOP_out[nnn]), mu[nnn,nn]*(PwThat[nnn]/PwThat[nn])**(-eta[nn])));
+	E_qout_EOP_TU[n]$(bra_o_EOP_TU[n])..	qS[n] =E= sum(nn$(map_EOP_TU[n,nn]), share[n,nn]*qD[nn]);
+	E_qnout_EOP_TU[n]$(bra_no_EOP_TU[n])..	qD[n] =E= sum(nn$(map_EOP_TU[n,nn]), share[n,nn]*qD[nn]);
+$ENDBLOCK
+$BLOCK M_EOP_TX 
+	E_sout_EOP_TX[n,nn]$(map_EOP_TX[n,nn] and bra_o_EOP_TX[n])..	share[n,nn] =E= mu[n,nn] * (PbT[nn]/PwThat[n])**(sigma[nn]);
+	E_snout_EOP_TX[n,nn]$(map_EOP_TX[n,nn] and bra_no_EOP_TX[n])..	share[n,nn] =E= mu[n,nn] * (PwThat[nn]/PwThat[n])**(sigma[nn]);
+	E_pout_EOP_TX[n]$(EOP_out_EOP_TX[n])..	PbT[n] =E= sum(nn$(map_EOP_TX[nn,n]),share[nn,n]*PwThat[nn]);
+	E_pnout_EOP_TX[n]$(kno_no_EOP_TX[n])..	PwThat[n] =E= sum(nn$(map_EOP_TX[nn,n]),share[nn,n]*PwThat[nn]);
+	E_qout_EOP_TX[n]$(bra_o_EOP_TX[n])..	qD[n] =E= sum(nn$(map_EOP_TX[n,nn]), share[n,nn]*qS[nn])+epsi;
+	E_qnout_EOP_TX[n]$(bra_no_EOP_TX[n])..	qD[n] =E= sum(nn$(map_EOP_TX[n,nn]), share[n,nn]*(qD[nn]-epsi))+epsi;
+$ENDBLOCK
+$BLOCK M_A3_EOP_agg 
+	E_aggqD_EOP_A3[n]$(ai[n])..	qD[n] =E= sum(nn$(ID_i2ai[nn,n] or EOP_i2ai[nn,n]), qD[nn]);
+	E_pMhat_EOP_A3[z]..	pMhat[z] =E= pM[z]+sum(n$(m2c[z,n]), theta[z,n]*(errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n])*(PbT[n]-pM[z]-muG[n])-sigmaG[n]*@std_pdf((pM[z]-PbT[n]+muG[n])/sigmaG[n])));
+$ENDBLOCK
+$BLOCK M_A3_EOP_Em 
+	E_EOP_qS_A3[n]$(EOP_out[n])..	qS[n] =E= sum(z$(m2c[z,n]), M0[z]*theta[z,n]*errorf((pM[z]-PbT[n]+muG[n])/sigmaG[n]));
+	E_EOP_M_A3[z]..	M[z] =E= M0[z]-sum(n$(m2c[z,n]), qS[n]);
+	E_EOP_PwThat_A3[n]$(EOP_inp[n])..	PwThat[n] =E= PwT[n]+sum(z, sum(nn$(EOP_i2ai[n,nn]), phi[z,nn]*pMhat[z]));
+$ENDBLOCK
+$BLOCK M_A3_EOP_calib_aux 
+	E_currapp_EOP_A3[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
 $ENDBLOCK
