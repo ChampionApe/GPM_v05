@@ -95,6 +95,7 @@ sets
 	ID_mu_endoincalib_CNScalib[n,nn]
 	ID_mu_exo_CNScalib[n,nn]
 	ID_q_unique[n]
+	ID_electricity_set[n]
 	EOP_map_all[n,nn]
 	EOP_inp[n]
 	EOP_out[n]
@@ -133,6 +134,7 @@ sets
 	m2t[z,n]
 	m2u[z,n]
 	EOP_q_unique[n]
+	EOP_electricity_set[n]
 ;
 
 $GDXIN %ID_0%
@@ -207,6 +209,7 @@ $load ID_t_all
 $load ai
 $load ID_nonbaseC
 $load ID_q_unique
+$load ID_electricity_set
 $load EOP_inp
 $load EOP_out
 $load EOP_int
@@ -237,6 +240,7 @@ $load kno_no_EOP_TX
 $load bra_o_EOP_TX
 $load bra_no_EOP_TX
 $load EOP_q_unique
+$load EOP_electricity_set
 $load alias_
 $load ID_map_all
 $load map_ID_EC

@@ -498,6 +498,30 @@ class aggregates:
 		RHS = f"""{pM}+sum({n}$({m2c}), {theta}*(errorf(({pM}-{PbT}+{muG})/{sigmaG})*({PbT}-{pM}-{muG})-{sigmaG}*@std_pdf(({pM}-{PbT}+{muG})/{sigmaG})))"""
 		return equation(name,self.pMhat.doms(),conditions,self.pMhat.write(),RHS)
 
+class endo_elecprice:
+	def __init__(self):
+		pass
+	def add_symbols(self, db):
+		[setattr(self, sym, db[sym]) for sym in ("n", "EOP_electricity_set", "ID_electricity_set", "PwT", "elec_scale", "elec_elast", "qD", "ID_i2ai", "EOP_i2ai")];
+		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
+	def add_conditions(self):
+		self.conditions = {"ID":self.ID_electricity_set.write(), "EOP":self.EOP_electricity_set.write()}
+	def a(self,attr,lot_indices=[],l='',lag={}):
+		return getattr(self,attr).write(alias=create_alias_dict(self.aliases,lot_indices),l=l,lag=lag)
+	def run(self,name):
+		nn = self.a('n',[(0,1)])
+		elec_scale, elec_elast = self.a("elec_scale"), self.a("elec_elast")
+		ID_i2ai, EOP_i2ai = self.a("ID_i2ai"), self.a("EOP_i2ai")
+		qD2 = self.a("qD", [(0,1)])
+		text = self.e_elec(f"E_PwT_elec_ID_{name}", self.conditions["ID"], elec_scale, nn, ID_i2ai, qD2, elec_elast)+'\n\t'
+		text += self.e_elec(f"E_PwT_elec_EOP_{name}", self.conditions["EOP"], elec_scale, nn, EOP_i2ai, qD2, elec_elast)
+		return text
+	
+	def e_elec(self,name,condition, elec_scale, nn, i2ai, qD2, elec_elast):
+		RHS = f"({elec_scale} * sum({nn}$({i2ai}), {qD2}))**({elec_elast})"
+		return equation(name, self.PwT.doms(), condition, self.PwT.write(), RHS)
+
+
 class currentapplications:
 	def __init__(self):
 		pass

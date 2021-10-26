@@ -62,7 +62,7 @@ class abate(gmspython):
 		return ['weight_mu','mubar','minobj']
 	@property
 	def eop_vars(self):
-		return ['muG','sigmaG','currapp_EOP']
+		return ['muG','sigmaG','currapp_EOP',"elec_scale", "elec_elast"]
 	@property
 	def eop_calibrate_vars(self):
 		return ['w_mu_EOP','muGbar','sigmaGbar','w_EOP','theta']
@@ -107,6 +107,8 @@ class abate(gmspython):
 			self.model.database[self.n("ID_mu_endoincalib_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'not': DataBase.gpy_symbol(baseC)}), self.get('map_ID_BX'), self.g('map_ID_Y').rctree_pd({"not":[self.g("kno_no_ID_Y")]}))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n("ID_mu_exo_CNScalib")] = pd.MultiIndex.from_tuples(OS.union(*[s.tolist() for s in (self.g('map_ID_EC').rctree_pd({'and': DataBase.gpy_symbol(baseC)}), self.g('map_ID_CU').rctree_pd(self.g('bra_no_ID_TU')), self.get('map_ID_TX'), self.get('map_ID_TU'), self.g('map_ID_CU').rctree_pd(self.g('bra_ID_BU')), self.g("map_ID_Y").rctree_pd(self.g("kno_no_ID_Y")), self.get("map_ID_BU"))]), names = [self.n('n'),self.n('nn')])
 			self.model.database[self.n('ID_q_unique')] = self.u2t_unique(state='ID').levels[0]
+			#Set related to ad hoc endogenous electricity price
+			self.model.database[self.n("ID_electricity_set")] = pd.Series(0, index=tech['ID']['Q2P'])[pd.Series(0, index=tech['ID']['Q2P']).index.get_level_values("nn") == "electricity"].droplevel("nn").index
 		elif state == 'EOP':
 			self.ns.update({s: df(s,kwargs) for s in ['m2c','m2t','m2u','theta','EOP_u2t_unique']})
 			[DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"], tech["EOP"]["unit_costs_EOP"]]];
@@ -117,6 +119,8 @@ class abate(gmspython):
 			self.model.database[self.n('m2u')] = DataBase_wheels.appmap(self.get('map_EOP_CU'),DataBase_wheels.map_from_mi(self.get('m2c'),self.n('n'),self.n('z')),self.n('nn')).swaplevel(0,1).set_names([self.n('z'),self.n('n')])
 			self.model.database[self.n('theta')] = tech['EOP']['coverage_potentials_EOP'].swaplevel(0,1).rename(self.n('theta'))
 			self.model.database[self.n('EOP_q_unique')] = self.u2t_unique(state='EOP').levels[0]
+			#Set related to ad hoc endogenous electricity price
+			self.model.database[self.n("EOP_electricity_set")] = pd.Series(0, index=tech['EOP']['Q2P'])[pd.Series(0, index=tech['EOP']['Q2P']).index.get_level_values("nn") == "electricity"].droplevel("nn").index
 
 	def df_var(self,val,var,domain=None,scalar=False):
 		return pd.Series(val, index = domain, name = self.n(var)) if not scalar else DataBase.gpy_symbol(val,**{'name': self.n(var)})
@@ -184,6 +188,10 @@ class abate(gmspython):
 			return self.df_var(1,var,domain=self.get('kno_EOP_CU'))
 		elif var in ['weight_mu']:
 			return self.df_var(10,var,scalar=True)
+		elif var == 'elec_scale':
+			return self.df_var(1/70,var,scalar=True)
+		elif var == "elec_elast":
+			return self.df_var(1,var,scalar=True)
 		elif var in ['w_mu_EOP']:
 			return self.df_var(30,var,scalar=True)
 		elif var == 'currapp_EOP':
@@ -255,7 +263,7 @@ class abate(gmspython):
 			db["qS"], db["qD"], db["mu"], db["PwThat"], db["PbT"], db["PwT"] = qS, qD, mu, PwThat, PbT, PwT
 			DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
-	def add_calib_data(self, inputIO, currapp=True):
+	def add_calib_data(self, inputIO, currapp=True, elec=False):
 		pm = excel2py.xl2PM.pm_from_workbook(inputIO,{'IO': 'vars'})
 		db = DataBase.GPM_database()
 		db["qD"] = pm.database["qD"].vals
@@ -267,6 +275,10 @@ class abate(gmspython):
 			db["currapp_mod"] = self.get("current_applications_ID").rename("currapp_mod")
 			if 'EOP' in self.state:
 				db["currapp_EOP"] = self.get("current_applications_EOP").rename("currapp_EOP")
+		if elec:
+			DataBase.GPM_database.add_or_merge(self.model.database, DataBase.gpy_symbol(1/pm.database["qD"].vals["electricity"],**{'name': self.n("elec_scale")}), "second")
+			# [DataBase.GPM_database.add_or_merge(self.model.database,s,'second') for s in [tech['EOP']['mu'], tech["EOP"]["current_applications_EOP"], tech["EOP"]["coverage_potentials_EOP"], tech["EOP"]["unit_costs_EOP"]]];
+			# db["elec_scale"] = DataBase.gpy_symbol(1/pm.database["qD"].vals["electricity"],**{'name': self.n("elec_scale")})
 		return db 
 		# DataBase.GPM_database.merge_dbs(self.model.database,db,'second')
 
@@ -274,7 +286,9 @@ class abate(gmspython):
 	def group_conditions(self,group):
 		if group == 'g_ID_alwaysexo':
 			return [{'sigma': self.g('ID_kno_inp'), 'eta': self.g('ID_kno_out'), 'phi': self.g('ai'), 
-			  		 'pM': None, 'PwT': self.g('ID_inp'), 'qS': self.g('ID_out'),'epsi': None}] #'mu': self.g('ID_mu_exo')
+			  		 'pM': None, 
+					 'PwT': {"and": [self.g('ID_inp'), {"not":self.g("ID_electricity_set")}]},
+					 'qS': self.g('ID_out'),'epsi': None}] #'mu': self.g('ID_mu_exo')
 		elif group == "g_ID_mu_exo":
 			return [{"mu":self.g("ID_mu_exo")}]
 		elif group == "g_ID_mu_exo_CNScalib":
@@ -300,7 +314,7 @@ class abate(gmspython):
 			return [{'currapp': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]},
 					 'currapp_mod': {'and': [self.g('ID_e2t'), DataBase.gpy_symbol(self.get('kno_ID_TU').rename(self.n('nn')),**{'name': self.n('kno_ID_TU')})]}}]
 		elif group == 'g_EOP_alwaysexo':
-			return [{'sigma': self.g('EOP_kno_inp'), 'mu': self.g('EOP_map_all'), 'eta': self.g('EOP_kno_out'), 'theta': self.g('m2c'),'PwT': self.g('EOP_inp')}]
+			return [{'sigma': self.g('EOP_kno_inp'), 'mu': self.g('EOP_map_all'), 'eta': self.g('EOP_kno_out'), 'theta': self.g('m2c'),'PwT': {"and": [self.g('EOP_inp'), {"not":self.g("EOP_electricity_set")}]}}]
 		elif group == 'g_EOP_alwaysendo':
 			return [{'PwThat': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'PbT': self.g('EOP_out'), 
 					 'qD': {'or': [self.g('EOP_int'), self.g('EOP_inp')]}, 'qS': self.g('EOP_out'), 'M': None, 'share': self.g('EOP_map_all')}]
@@ -314,13 +328,19 @@ class abate(gmspython):
 			return [{'weight_mu': None, 'mubar': {'and': [self.g('map_ID_CU'), self.g('bra_ID_TU')]}}]
 		elif group == 'g_minobj_EOP_alwaysexo':
 			return [{'w_EOP': None, 'w_mu_EOP': None, 'muGbar': self.g('kno_EOP_CU'),'sigmaGbar': self.g('kno_EOP_CU')}]
+		elif group == "g_electricity_alwaysexo":
+			return [{"elec_scale":None, "elec_elast":None}]
+		elif group == "g_electricity_endo_ID":
+			return [{"PwT": self.g("ID_electricity_set")}]
+		elif group == "g_electricity_endo_EOP":
+			return [{"PwT":self.g("EOP_electricity_set")}]
 		# elif group == 'g_debug':
 			# return [{'testminobj': None}] # Debugging state
 
 	@property
 	def exo_groups(self):
 		n = self.model.settings.name+'_'
-		gs = OS(['g_ID_alwaysexo','g_ID_gamma_tau', "g_ID_mu_exo", "g_ID_mu_endoincalib"])
+		gs = OS(['g_ID_alwaysexo','g_ID_gamma_tau', "g_ID_mu_exo", "g_ID_mu_endoincalib", "g_electricity_endo_ID"])
 		if self.state == 'ID':
 			return {n+g: self.add_group(g,n=n) for g in gs}
 		elif self.state == 'ID_calibrate':
@@ -328,11 +348,13 @@ class abate(gmspython):
 		elif self.state == "ID_calibrate_CNS":
 			return {n+g: self.add_group(g,n=n) for g in (gs + OS(['g_ID_exoincalib',"g_ID_mu_exo_CNScalib"]) - OS(["g_ID_mu_exo","g_ID_mu_endoincalib"]))}
 		elif self.state == 'EOP':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_EOP_endoincalib']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_EOP_endoincalib', "g_electricity_endo_EOP"]))}
+		elif self.state == "EOP_elec":
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_EOP_endoincalib', "g_electricity_alwaysexo"])-OS(['g_electricity_endo_ID']))}
 		elif self.state == 'EOP_calibrate':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib','g_minobj_ID_alwaysexo','g_minobj_EOP_alwaysexo',"g_ID_currapp"])-OS(['g_ID_gamma_tau']))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib','g_minobj_ID_alwaysexo','g_minobj_EOP_alwaysexo',"g_ID_currapp","g_electricity_endo_EOP"])-OS(['g_ID_gamma_tau']))}
 		elif self.state == 'EOP_calibrate_CNS':
-			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib', "g_ID_mu_exo_CNScalib", "g_EOP_endoincalib"])-OS(["g_ID_mu_exo", "g_ID_mu_endoincalib"]))}
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysexo','g_ID_exoincalib', "g_ID_mu_exo_CNScalib", "g_EOP_endoincalib","g_electricity_endo_EOP"])-OS(["g_ID_mu_exo", "g_ID_mu_endoincalib"]))}
 
 	@property 
 	def endo_groups(self):
@@ -347,6 +369,8 @@ class abate(gmspython):
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(["g_ID_mu_endoincalib_CNScalib"])-OS(['g_ID_exoincalib']))}
 		elif self.state == 'EOP':
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_EOP_currapp']))}
+		elif self.state == "EOP_elec":
+			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_EOP_currapp', "g_electricity_endo_EOP", "g_electricity_endo_ID"]))}
 		elif self.state == 'EOP_calibrate':
 			return {n+g: self.add_group(g,n=n) for g in (gs+OS(['g_EOP_alwaysendo','g_ID_gamma_tau',"g_ID_mu_endoincalib",'g_EOP_endoincalib','g_minobj_alwaysendo'])-OS(['g_ID_exoincalib', "g_ID_currapp"]))}
 		elif self.state == 'EOP_calibrate_CNS':
@@ -392,6 +416,8 @@ class abate(gmspython):
 						   **{f"M_{self.model.settings.name}_EOP_agg": self.init_agg('EOP'),
 							  f"M_{self.model.settings.name}_EOP_Em": self.init_EOP_emissions(),
 							  f"M_{self.model.settings.name}_EOP_calib_aux": self.init_EOP_calib_aux()}})
+			if "elec" in self.state:
+				blocks[f"M_{self.model.settings.name}_endo_elecprice"] = self.init_endo_elecprice()
 		if self.state == 'EOP_calibrate':
 			blocks[f"M_{self.model.settings.name}_EOP_minobj"] = self.init_minobj('EOP')
 		return blocks
@@ -404,12 +430,19 @@ class abate(gmspython):
 		elif 'EOP' in self.state:
 			mblocks += OS([f"M_{tree}" for tree in self.ns_local if tree.startswith('EOP_')]+[f"M_{self.model.settings.name}_"+m for m in ('EOP_agg','EOP_Em','EOP_calib_aux')])
 			mblocks -= OS([f"M_{self.model.settings.name}_ID_agg"])
+			if "elec" in self.state:
+				mblocks += OS([f"M_{self.model.settings.name}_endo_elecprice"])
 		if self.state == 'EOP_calibrate':
 			mblocks += OS([f"M_{self.model.settings.name}_EOP_minobj"])
 		return mblocks
 	# @property
 	# def M_testminobj(self):
 		# return f"E_testminobject..	testminobj =E= 0;" # Debugging state
+	def init_endo_elecprice(self):
+		s = getattr(gams_abatement,'endo_elecprice')()
+		s.add_symbols(self.model.database)
+		s.add_conditions()
+		return s.run(self.model.settings.name)
 	def init_ID_sum(self):
 		s = getattr(gams_abatement,'ID_sum')()
 		s.add_symbols(self.model.database,self.ns)
