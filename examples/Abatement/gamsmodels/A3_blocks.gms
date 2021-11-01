@@ -107,7 +107,3 @@ $ENDBLOCK
 $BLOCK M_A3_EOP_calib_aux 
 	E_currapp_EOP_A3[z,n]$(m2t[z,n])..	currapp_EOP[z,n] =E= sum(nn$(map_EOP_TU[nn,n] and m2u[z,nn]), qD[nn])/M0[z];
 $ENDBLOCK
-$BLOCK M_A3_endo_elecprice 
-	E_PwT_elec_ID_A3[n]$(ID_electricity_set[n])..	PwT[n] =E= (elec_scale * sum(nn$(ID_i2ai[n,nn]), qD[nn]))**(elec_elast);
-	E_PwT_elec_EOP_A3[n]$(EOP_electricity_set[n])..	PwT[n] =E= (elec_scale * sum(nn$(EOP_i2ai[n,nn]), qD[nn]))**(elec_elast);
-$ENDBLOCK

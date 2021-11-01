@@ -32,14 +32,6 @@ $GROUP A3_g_EOP_currapp
 currapp_EOP[z,n]$(m2t[z,n]) ""
 ;
 
-$GROUP A3_g_electricity_endo_EOP
-PwT[n]$(EOP_electricity_set[n]) ""
-;
-
-$GROUP A3_g_electricity_endo_ID
-PwT[n]$(ID_electricity_set[n]) ""
-;
-
 $GROUP A3_g_ID_alwaysexo
 sigma[n]$(ID_kno_inp[n]) ""
 eta[n]$(ID_kno_out[n]) ""
@@ -62,6 +54,10 @@ $GROUP A3_g_ID_mu_endoincalib
 mu[n,nn]$(ID_mu_endoincalib[n,nn]) ""
 ;
 
+$GROUP A3_g_electricity_endo_ID
+PwT[n]$(ID_electricity_set[n]) ""
+;
+
 $GROUP A3_g_EOP_alwaysexo
 sigma[n]$(EOP_kno_inp[n]) ""
 mu[n,nn]$(EOP_map_all[n,nn]) ""
@@ -75,9 +71,8 @@ muG[n]$(kno_EOP_CU[n]) ""
 sigmaG[n]$(kno_EOP_CU[n]) ""
 ;
 
-$GROUP A3_g_electricity_alwaysexo
-elec_scale ""
-elec_elast ""
+$GROUP A3_g_electricity_endo_EOP
+PwT[n]$(EOP_electricity_set[n]) ""
 ;
 
 @load_level(A3_g_ID_alwaysendo,%qmark%%ID_0%");
@@ -85,12 +80,11 @@ elec_elast ""
 @load_level(A3_g_ID_currapp,%qmark%%ID_0%");
 @load_level(A3_g_EOP_alwaysendo,%qmark%%ID_0%");
 @load_level(A3_g_EOP_currapp,%qmark%%ID_0%");
-@load_level(A3_g_electricity_endo_EOP,%qmark%%ID_0%");
-@load_level(A3_g_electricity_endo_ID,%qmark%%ID_0%");
 @load_fixed(A3_g_ID_alwaysexo,%qmark%%ID_0%");
 @load_fixed(A3_g_ID_gamma_tau,%qmark%%ID_0%");
 @load_fixed(A3_g_ID_mu_exo,%qmark%%ID_0%");
 @load_fixed(A3_g_ID_mu_endoincalib,%qmark%%ID_0%");
+@load_fixed(A3_g_electricity_endo_ID,%qmark%%ID_0%");
 @load_fixed(A3_g_EOP_alwaysexo,%qmark%%ID_0%");
 @load_fixed(A3_g_EOP_endoincalib,%qmark%%ID_0%");
-@load_fixed(A3_g_electricity_alwaysexo,%qmark%%ID_0%");
+@load_fixed(A3_g_electricity_endo_EOP,%qmark%%ID_0%");
