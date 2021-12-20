@@ -9,3 +9,10 @@ A group of Python classes that is especially equipped to work with GAMS in. This
   - _gams_model:_ An executable class that is used to interact with GAMS. Includes prespecified ways to solve particularly difficult problems with the 'sneaky_solve' method. 
 - **gmspython classes:** Classes that builds on top of the DB2Gams and DataBase classes. This can be used to write and solve entire gams models based on a database and settings. The gmspython classes includes an integration class (gmspython_i) that can be used to combine and integrate various gmspython classes. 
   - Under the folder examples, "Example1.ipynb" shows how these classes are used to build a dynamic general equilibrium model with an arbitrarily nested production structure and an arbitrary number of goods. The model includes methods for calibration to national accounts (input-output data).
+
+
+## Examples:
+
+Under "Examples" there is a number of models specified using the gmspython class. This includes:
+- **Abatement:** A model that sets up a partial equilibrium model with end-of-pipe and input-displacing abatement technologies.
+- **GamsPythonCGE:** A class that generates CGE models from balanced IO data. Nesting structures can be specified by arranging data (from excel or pandas).
