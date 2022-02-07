@@ -8,7 +8,7 @@ reslim = 1000000
 # Limit for slow progress, Range: [12,MAXINT], Default: 12
 # lfnicr = 100
 # Optimality tolerance for reduced gradient
-RTREDG = 1.e-8
+# RTREDG = 1.e-8
 # Absolute pivot tolerance, Range: [2.2e-16, 1.e-7], Default: 1.e-10
 rtpiva = 2.22044605e-16
 Threads=4

@@ -502,7 +502,7 @@ class currentapplications:
 	def __init__(self):
 		pass
 	def add_symbols(self,db,ns):
-		[setattr(self,sym,db[df(sym,ns)]) for sym in ('n','ID_e2t','ID_e2u','map_ID_CU','map_ID_EC','bra_ID_TU','bra_ID_BU','kno_ID_TU','ID_u2t','sigma','mu','gamma_tau','PwThat','qD','currapp','s_uc','currapp_mod')];
+		[setattr(self,sym,db[df(sym,ns)]) for sym in ('n','ID_e2t','ID_e2u','map_ID_CU','map_ID_EC','bra_ID_TU','bra_ID_BU','kno_ID_TU','ID_u2t','sigma','mu','gamma_tau','PwThat','qD','currapp','s_uc','currapp_mod','epsi')];
 		self.aliases = {i: db.alias_dict0[self.n.name][i] for i in range(len(db.alias_dict0[self.n.name]))}
 	def add_conditions(self):
 		self.conditions = {'currapp_ID': self.ID_e2t.write()+' and '+self.a('kno_ID_TU',[(0,1)]),
@@ -524,12 +524,13 @@ class currentapplications:
 		P, P_2, P_3, P_5 = self.a('PwThat'), self.a('PwThat',[(0,1)]), self.a('PwThat',[(0,2)]), self.a('PwThat',[(0,4)])
 		qD, qD_3, qD_4 = self.a('qD'), self.a('qD',[(0,2)]), self.a('qD',[(0,3)])
 		s_uc_2 = self.a('s_uc',[(0,2),(1,3)])
-		text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], nnn, ID_u2t_4,ID_e2u_2, qD, qD_3, self.currapp) +'\n\t'
+		epsi = self.a('epsi')
+		text = self.e_currapp(f"E_currapp_ID_{name}", self.conditions['currapp_ID'], nnn, ID_u2t_4,ID_e2u_2, qD, qD_3, self.currapp,epsi) +'\n\t'
 		text += self.e_s_uc(f"E_share_uc_{name}", self.conditions['share_uc'], nnn, nnnn, nnnnn, ID_u2c_2, ID_tu_3, ID_bu_3, ID_e2u_3, ID_u2t_2, ID_u2t_3, sigma_2, mu, mu_2, gamma_tau_2, P, P_2, P_3, P_5,self.s_uc)+'\n\t'
-		text += self.e_currapp_mod(f"E_currapp_mod_{name}", self.conditions['currapp_mod'],nnn,nnnn,ID_u2t_4,ID_c2e_2,ID_u2c_3,s_uc_2,qD,qD_4,self.currapp_mod)
+		text += self.e_currapp_mod(f"E_currapp_mod_{name}", self.conditions['currapp_mod'],nnn,nnnn,ID_u2t_4,ID_c2e_2,ID_u2c_3,s_uc_2,qD,qD_4,self.currapp_mod,epsi)
 		return text
-	def e_currapp(self,name,conditions,nnn,u2t_4,e2u_2,qD,qD_3,currapp):
-		RHS = f"""sum({nnn}$({u2t_4} and {e2u_2}), {qD_3})/{qD}"""
+	def e_currapp(self,name,conditions,nnn,u2t_4,e2u_2,qD,qD_3,currapp,epsi):
+		RHS = f"""sum({nnn}$({u2t_4} and {e2u_2}), {qD_3})/{qD}+{epsi}"""
 		return equation(name,currapp.doms(),conditions,currapp.write(),RHS)
 	def e_s_uc(self,name,conditions,nnn,nnnn,nnnnn,u2c_2,tu_3,bu_3,e2u_3,u2t_2,u2t_3,sigma_2,mu,mu_2,gamma_tau_2,P,P_2,P_3,P_5,s_uc):
 		RHS = f"""{mu}*exp(({P_2}-{P})*{sigma_2})/(
@@ -537,8 +538,8 @@ class currentapplications:
 	sum({nnn}$({u2c_2} and {bu_3}), {mu_2}*exp({sigma_2}*({P_2}-sum({nnnn}$({e2u_3}), sum({nnnnn}$({u2t_2}), {gamma_tau_2})*sum({nnnnn}$({u2t_3}), {P_5})))))
 	)"""
 		return equation(name,s_uc.doms(), conditions, s_uc.write(),RHS)
-	def e_currapp_mod(self,name,conditions,nnn,nnnn,u2t_4,c2e_2,u2c_3,s_uc_2,qD,qD_4,currapp_mod):
-		RHS = f"""sum([{nnn},{nnnn}]$({u2t_4} and {c2e_2} and {u2c_3}), {s_uc_2} * {qD_4}/{qD})"""
+	def e_currapp_mod(self,name,conditions,nnn,nnnn,u2t_4,c2e_2,u2c_3,s_uc_2,qD,qD_4,currapp_mod,epsi):
+		RHS = f"""sum([{nnn},{nnnn}]$({u2t_4} and {c2e_2} and {u2c_3}), {s_uc_2} * {qD_4}/{qD})+{epsi}"""
 		return equation(name,currapp_mod.doms(),conditions,currapp_mod.write(),RHS)
 
 class minimize_object:

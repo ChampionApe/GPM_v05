@@ -74,8 +74,8 @@ class gams_model:
 		self.run_job(options_run)
 		self.out_db = DataBase.GPM_database(workspace=self.settings.ws,db=self.job.out_db,**kwargs_db)
 		if self.settings.solvestat is True:
-			self.modelstat = self.out_db.get(self.settings.name+'_'+self.settings.state+'_modelstat')
-			self.solvestat = self.out_db.get(self.settings.name+'_'+self.settings.state+'_solvestat')
+			self.modelstat = self.out_db.get(self.settings.get_conf('name')+'_modelstat')
+			self.solvestat = self.out_db.get(self.settings.get_conf('name')+'_solvestat')
 
 	def model_instance(self,add_default_placeholders=True,overwrite=False,**kwargs):
 		if add_default_placeholders is True:

@@ -65,10 +65,13 @@ $BLOCK M_A4_ID_agg
 	E_pMhat_ID_A4[z]..	pMhat[z] =E= pM[z];
 $ENDBLOCK
 $BLOCK M_A4_ID_calib_aux 
-	E_currapp_ID_A4[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp[n,nn] =E= sum(nnn$(ID_u2t[nnn,nn] and ID_e2u[n,nnn]), qD[nnn])/qD[n];
+	E_currapp_ID_A4[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp[n,nn] =E= sum(nnn$(ID_u2t[nnn,nn] and ID_e2u[n,nnn]), qD[nnn])/qD[n]+epsi;
 	E_share_uc_A4[n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n])..	s_uc[n,nn] =E= mu[n,nn]*exp((PwThat[nn]-PwThat[n])*sigma[nn])/(
 	sum(nnn$(map_ID_CU[nnn,nn] and bra_ID_TU[nnn]), mu[nnn,nn]*exp((PwThat[nn]-PwThat[nnn])*sigma[nn]))+
 	sum(nnn$(map_ID_CU[nnn,nn] and bra_ID_BU[nnn]), mu[nnn,nn]*exp(sigma[nn]*(PwThat[nn]-sum(nnnn$(ID_e2u[nnnn,n]), sum(nnnnn$(ID_u2t[n,nnnnn]), gamma_tau[nnnn,nnnnn])*sum(nnnnn$(ID_u2t[nnn,nnnnn]), PwThat[nnnnn])))))
 	);
-	E_currapp_mod_A4[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n]);
+	E_currapp_mod_A4[n,nn]$(ID_e2t[n,nn] and kno_ID_TU[nn])..	currapp_mod[n,nn] =E= sum([nnn,nnnn]$(ID_u2t[nnn,nn] and map_ID_EC[nnnn,n] and map_ID_CU[nnn,nnnn]), s_uc[nnn,nnnn] * qD[nnnn]/qD[n])+epsi;
+$ENDBLOCK
+$BLOCK M_A4_ID_minobj 
+	E_minobj_ID_A4..	minobj =E= sum(map_gamma[n,nn,nnn,nnnn], Sqr(mu[nnn,nnnn]-gamma_tau[n,nn]))+weight_mu*sum([n,nn]$(map_ID_CU[n,nn] and bra_ID_TU[n]), Sqr(mu[n,nn]-mubar[n,nn]));
 $ENDBLOCK

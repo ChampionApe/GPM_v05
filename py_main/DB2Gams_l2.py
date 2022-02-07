@@ -262,7 +262,7 @@ class mgs:
 	Collection of methods for merging gams_settings (classes) into one, to run combined models.
 	"""
 	@staticmethod
-	def merge(ls,ws=None,merge_dbs_adhoc=True,name=None,run_file=None,solve=None):
+	def merge(ls,ws=None,merge_dbs_adhoc=True,name=None,run_file=None,solve=None,clean_exo=True):
 		if ws is None:
 			ws = ls[0].ws
 		gs = gams_settings(work_folder=ws,**{'name':mgs.merge_names(ls,name=name),
@@ -272,6 +272,7 @@ class mgs:
 													  'files': mgs.merge_files(ls),
 													  'collect_files': mgs.merge_collect_files(ls)})
 		mgs.merge_databases(gs,ls,merge_dbs_adhoc)
+		gs.clean_g_exo(clean=clean_exo)
 		return gs
 
 	@staticmethod
@@ -285,7 +286,7 @@ class mgs:
 	@staticmethod
 	def merge_databases(gs_merged,ls,merge_dbs_adhoc):
 		"""
-		Note that if merge_dbs_adhoc is True the databases that share the same name are merged. 
+		Note that if dbs_adhoc is True the databases that share the same name are merged. 
 		However, if symbols overlap in the various databases, these are merged as well. Thus 
 		the underlying data may be altered as well. 
 		"""
@@ -392,16 +393,17 @@ class gams_model_py:
 		self.default_export(repo,export_settings=export_settings)
 
 	def write_default_components(self):
+		write_to_db = [k for k,v in self.settings.databases.items() if v == self.database][0]
 		self.functions = gams_model_py.merge_functions(regex_gms.functions_from_str(default_user_functions()),self.functions)
 		self.components['functions'] = self.write_functions()
 		self.components['sets'] = self.write_sets()
 		self.components['alias'] = self.write_aliased_sets()
 		self.components['sets_other'] = self.write_sets_other()
-		self.components['sets_load'] = self.write_sets_load(self.database.name)
+		self.components['sets_load'] = self.write_sets_load(write_to_db)
 		self.components['parameters'] = self.write_parameters()
-		self.components['parameters_load'] = self.write_parameters_load(self.database.name)
+		self.components['parameters_load'] = self.write_parameters_load(write_to_db)
 		self.components['groups'] = self.write_groups()
-		self.components['groups_load'] = self.write_groups_load(self.database.name)
+		self.components['groups_load'] = self.write_groups_load(write_to_db)
 		self.components['blocks'] = self.write_blocks()
 
 	@staticmethod

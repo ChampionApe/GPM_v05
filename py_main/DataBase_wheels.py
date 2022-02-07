@@ -8,15 +8,26 @@ def append_index_with_1dindex(index1,index2):
 	"""
 	return pd.MultiIndex.from_tuples([a+(b,) for a in index1 for b in index2],names=index1.names+index2.names) if isinstance(index1,pd.MultiIndex) else pd.MultiIndex.from_tuples([(a,b) for a in index1 for b in index2],names=index1.names+index2.names)
 
+def append_index_with_index(index1,index2):
+	"""
+	index1 is a pandas index/multiindex. index 2 is a pandas index/multiindex.
+	Returns a pandas multiindex with the cartesian product of elements in (index1,index2). 
+	NB: If index1 is a sparse multiindex, the cartesian product of (index1,index2) will keep this structure.
+	"""
+	if isinstance(index2,pd.MultiIndex):
+		return pd.MultiIndex.from_tuples([a+b for a in index1 for b in index2],names=index1.names+index2.names) if isinstance(index1,pd.MultiIndex) else pd.MultiIndex.from_tuples([(a,) + b for a in index1 for b in index2],names=index1.names+index2.names)
+	else:
+		return append_index_with_1dindex(index1,index2)
+
 def prepend_index_with_1dindex(index1,index2):
 	return pd.MultiIndex.from_tuples([(b,)+a for a in index1 for b in index2],names=index2.names+index1.names) if isinstance(index1,pd.MultiIndex) else pd.MultiIndex.from_tuples([(b,a) for a in index1 for b in index2],names=index2.names+index1.names)
 
 def slice_in_and_out(all_,exceptions=[],add_to_specific=None):
-	all_ = all_ if type(all_) is set else set(all_)
+	all_ = all_ if type(all_) is set else set(all_)	
 	all_ = all_ if add_to_specific is None else all_.intersection(set(add_to_specific))
 	return all_-set(exceptions)
 
-def repeat_variable_windex(var,index):
+def repeat_variable_windex(var,index)
 	if index.name not in var.index.names:
 		return pd.concat({i: var for i in index},names=index.names)
 	else:
@@ -30,6 +41,8 @@ def apply_map(index_,map_):
 	return [map_[x] for x in index_]
 
 def appmap(map_,mapping,level=None):
+	if isinstance(mapping,pd.MultiIndex):
+		mapping = map_from_mi(mapping,mapping.names[0],mapping.names[1])
 	if isinstance(map_,pd.MultiIndex):
 		return pd.MultiIndex.from_arrays([map_.get_level_values(l) for l in map_.droplevel(level).names]+[map_.get_level_values(level).map(mapping)]).reorder_levels(map_.names)
 	elif isinstance(map_,pd.Index):
@@ -103,7 +116,11 @@ class mi:
 			level = [x for x in mi1.names if x in mi2.names][0]
 			name = [name] if name is not None else [n for n in mi2.names if n!=level]
 			mi_map = {k:v for k,v in mi2.swaplevel(i=level,j=0)}
-		return pd.MultiIndex.from_tuples(zip(*([mi1.get_level_values(x) for x in mi1.droplevel(level).names]+[a])),names=mi1.droplevel(level).names+name)
+		return pd.MultiIndex.from_tuples(zip(*([mi1.get_level_values(x) for x in mi1.droplevel(level).names]+[mi1.get_level_values(level).map(mi_map)])),names=mi1.droplevel(level).names+name)
+
+	@staticmethod
+	def v2_series(s,mi_map,level=None,name=None):
+		return pd.Series(s.values,index = mi.map_v2(s.index,mi_map,name=name),name=s.name)
 
 	@staticmethod
 	def add_ndmi(mi1,mi2,level=None):

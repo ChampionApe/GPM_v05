@@ -92,3 +92,20 @@ class xl2PM:
 		var = pd.DataFrame(pd_sheet.iloc[1:,1:].values, index = pd.Index(pd_sheet.iloc[1:,0],name=domains[1]), columns = pd.Index(pd_sheet.iloc[0,1:], name = domains[2])).stack()
 		var.name = domains[0]
 		return {domains[0]: gpy_symbol(var,**kwargs)}
+
+	@staticmethod
+	def maps_2dmatrix(sheet,**kwargs):
+		""" read in 2d maps arranged in matrix. 
+			Along rows: Common index X. 
+			Columns: Various other indices (Y) that are mapped to index X.
+			Mappings are called X2Y."""
+		pd_sheet = pd.DataFrame(sheet.values)
+		pd_sheet.columns = pd_sheet.iloc[0,:]
+		pd_sheet = pd_sheet.iloc[1:,:]
+		common_index = pd_sheet.columns[0]
+		output = {}
+		for col in set(pd_sheet.columns)-set([common_index]):
+			n = '2'.join([common_index,col])
+			output[n] = pd.MultiIndex.from_frame(pd_sheet[[common_index,col]].dropna())
+			output[n].name = n
+		return output

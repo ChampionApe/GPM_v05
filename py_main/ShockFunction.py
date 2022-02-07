@@ -149,7 +149,7 @@ class AddShocks:
 			(3) Store solution in database.
 		"""
 		self.model = model
-		self.name = self.model.settings.name+'_'+self.model.settings.state if model_name is None else model_name
+		self.name = self.model.settings.get_conf('name') if model_name is None else model_name
 		self.solvetext = solvetext
 		self.UEVAS = {'sol': {}, 'adj': {}}
 

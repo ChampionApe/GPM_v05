@@ -32,7 +32,18 @@ mu[n,nn]$(ID_mu_endoincalib[n,nn]) ""
 gamma_tau[n,nn]$((ID_e2t[n,nn] and kno_ID_TU[nn])) ""
 ;
 
+$GROUP A4_g_minobj_alwaysendo
+minobj ""
+;
+
+$GROUP A4_g_minobj_ID_alwaysexo
+weight_mu ""
+mubar[n,nn]$((map_ID_CU[n,nn] and bra_ID_TU[n])) ""
+;
+
 @load_level(A4_g_ID_alwaysendo,%qmark%%ID_0%");
-@load_level(A4_g_ID_exoincalib,%qmark%%ID_0%");
+@load_level(A4_g_ID_endoincalib,%qmark%%ID_0%");
+@load_level(A4_g_minobj_alwaysendo,%qmark%%ID_0%");
+@load_fixed(A4_g_ID_exoincalib,%qmark%%ID_0%");
 @load_fixed(A4_g_ID_alwaysexo,%qmark%%ID_0%");
-@load_fixed(A4_g_ID_endoincalib,%qmark%%ID_0%");
+@load_fixed(A4_g_minobj_ID_alwaysexo,%qmark%%ID_0%");
