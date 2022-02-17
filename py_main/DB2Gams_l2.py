@@ -184,7 +184,7 @@ class gams_settings:
 		return database
 
 	def __getstate__(self):
-		if 'run_file' is not None and 'run_file' in self.export_settings['dropattrs']:
+		if self.run_file is not None and 'run_file' in self.export_settings['dropattrs']:
 			self.files.pop(self.run_file,None)
 		return {key:value for key,value in self.__dict__.items() if key not in self.export_settings['dropattrs']}
 
