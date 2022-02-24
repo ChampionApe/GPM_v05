@@ -1,0 +1,9 @@
+@load_level(G_V01_NT_endo_always,%qmark%%V01_DB%");
+@load_level(G_V01_NT_endo_base,%qmark%%V01_DB%");
+@load_level(G_V01_T_endo_always,%qmark%%V01_DB%");
+@load_level(G_V01_T_endo_base,%qmark%%V01_DB%");
+@load_level(G_V01_ACC_endo_base,%qmark%%V01_DB%");
+@load_fixed(G_V01_NT_exo_always,%qmark%%V01_DB%");
+@load_fixed(G_V01_NT_exo_base,%qmark%%V01_DB%");
+@load_fixed(G_V01_T_exo_always,%qmark%%V01_DB%");
+@load_fixed(G_V01_T_exo_base,%qmark%%V01_DB%");

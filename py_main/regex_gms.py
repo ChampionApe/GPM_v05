@@ -4,6 +4,14 @@ def functions_from_file(file):
 	with open(file) as infile:
 		r = infile.read()
 	return functions_from_str(r)
+def blocks_from_file(file):
+	with open(file) as infile:
+		r = infile.read()
+	return blocks_from_str(r)
+def groups_from_file(file):
+	with open(file) as infile:
+		r = infile.read()
+	return groups_from_str(r)
 
 def functions_from_str(string):
 	a = re.findall(r"^.*?\$FUNCTION(.*?)\$ENDFUNCTION.*?$",string,re.IGNORECASE | re.DOTALL | re.MULTILINE)
@@ -12,9 +20,26 @@ def functions_from_str(string):
 		return {function_name_from_str(b[i]): b[i] for i in range(len(b))}
 	else:
 		return ''
+def blocks_from_str(string):
+	a = re.findall(r"^.*?\$BLOCK(.*?)\$ENDBLOCK.*?$",string,re.IGNORECASE | re.DOTALL | re.MULTILINE)
+	if a:
+		return [block_name_from_str('$BLOCK'+a[i] +'$ENDBLOCK') for i in range(len(a))]
+	else:
+		return []
+def groups_from_str(string):
+	a = re.findall(r"^.*?\$GROUP(.*?)\;.*?$",string,re.IGNORECASE | re.DOTALL | re.MULTILINE)
+	if a:
+		return [group_name_from_str('$GROUP'+a[i] +';') for i in range(len(a))]
+	else:
+		return []
+
 
 def function_name_from_str(string):
 	return re.search(r"^.*?\$FUNCTION(.*?)\(.*?",string,re.IGNORECASE | re.DOTALL | re.MULTILINE).group(1).strip()
+def block_name_from_str(string):
+	return re.search(r"^.*?\$BLOCK\s(.*?)\s.*?",string,re.IGNORECASE | re.DOTALL | re.MULTILINE).group(1).strip()		
+def group_name_from_str(string):
+	return re.search(r"^.*?\$GROUP\s(.*?)\s.*?",string,re.IGNORECASE | re.DOTALL | re.MULTILINE).group(1).strip()		
 
 def lines_to_string(lines):
 	out_str = ''
